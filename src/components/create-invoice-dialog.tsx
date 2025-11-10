@@ -32,13 +32,7 @@ import {
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency } from '@/lib/utils';
-import type { Invoice } from '@/lib/data';
-
-type LineItem = {
-  name: string;
-  quantity: number;
-  price: number;
-};
+import type { Invoice, LineItem } from '@/lib/data';
 
 const demoDescriptions = [
   'Web Development Services',
@@ -86,14 +80,21 @@ export function CreateInvoiceDialog({ onInvoiceCreate, onInvoiceUpdate, invoiceT
       setCustomerName(invoiceToEdit.customer);
       setInvoiceNumber(invoiceToEdit.id);
       setIssueDate(invoiceToEdit.date);
-      setDueDate(''); // Assuming due date is not part of invoice data
+      setDueDate(invoiceToEdit.dueDate || '');
       setStatus(invoiceToEdit.status);
-      setLineItems([]); // Resetting line items, would need more complex logic to edit them
-      setDescription('');
-      setCustomDescription('');
-      setEmail('');
-      setCustomerAddress('');
-      setGstin('');
+      setLineItems(invoiceToEdit.lineItems || []);
+      setEmail(invoiceToEdit.email || '');
+      setCustomerAddress(invoiceToEdit.customerAddress || '');
+      setGstin(invoiceToEdit.gstin || '');
+
+      const isDemoDesc = demoDescriptions.includes(invoiceToEdit.description);
+      if (isDemoDesc) {
+        setDescription(invoiceToEdit.description);
+        setCustomDescription('');
+      } else {
+        setDescription('custom');
+        setCustomDescription(invoiceToEdit.description || '');
+      }
       
     } else {
         resetForm();
@@ -138,23 +139,37 @@ export function CreateInvoiceDialog({ onInvoiceCreate, onInvoiceUpdate, invoiceT
   const totalAmount = lineItems.reduce((acc, item) => acc + item.quantity * item.price, 0);
 
   const handleSave = () => {
+    const finalDescription = description === 'custom' ? customDescription : description;
+    
     if (isEditing && invoiceToEdit) {
       const updatedInvoice: Invoice = {
         ...invoiceToEdit,
         id: invoiceNumber,
         customer: customerName,
-        amount: totalAmount > 0 ? totalAmount : invoiceToEdit.amount, // Keep original amount if no new items
+        email: email,
+        customerAddress: customerAddress,
+        gstin: gstin,
+        description: finalDescription,
+        lineItems: lineItems,
+        amount: totalAmount,
         status: status,
         date: issueDate,
+        dueDate: dueDate,
       };
       onInvoiceUpdate(updatedInvoice);
     } else {
       const newInvoice: Invoice = {
         id: invoiceNumber || `INV-${Math.floor(Math.random() * 1000)}`,
         customer: customerName,
+        email: email,
+        customerAddress: customerAddress,
+        gstin: gstin,
+        description: finalDescription,
+        lineItems: lineItems,
         amount: totalAmount,
         status: status,
         date: issueDate,
+        dueDate: dueDate,
       };
       onInvoiceCreate(newInvoice);
     }

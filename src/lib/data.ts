@@ -1,9 +1,21 @@
+export type LineItem = {
+  name: string;
+  quantity: number;
+  price: number;
+};
+
 export type Invoice = {
   id: string;
   customer: string;
+  email: string;
+  customerAddress: string;
+  gstin: string;
+  description: string;
+  lineItems: LineItem[];
   amount: number;
   status: 'Paid' | 'Pending' | 'Overdue';
   date: string;
+  dueDate: string;
 };
 
 export type PurchaseOrder = {
@@ -23,13 +35,97 @@ export type Quotation = {
 };
 
 export const invoices: Invoice[] = [
-  { id: 'INV-001', customer: 'KeeRa Innovations', amount: 250.0, status: 'Paid', date: '2023-10-23' },
-  { id: 'INV-002', customer: 'Solutions Inc.', amount: 150.0, status: 'Pending', date: '2023-10-24' },
-  { id: 'INV-003', customer: 'Tech Corp', amount: 350.0, status: 'Paid', date: '2023-10-15' },
-  { id: 'INV-004', customer: 'Global Services', amount: 450.0, status: 'Overdue', date: '2023-09-01' },
-  { id: 'INV-005', customer: 'KeeRa Innovations', amount: 550.0, status: 'Pending', date: '2023-10-28' },
-  { id: 'INV-006', customer: 'Alpha Co', amount: 50.0, status: 'Paid', date: '2023-10-29' },
-  { id: 'INV-007', customer: 'Beta Co', amount: 750.0, status: 'Pending', date: '2023-11-01' },
+  { 
+    id: 'INV-001', 
+    customer: 'KeeRa Innovations', 
+    email: 'keera@innovations.com',
+    customerAddress: '123 Tech Park, Silicon Valley',
+    gstin: '29ABCDE1234F1Z5',
+    description: 'Web Development Services',
+    lineItems: [{ name: 'Frontend Development', quantity: 1, price: 250.0 }],
+    amount: 250.0, 
+    status: 'Paid', 
+    date: '2023-10-23',
+    dueDate: '2023-11-22'
+  },
+  { 
+    id: 'INV-002', 
+    customer: 'Solutions Inc.', 
+    email: 'contact@solutions.inc',
+    customerAddress: '456 Business Blvd, Metropolis',
+    gstin: '27FGHIJ5678K1Z4',
+    description: 'Consulting Services',
+    lineItems: [{ name: 'Strategy Session', quantity: 1, price: 150.0 }],
+    amount: 150.0, 
+    status: 'Pending', 
+    date: '2023-10-24',
+    dueDate: '2023-11-23'
+  },
+  { 
+    id: 'INV-003', 
+    customer: 'Tech Corp', 
+    email: 'info@techcorp.com',
+    customerAddress: '789 Innovation Dr, Technocity',
+    gstin: '36LMNOP9012Q1Z3',
+    description: 'Software License',
+    lineItems: [{ name: 'Pro License', quantity: 1, price: 350.0 }],
+    amount: 350.0, 
+    status: 'Paid', 
+    date: '2023-10-15',
+    dueDate: '2023-11-14'
+  },
+  { 
+    id: 'INV-004', 
+    customer: 'Global Services', 
+    email: 'support@globalservices.com',
+    customerAddress: '101 World Ave, Capital City',
+    gstin: '24RSTUV3456W1Z2',
+    description: 'Monthly Retainer',
+    lineItems: [{ name: 'Support Contract', quantity: 1, price: 450.0 }],
+    amount: 450.0, 
+    status: 'Overdue', 
+    date: '2023-09-01',
+    dueDate: '2023-10-01'
+  },
+  { 
+    id: 'INV-005', 
+    customer: 'KeeRa Innovations', 
+    email: 'keera@innovations.com',
+    customerAddress: '123 Tech Park, Silicon Valley',
+    gstin: '29ABCDE1234F1Z5',
+    description: 'Project Milestone 1',
+    lineItems: [{ name: 'UI/UX Design', quantity: 1, price: 550.0 }],
+    amount: 550.0, 
+    status: 'Pending', 
+    date: '2023-10-28',
+    dueDate: '2023-11-27'
+  },
+  { 
+    id: 'INV-006', 
+    customer: 'Alpha Co', 
+    email: 'contact@alphaco.com',
+    customerAddress: '210 First St, Alphaville',
+    gstin: '22XYZAB7890C1Z1',
+    description: 'Hardware purchase',
+    lineItems: [{ name: 'Wireless Mouse', quantity: 1, price: 50.0 }],
+    amount: 50.0, 
+    status: 'Paid', 
+    date: '2023-10-29',
+    dueDate: '2023-11-28'
+  },
+  { 
+    id: 'INV-007', 
+    customer: 'Beta Co', 
+    email: 'accounts@betaco.com',
+    customerAddress: '321 Second St, Betatown',
+    gstin: '33BCDAF2345E1Z0',
+    description: 'Support and Maintenance',
+    lineItems: [{ name: 'Annual Support', quantity: 1, price: 750.0 }],
+    amount: 750.0, 
+    status: 'Pending', 
+    date: '2023-11-01',
+    dueDate: '2023-12-01'
+  },
 ];
 
 export const purchaseOrders: PurchaseOrder[] = [
