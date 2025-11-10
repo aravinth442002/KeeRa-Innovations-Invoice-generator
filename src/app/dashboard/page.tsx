@@ -5,15 +5,15 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { DollarSign, Package, CreditCard, Users } from 'lucide-react';
+import { IndianRupee, Package, CreditCard, Users } from 'lucide-react';
 import { DashboardHeader } from '@/components/dashboard-header';
 
 const summaryData = [
   {
     title: 'Total Revenue',
-    value: '$45,231.89',
+    value: '₹3,782,883.42',
     change: '+20.1% from last month',
-    icon: DollarSign,
+    icon: IndianRupee,
   },
   {
     title: 'Active Clients',
