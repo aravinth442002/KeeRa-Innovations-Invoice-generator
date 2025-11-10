@@ -7,7 +7,7 @@ export default function AppLogo() {
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="h-6 w-6 text-primary"
+        className="h-6 w-6 bg-clip-text text-transparent bg-primary-gradient"
       >
         <path
           d="M9.50383 6.13175L9.50383 17.8682L6 17.8682L6 6.13175L9.50383 6.13175Z"
@@ -18,9 +18,8 @@ export default function AppLogo() {
           fill="currentColor"
         />
       </svg>
-
-      <h1 className="font-headline text-xl font-bold text-foreground">
-        OfficeFlow
+      <h1 className="font-headline text-xl font-bold bg-clip-text text-transparent bg-primary-gradient">
+        KeeRa Innovations
       </h1>
     </div>
   );

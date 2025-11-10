@@ -53,7 +53,7 @@ export default function SettingsPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Company Name</Label>
-                  <Input id="name" defaultValue="OfficeFlow" />
+                  <Input id="name" defaultValue="KeeRa Innovations" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="address">Address</Label>
@@ -61,7 +61,7 @@ export default function SettingsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="contact">Contact Info</Label>
-                  <Input id="contact" defaultValue="contact@officeflow.com | +1 234 567 890" />
+                  <Input id="contact" defaultValue="contact@keerainnovations.com | +1 234 567 890" />
                 </div>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div className="space-y-2">

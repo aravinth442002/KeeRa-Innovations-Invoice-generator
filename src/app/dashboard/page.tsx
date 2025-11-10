@@ -61,7 +61,7 @@ export default function DashboardPage() {
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>Welcome to OfficeFlow!</CardTitle>
+            <CardTitle>Welcome to KeeRa Innovations!</CardTitle>
             <CardDescription>
               Your all-in-one solution for managing invoices, purchase orders, and
               quotations. Explore the sections on the left to get started.

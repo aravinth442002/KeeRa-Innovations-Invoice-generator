@@ -23,11 +23,11 @@ export type Quotation = {
 };
 
 export const invoices: Invoice[] = [
-  { id: 'INV-001', customer: 'OfficeFlow', amount: 250.0, status: 'Paid', date: '2023-10-23' },
+  { id: 'INV-001', customer: 'KeeRa Innovations', amount: 250.0, status: 'Paid', date: '2023-10-23' },
   { id: 'INV-002', customer: 'Solutions Inc.', amount: 150.0, status: 'Pending', date: '2023-10-24' },
   { id: 'INV-003', customer: 'Tech Corp', amount: 350.0, status: 'Paid', date: '2023-10-15' },
   { id: 'INV-004', customer: 'Global Services', amount: 450.0, status: 'Overdue', date: '2023-09-01' },
-  { id: 'INV-005', customer: 'OfficeFlow', amount: 550.0, status: 'Pending', date: '2023-10-28' },
+  { id: 'INV-005', customer: 'KeeRa Innovations', amount: 550.0, status: 'Pending', date: '2023-10-28' },
   { id: 'INV-006', customer: 'Alpha Co', amount: 50.0, status: 'Paid', date: '2023-10-29' },
   { id: 'INV-007', customer: 'Beta Co', amount: 750.0, status: 'Pending', date: '2023-11-01' },
 ];
