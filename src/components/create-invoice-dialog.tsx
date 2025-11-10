@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency } from '@/lib/utils';
+import type { Invoice } from '@/lib/data';
 
 type LineItem = {
   name: string;
@@ -52,16 +53,27 @@ const demoDescriptions = [
   'Support and Maintenance',
 ];
 
-export function CreateInvoiceDialog() {
+type CreateInvoiceDialogProps = {
+  onInvoiceCreate: (invoice: Invoice) => void;
+};
+
+export function CreateInvoiceDialog({ onInvoiceCreate }: CreateInvoiceDialogProps) {
   const [open, setOpen] = useState(false);
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
   const [newItem, setNewItem] = useState<{ name: string; quantity: string; price: string }>({
     name: '',
-    quantity: '',
+    quantity: '1',
     price: '',
   });
   const [description, setDescription] = useState('');
   const [customDescription, setCustomDescription] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [email, setEmail] = useState('');
+  const [customerAddress, setCustomerAddress] = useState('');
+  const [invoiceNumber, setInvoiceNumber] = useState('');
+  const [gstin, setGstin] = useState('');
+  const [issueDate, setIssueDate] = useState(new Date().toISOString().split('T')[0]);
+  const [dueDate, setDueDate] = useState('');
 
   const handleAddItem = () => {
     if (newItem.name && newItem.quantity && newItem.price) {
@@ -73,7 +85,7 @@ export function CreateInvoiceDialog() {
           price: parseFloat(newItem.price),
         },
       ]);
-      setNewItem({ name: '', quantity: '', price: '' });
+      setNewItem({ name: '', quantity: '1', price: '' });
     }
   };
 
@@ -85,6 +97,29 @@ export function CreateInvoiceDialog() {
   const isAddItemDisabled = !newItem.name || !newItem.quantity || !newItem.price;
 
   const totalAmount = lineItems.reduce((acc, item) => acc + item.quantity * item.price, 0);
+
+  const handleSave = () => {
+    const newInvoice: Invoice = {
+      id: invoiceNumber || `INV-${Math.floor(Math.random() * 1000)}`,
+      customer: customerName,
+      amount: totalAmount,
+      status: 'Pending',
+      date: issueDate,
+    };
+    onInvoiceCreate(newInvoice);
+    setOpen(false);
+    // Reset form
+    setCustomerName('');
+    setEmail('');
+    setCustomerAddress('');
+    setInvoiceNumber('');
+    setGstin('');
+    setIssueDate(new Date().toISOString().split('T')[0]);
+    setDueDate('');
+    setDescription('');
+    setCustomDescription('');
+    setLineItems([]);
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -105,35 +140,35 @@ export function CreateInvoiceDialog() {
           <div className="grid grid-cols-1 gap-6 px-4 md:grid-cols-2">
             <div className="grid gap-3">
               <Label htmlFor="customer">Customer Name</Label>
-              <Input id="customer" type="text" placeholder="Acme Inc." />
+              <Input id="customer" type="text" placeholder="Acme Inc." value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
             </div>
              <div className="grid gap-3">
               <Label htmlFor="email">Email ID</Label>
-              <Input id="email" type="email" placeholder="contact@acme.com" />
+              <Input id="email" type="email" placeholder="contact@acme.com" value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
           </div>
            <div className="grid gap-3 px-4">
             <Label htmlFor="customer-address">Customer Address</Label>
-            <Textarea id="customer-address" placeholder="123 Main St, Anytown, USA" />
+            <Textarea id="customer-address" placeholder="123 Main St, Anytown, USA" value={customerAddress} onChange={(e) => setCustomerAddress(e.target.value)} />
           </div>
            <div className="grid grid-cols-1 gap-6 px-4 md:grid-cols-2">
              <div className="grid gap-3">
               <Label htmlFor="invoice-number">Invoice Number</Label>
-              <Input id="invoice-number" type="text" placeholder="INV-008" />
+              <Input id="invoice-number" type="text" placeholder="INV-008" value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)}/>
             </div>
             <div className="grid gap-3">
               <Label htmlFor="gstin">GSTIN</Label>
-              <Input id="gstin" type="text" placeholder="22AAAAA0000A1Z5" />
+              <Input id="gstin" type="text" placeholder="22AAAAA0000A1Z5" value={gstin} onChange={(e) => setGstin(e.target.value)} />
             </div>
           </div>
           <div className="grid grid-cols-1 gap-6 px-4 md:grid-cols-2">
             <div className="grid gap-3">
               <Label htmlFor="issue-date">Issue Date</Label>
-              <Input id="issue-date" type="date" defaultValue={new Date().toISOString().split('T')[0]} />
+              <Input id="issue-date" type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} />
             </div>
             <div className="grid gap-3">
               <Label htmlFor="due-date">Due Date</Label>
-              <Input id="due-date" type="date" />
+              <Input id="due-date" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
             </div>
           </div>
 
@@ -249,7 +284,7 @@ export function CreateInvoiceDialog() {
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button type="submit">Save Invoice</Button>
+          <Button onClick={handleSave}>Save Invoice</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

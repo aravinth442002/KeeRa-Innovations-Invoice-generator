@@ -31,10 +31,10 @@ export function UserNav() {
       )}
       <div className="flex-1 overflow-hidden">
         <p className="truncate text-sm font-medium text-sidebar-foreground">
-          Demo User
+          Sathish Pandey
         </p>
         <p className="truncate text-xs text-sidebar-foreground/70">
-          demo@officeflow.com
+          sathishgethu@gmail.com
         </p>
       </div>
       <DropdownMenu>

@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import { MoreHorizontal } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,7 +27,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { DashboardHeader } from '@/components/dashboard-header';
-import { invoices } from '@/lib/data';
+import { invoices as initialInvoices, type Invoice } from '@/lib/data';
 import { formatCurrency } from '@/lib/utils';
 import { InvoiceUploadButton } from '@/components/invoice-upload-button';
 import { CreateInvoiceDialog } from '@/components/create-invoice-dialog';
@@ -36,6 +39,12 @@ const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } 
 };
 
 export default function InvoicesPage() {
+  const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
+
+  const handleInvoiceCreate = (newInvoice: Invoice) => {
+    setInvoices((prevInvoices) => [newInvoice, ...prevInvoices]);
+  };
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <DashboardHeader
@@ -44,7 +53,7 @@ export default function InvoicesPage() {
       >
         <div className="flex items-center gap-2">
           <InvoiceUploadButton />
-          <CreateInvoiceDialog />
+          <CreateInvoiceDialog onInvoiceCreate={handleInvoiceCreate} />
         </div>
       </DashboardHeader>
       <main className="flex-1 space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">

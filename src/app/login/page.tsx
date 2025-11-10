@@ -48,7 +48,7 @@ export default function LoginPage() {
                   type="email"
                   placeholder="m@example.com"
                   required
-                  defaultValue="demo@officeflow.com"
+                  defaultValue="keera@gmail.com"
                 />
               </div>
               <div className="space-y-2">
@@ -65,7 +65,7 @@ export default function LoginPage() {
                   id="password"
                   type="password"
                   required
-                  defaultValue="password"
+                  defaultValue="123"
                 />
               </div>
               <Button type="submit" className="w-full bg-accent hover:bg-accent/90">
