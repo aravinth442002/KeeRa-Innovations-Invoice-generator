@@ -94,15 +94,15 @@ export function CreateInvoiceDialog() {
           Create Invoice
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-4xl">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>Create Invoice</DialogTitle>
           <DialogDescription>
             Fill out the form below to create a new invoice.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid max-h-[80vh] gap-6 overflow-y-auto py-4 pr-6">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="grid max-h-[70vh] gap-6 overflow-y-auto p-1 py-4">
+          <div className="grid grid-cols-1 gap-6 px-4 md:grid-cols-2">
             <div className="grid gap-3">
               <Label htmlFor="customer">Customer Name</Label>
               <Input id="customer" type="text" placeholder="Acme Inc." />
@@ -112,11 +112,11 @@ export function CreateInvoiceDialog() {
               <Input id="email" type="email" placeholder="contact@acme.com" />
             </div>
           </div>
-           <div className="grid gap-3">
+           <div className="grid gap-3 px-4">
             <Label htmlFor="customer-address">Customer Address</Label>
             <Textarea id="customer-address" placeholder="123 Main St, Anytown, USA" />
           </div>
-           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+           <div className="grid grid-cols-1 gap-6 px-4 md:grid-cols-2">
              <div className="grid gap-3">
               <Label htmlFor="invoice-number">Invoice Number</Label>
               <Input id="invoice-number" type="text" placeholder="INV-008" />
@@ -126,7 +126,7 @@ export function CreateInvoiceDialog() {
               <Input id="gstin" type="text" placeholder="22AAAAA0000A1Z5" />
             </div>
           </div>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 px-4 md:grid-cols-2">
             <div className="grid gap-3">
               <Label htmlFor="issue-date">Issue Date</Label>
               <Input id="issue-date" type="date" defaultValue={new Date().toISOString().split('T')[0]} />
@@ -137,7 +137,7 @@ export function CreateInvoiceDialog() {
             </div>
           </div>
 
-           <div className="grid gap-3">
+           <div className="grid gap-3 px-4">
             <Label htmlFor="description">Description</Label>
             <Select onValueChange={setDescription} value={description}>
               <SelectTrigger id="description">
@@ -163,7 +163,7 @@ export function CreateInvoiceDialog() {
             )}
           </div>
 
-          <div>
+          <div className="px-4">
             <h3 className="text-lg font-medium">Invoice Items</h3>
             {lineItems.length === 0 && (
                  <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto_auto_auto]">
@@ -217,7 +217,7 @@ export function CreateInvoiceDialog() {
                 </TableBody>
               </Table>
             </div>
-             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto_auto_auto]">
+             <div className="mt-4 grid grid-cols-1 gap-4 px-4 sm:grid-cols-[1fr_auto_auto_auto]">
                 <div className="grid gap-1.5">
                     <Label htmlFor="item-name" className="sr-only">Item Name</Label>
                     <Input id="item-name" placeholder="Item Name" value={newItem.name} onChange={(e) => setNewItem({ ...newItem, name: e.target.value })} />
@@ -236,7 +236,7 @@ export function CreateInvoiceDialog() {
             </div>
             </>
           )}
-          <div className="mt-4 flex justify-end">
+          <div className="mt-4 flex justify-end px-4">
             <div className="w-full max-w-xs space-y-2">
                 <div className="flex justify-between font-medium">
                     <span>Total</span>
