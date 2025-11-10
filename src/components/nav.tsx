@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   FileText,
-  FileQuote,
+  FileQuestion,
   LayoutDashboard,
   Settings,
   ShoppingCart,
@@ -23,7 +23,7 @@ const navItems = [
     icon: ShoppingCart,
     label: 'Purchase Orders',
   },
-  { href: '/dashboard/quotations', icon: FileQuote, label: 'Quotations' },
+  { href: '/dashboard/quotations', icon: FileQuestion, label: 'Quotations' },
   { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
 ];
 
