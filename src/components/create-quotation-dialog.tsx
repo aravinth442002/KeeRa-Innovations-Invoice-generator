@@ -21,9 +21,38 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import type { Quotation } from '@/lib/data';
 
-export function CreateQuotationDialog() {
+type CreateQuotationDialogProps = {
+  onQuotationCreate: (quotation: Quotation) => void;
+}
+
+export function CreateQuotationDialog({ onQuotationCreate }: CreateQuotationDialogProps) {
   const [open, setOpen] = useState(false);
+  const [customer, setCustomer] = useState('');
+  const [quotationId, setQuotationId] = useState('');
+  const [amount, setAmount] = useState('');
+  const [expiryDate, setExpiryDate] = useState('');
+  const [status, setStatus] = useState<'Sent' | 'Accepted' | 'Expired'>('Sent');
+
+  const handleSave = () => {
+    if (customer && quotationId && amount && expiryDate) {
+      onQuotationCreate({
+        id: quotationId,
+        customer,
+        amount: parseFloat(amount),
+        status,
+        expiryDate,
+      });
+      setOpen(false);
+      // Reset form
+      setCustomer('');
+      setQuotationId('');
+      setAmount('');
+      setExpiryDate('');
+      setStatus('Sent');
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -43,26 +72,26 @@ export function CreateQuotationDialog() {
         <div className="grid gap-6 py-4">
           <div className="grid gap-3">
             <Label htmlFor="customer">Customer</Label>
-            <Input id="customer" type="text" placeholder="Future Systems" />
+            <Input id="customer" type="text" placeholder="Future Systems" value={customer} onChange={(e) => setCustomer(e.target.value)} />
           </div>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="grid gap-3">
               <Label htmlFor="quotation-id">Quotation ID</Label>
-              <Input id="quotation-id" type="text" placeholder="QUO-005" />
+              <Input id="quotation-id" type="text" placeholder="QUO-005" value={quotationId} onChange={(e) => setQuotationId(e.target.value)} />
             </div>
             <div className="grid gap-3">
               <Label htmlFor="amount">Amount</Label>
-              <Input id="amount" type="number" placeholder="2500.00" />
+              <Input id="amount" type="number" placeholder="2500.00" value={amount} onChange={(e) => setAmount(e.target.value)} />
             </div>
           </div>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="grid gap-3">
               <Label htmlFor="expiry-date">Expiry Date</Label>
-              <Input id="expiry-date" type="date" />
+              <Input id="expiry-date" type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} />
             </div>
             <div className="grid gap-3">
               <Label htmlFor="status">Status</Label>
-              <Select defaultValue="Sent">
+              <Select value={status} onValueChange={(value: 'Sent' | 'Accepted' | 'Expired') => setStatus(value)}>
                 <SelectTrigger id="status" aria-label="Select status">
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
@@ -79,7 +108,7 @@ export function CreateQuotationDialog() {
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button type="submit">Save Quotation</Button>
+          <Button type="submit" onClick={handleSave}>Save Quotation</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

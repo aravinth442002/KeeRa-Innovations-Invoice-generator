@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import { MoreHorizontal } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,7 +27,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { DashboardHeader } from '@/components/dashboard-header';
-import { purchaseOrders } from '@/lib/data';
+import { purchaseOrders as initialPurchaseOrders, type PurchaseOrder } from '@/lib/data';
 import { formatCurrency } from '@/lib/utils';
 import { CreatePurchaseOrderDialog } from '@/components/create-purchase-order-dialog';
 
@@ -35,13 +38,19 @@ const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } 
 };
 
 export default function PurchaseOrdersPage() {
+  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>(initialPurchaseOrders);
+
+  const handlePurchaseOrderCreate = (newPurchaseOrder: PurchaseOrder) => {
+    setPurchaseOrders((prev) => [newPurchaseOrder, ...prev]);
+  };
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <DashboardHeader
         title="Purchase Orders"
         description="Manage your company's purchase orders."
       >
-        <CreatePurchaseOrderDialog />
+        <CreatePurchaseOrderDialog onPurchaseOrderCreate={handlePurchaseOrderCreate} />
       </DashboardHeader>
       <main className="flex-1 space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
         <Card>

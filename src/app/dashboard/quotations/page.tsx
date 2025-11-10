@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import { MoreHorizontal } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,7 +27,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { DashboardHeader } from '@/components/dashboard-header';
-import { quotations } from '@/lib/data';
+import { quotations as initialQuotations, type Quotation } from '@/lib/data';
 import { formatCurrency } from '@/lib/utils';
 import { CreateQuotationDialog } from '@/components/create-quotation-dialog';
 
@@ -35,13 +38,19 @@ const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } 
 };
 
 export default function QuotationsPage() {
+  const [quotations, setQuotations] = useState<Quotation[]>(initialQuotations);
+
+  const handleQuotationCreate = (newQuotation: Quotation) => {
+    setQuotations((prev) => [newQuotation, ...prev]);
+  };
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <DashboardHeader
         title="Quotations"
         description="Manage your customer quotations."
       >
-        <CreateQuotationDialog />
+        <CreateQuotationDialog onQuotationCreate={handleQuotationCreate} />
       </DashboardHeader>
       <main className="flex-1 space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
         <Card>
