@@ -53,15 +53,15 @@ export default function SettingsPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Company Name</Label>
-                  <Input id="name" defaultValue="Innovate LLC" />
+                  <Input id="name" defaultValue="OfficeFlow" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="address">Address</Label>
-                  <Input id="address" defaultValue="123 Tech Street, Silicon Valley, CA 94002" />
+                  <Input id="address" defaultValue="123 Business Ave, Suite 100, Metro City, 12345" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="contact">Contact Info</Label>
-                  <Input id="contact" defaultValue="contact@innovate.com | +1 234 567 890" />
+                  <Input id="contact" defaultValue="contact@officeflow.com | +1 234 567 890" />
                 </div>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div className="space-y-2">
