@@ -50,10 +50,19 @@ const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } 
 export default function QuotationsPage() {
   const [quotations, setQuotations] = useState<Quotation[]>(initialQuotations);
   const [quotationToDelete, setQuotationToDelete] = useState<string | null>(null);
+  const [quotationToEdit, setQuotationToEdit] = useState<Quotation | null>(null);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const handleQuotationCreate = (newQuotation: Quotation) => {
     setQuotations((prev) => [newQuotation, ...prev]);
   };
+  
+  const handleQuotationUpdate = (updatedQuotation: Quotation) => {
+    setQuotations((prev) =>
+      prev.map((q) => (q.id === updatedQuotation.id ? updatedQuotation : q))
+    );
+    setQuotationToEdit(null);
+  }
 
   const handleDeleteConfirm = () => {
     if (quotationToDelete) {
@@ -64,6 +73,18 @@ export default function QuotationsPage() {
     }
   };
 
+  const openEditDialog = (quotation: Quotation) => {
+    setQuotationToEdit(quotation);
+    setIsCreateDialogOpen(true);
+  };
+
+  const handleDialogStateChange = (open: boolean) => {
+    setIsCreateDialogOpen(open);
+    if (!open) {
+      setQuotationToEdit(null);
+    }
+  };
+
   return (
     <>
       <div className="flex min-h-0 flex-1 flex-col">
@@ -71,7 +92,13 @@ export default function QuotationsPage() {
           title="Quotations"
           description="Manage your customer quotations."
         >
-          <CreateQuotationDialog onQuotationCreate={handleQuotationCreate} />
+          <CreateQuotationDialog
+            onQuotationCreate={handleQuotationCreate}
+            onQuotationUpdate={handleQuotationUpdate}
+            quotationToEdit={quotationToEdit}
+            open={isCreateDialogOpen}
+            onOpenChange={handleDialogStateChange}
+          />
         </DashboardHeader>
         <main className="flex-1 space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
           <Card>
@@ -124,7 +151,7 @@ export default function QuotationsPage() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem>View</DropdownMenuItem>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openEditDialog(quote)}>Edit</DropdownMenuItem>
                             <DropdownMenuItem>Download</DropdownMenuItem>
                             <DropdownMenuItem
                               className="text-destructive"

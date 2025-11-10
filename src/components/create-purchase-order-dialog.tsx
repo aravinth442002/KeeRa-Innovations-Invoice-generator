@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,48 +25,87 @@ import type { PurchaseOrder } from '@/lib/data';
 
 type CreatePurchaseOrderDialogProps = {
   onPurchaseOrderCreate: (po: PurchaseOrder) => void;
+  onPurchaseOrderUpdate: (po: PurchaseOrder) => void;
+  purchaseOrderToEdit?: PurchaseOrder | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 };
 
-export function CreatePurchaseOrderDialog({ onPurchaseOrderCreate }: CreatePurchaseOrderDialogProps) {
-  const [open, setOpen] = useState(false);
+export function CreatePurchaseOrderDialog({ 
+  onPurchaseOrderCreate, 
+  onPurchaseOrderUpdate, 
+  purchaseOrderToEdit,
+  open,
+  onOpenChange
+}: CreatePurchaseOrderDialogProps) {
   const [vendor, setVendor] = useState('');
   const [poNumber, setPoNumber] = useState('');
   const [amount, setAmount] = useState('');
   const [orderDate, setOrderDate] = useState(new Date().toISOString().split('T')[0]);
   const [status, setStatus] = useState<'Approved' | 'Pending' | 'Rejected'>('Pending');
+
+  const isEditing = !!purchaseOrderToEdit;
+
+  useEffect(() => {
+    if (isEditing && purchaseOrderToEdit) {
+      setVendor(purchaseOrderToEdit.vendor);
+      setPoNumber(purchaseOrderToEdit.id);
+      setAmount(String(purchaseOrderToEdit.amount));
+      setOrderDate(purchaseOrderToEdit.date);
+      setStatus(purchaseOrderToEdit.status);
+    } else {
+      resetForm();
+    }
+  }, [purchaseOrderToEdit, isEditing]);
+
+  const resetForm = () => {
+    setVendor('');
+    setPoNumber('');
+    setAmount('');
+    setOrderDate(new Date().toISOString().split('T')[0]);
+    setStatus('Pending');
+  };
   
   const handleSave = () => {
     if (vendor && poNumber && amount) {
-      onPurchaseOrderCreate({
+      const poData = {
         id: poNumber,
         vendor,
         amount: parseFloat(amount),
         status,
         date: orderDate,
-      });
-      setOpen(false);
-      // Reset form
-      setVendor('');
-      setPoNumber('');
-      setAmount('');
-      setOrderDate(new Date().toISOString().split('T')[0]);
-      setStatus('Pending');
+      };
+
+      if (isEditing) {
+        onPurchaseOrderUpdate({ ...purchaseOrderToEdit, ...poData });
+      } else {
+        onPurchaseOrderCreate(poData);
+      }
+
+      onOpenChange(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Create PO
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+        if (!isOpen) {
+            resetForm();
+        }
+        onOpenChange(isOpen)
+    }}>
+      {!isEditing && (
+        <DialogTrigger asChild>
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Create PO
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Create Purchase Order</DialogTitle>
+          <DialogTitle>{isEditing ? 'Edit Purchase Order' : 'Create Purchase Order'}</DialogTitle>
           <DialogDescription>
-            Fill out the form below to create a new purchase order.
+            {isEditing ? 'Update the details for this purchase order.' : 'Fill out the form below to create a new purchase order.'}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-6 py-4">
@@ -105,7 +144,7 @@ export function CreatePurchaseOrderDialog({ onPurchaseOrderCreate }: CreatePurch
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
           <Button type="submit" onClick={handleSave}>Save Purchase Order</Button>

@@ -50,10 +50,19 @@ const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } 
 export default function PurchaseOrdersPage() {
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>(initialPurchaseOrders);
   const [poToDelete, setPoToDelete] = useState<string | null>(null);
+  const [poToEdit, setPoToEdit] = useState<PurchaseOrder | null>(null);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const handlePurchaseOrderCreate = (newPurchaseOrder: PurchaseOrder) => {
     setPurchaseOrders((prev) => [newPurchaseOrder, ...prev]);
   };
+
+  const handlePurchaseOrderUpdate = (updatedPo: PurchaseOrder) => {
+    setPurchaseOrders((prev) =>
+      prev.map((po) => (po.id === updatedPo.id ? updatedPo : po))
+    );
+    setPoToEdit(null);
+  }
 
   const handleDeleteConfirm = () => {
     if (poToDelete) {
@@ -64,6 +73,18 @@ export default function PurchaseOrdersPage() {
     }
   };
 
+  const openEditDialog = (po: PurchaseOrder) => {
+    setPoToEdit(po);
+    setIsCreateDialogOpen(true);
+  };
+  
+  const handleDialogStateChange = (open: boolean) => {
+    setIsCreateDialogOpen(open);
+    if (!open) {
+      setPoToEdit(null);
+    }
+  }
+
   return (
     <>
       <div className="flex min-h-0 flex-1 flex-col">
@@ -71,7 +92,13 @@ export default function PurchaseOrdersPage() {
           title="Purchase Orders"
           description="Manage your company's purchase orders."
         >
-          <CreatePurchaseOrderDialog onPurchaseOrderCreate={handlePurchaseOrderCreate} />
+           <CreatePurchaseOrderDialog
+            onPurchaseOrderCreate={handlePurchaseOrderCreate}
+            onPurchaseOrderUpdate={handlePurchaseOrderUpdate}
+            purchaseOrderToEdit={poToEdit}
+            open={isCreateDialogOpen}
+            onOpenChange={handleDialogStateChange}
+          />
         </DashboardHeader>
         <main className="flex-1 space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
           <Card>
@@ -122,7 +149,7 @@ export default function PurchaseOrdersPage() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem>View</DropdownMenuItem>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openEditDialog(po)}>Edit</DropdownMenuItem>
                             <DropdownMenuItem>Download</DropdownMenuItem>
                             <DropdownMenuItem
                               className="text-destructive"

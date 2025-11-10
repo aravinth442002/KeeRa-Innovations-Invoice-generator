@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,48 +25,86 @@ import type { Quotation } from '@/lib/data';
 
 type CreateQuotationDialogProps = {
   onQuotationCreate: (quotation: Quotation) => void;
+  onQuotationUpdate: (quotation: Quotation) => void;
+  quotationToEdit?: Quotation | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function CreateQuotationDialog({ onQuotationCreate }: CreateQuotationDialogProps) {
-  const [open, setOpen] = useState(false);
+export function CreateQuotationDialog({ 
+  onQuotationCreate,
+  onQuotationUpdate,
+  quotationToEdit,
+  open,
+  onOpenChange,
+}: CreateQuotationDialogProps) {
   const [customer, setCustomer] = useState('');
   const [quotationId, setQuotationId] = useState('');
   const [amount, setAmount] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [status, setStatus] = useState<'Sent' | 'Accepted' | 'Expired'>('Sent');
 
+  const isEditing = !!quotationToEdit;
+
+  useEffect(() => {
+    if (isEditing && quotationToEdit) {
+      setCustomer(quotationToEdit.customer);
+      setQuotationId(quotationToEdit.id);
+      setAmount(String(quotationToEdit.amount));
+      setExpiryDate(quotationToEdit.expiryDate);
+      setStatus(quotationToEdit.status);
+    } else {
+      resetForm();
+    }
+  }, [quotationToEdit, isEditing]);
+
+  const resetForm = () => {
+    setCustomer('');
+    setQuotationId('');
+    setAmount('');
+    setExpiryDate('');
+    setStatus('Sent');
+  };
+
   const handleSave = () => {
     if (customer && quotationId && amount && expiryDate) {
-      onQuotationCreate({
+      const quotationData = {
         id: quotationId,
         customer,
         amount: parseFloat(amount),
         status,
         expiryDate,
-      });
-      setOpen(false);
-      // Reset form
-      setCustomer('');
-      setQuotationId('');
-      setAmount('');
-      setExpiryDate('');
-      setStatus('Sent');
+      };
+
+      if (isEditing) {
+        onQuotationUpdate({ ...quotationToEdit, ...quotationData });
+      } else {
+        onQuotationCreate(quotationData);
+      }
+      onOpenChange(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Create Quotation
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+        if (!isOpen) {
+            resetForm();
+        }
+        onOpenChange(isOpen);
+    }}>
+      {!isEditing && (
+        <DialogTrigger asChild>
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Create Quotation
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Create Quotation</DialogTitle>
+          <DialogTitle>{isEditing ? 'Edit Quotation' : 'Create Quotation'}</DialogTitle>
           <DialogDescription>
-            Fill out the form below to create a new quotation.
+            {isEditing ? 'Update the details for this quotation.' : 'Fill out the form below to create a new quotation.'}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-6 py-4">
@@ -105,7 +143,7 @@ export function CreateQuotationDialog({ onQuotationCreate }: CreateQuotationDial
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
           <Button type="submit" onClick={handleSave}>Save Quotation</Button>
