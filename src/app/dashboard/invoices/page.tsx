@@ -1,5 +1,4 @@
-import Link from 'next/link';
-import { MoreHorizontal, PlusCircle } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,6 +27,7 @@ import { DashboardHeader } from '@/components/dashboard-header';
 import { invoices } from '@/lib/data';
 import { formatCurrency } from '@/lib/utils';
 import { InvoiceUploadButton } from '@/components/invoice-upload-button';
+import { CreateInvoiceDialog } from '@/components/create-invoice-dialog';
 
 const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
   Paid: 'default',
@@ -44,12 +44,7 @@ export default function InvoicesPage() {
       >
         <div className="flex items-center gap-2">
           <InvoiceUploadButton />
-          <Button asChild>
-            <Link href="/dashboard/invoices/new">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Create Invoice
-            </Link>
-          </Button>
+          <CreateInvoiceDialog />
         </div>
       </DashboardHeader>
       <main className="flex-1 space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">

@@ -1,5 +1,4 @@
-import Link from 'next/link';
-import { MoreHorizontal, PlusCircle } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,6 +26,7 @@ import {
 import { DashboardHeader } from '@/components/dashboard-header';
 import { purchaseOrders } from '@/lib/data';
 import { formatCurrency } from '@/lib/utils';
+import { CreatePurchaseOrderDialog } from '@/components/create-purchase-order-dialog';
 
 const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
   Approved: 'default',
@@ -41,12 +41,7 @@ export default function PurchaseOrdersPage() {
         title="Purchase Orders"
         description="Manage your company's purchase orders."
       >
-        <Button asChild>
-          <Link href="#">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Create PO
-          </Link>
-        </Button>
+        <CreatePurchaseOrderDialog />
       </DashboardHeader>
       <main className="flex-1 space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
         <Card>
