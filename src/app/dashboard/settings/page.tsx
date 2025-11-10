@@ -29,7 +29,8 @@ export default function SettingsPage() {
   // Office State
   const [companyName, setCompanyName] = useState('KeeRa Innovations');
   const [address, setAddress] = useState('112-A, 3rd Ave, W Block, Anna Nagar, Chennai, Tamil Nadu 600042');
-  const [contact, setContact] = useState('keerainnovations@gmail.com | +1 234 567 890');
+  const [email, setEmail] = useState('keerainnovations@gmail.com');
+  const [phone, setPhone] = useState('+1 234 567 890');
   
   // Tax State
   const [taxId, setTaxId] = useState('12-3456789');
@@ -86,9 +87,15 @@ export default function SettingsPage() {
                   <Label htmlFor="address">Address</Label>
                   <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="contact">Contact Info</Label>
-                  <Input id="contact" value={contact} onChange={(e) => setContact(e.target.value)} />
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                  </div>
                 </div>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div className="space-y-2">
