@@ -32,7 +32,6 @@ import {
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency } from '@/lib/utils';
-import { Separator } from '@/components/ui/separator';
 
 type LineItem = {
   name: string;
@@ -159,33 +158,36 @@ export function CreateInvoiceDialog() {
                 placeholder="Enter your custom description"
                 value={customDescription}
                 onChange={(e) => setCustomDescription(e.target.value)}
-                className="mt-2"
+                className="mt-2 bg-primary-gradient text-primary-foreground placeholder:text-primary-foreground/80"
               />
             )}
           </div>
 
           <div>
             <h3 className="text-lg font-medium">Invoice Items</h3>
-            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto_auto_auto]">
-              <div className="grid gap-1.5">
-                  <Label htmlFor="item-name" className="sr-only">Item Name</Label>
-                  <Input id="item-name" placeholder="Item Name" value={newItem.name} onChange={(e) => setNewItem({ ...newItem, name: e.target.value })} />
-              </div>
-              <div className="grid gap-1.5">
-                  <Label htmlFor="quantity" className="sr-only">Quantity</Label>
-                  <Input id="quantity" type="number" placeholder="Quantity" value={newItem.quantity} onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}/>
-              </div>
-              <div className="grid gap-1.5">
-                  <Label htmlFor="price" className="sr-only">Price</Label>
-                  <Input id="price" type="number" placeholder="Price" value={newItem.price} onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}/>
-              </div>
-              <Button onClick={handleAddItem} disabled={isAddItemDisabled} className="w-full sm:w-auto">
-                Add Item
-              </Button>
-            </div>
+            {lineItems.length === 0 && (
+                 <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto_auto_auto]">
+                    <div className="grid gap-1.5">
+                        <Label htmlFor="item-name" className="sr-only">Item Name</Label>
+                        <Input id="item-name" placeholder="Item Name" value={newItem.name} onChange={(e) => setNewItem({ ...newItem, name: e.target.value })} />
+                    </div>
+                    <div className="grid gap-1.5">
+                        <Label htmlFor="quantity" className="sr-only">Quantity</Label>
+                        <Input id="quantity" type="number" placeholder="Quantity" value={newItem.quantity} onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}/>
+                    </div>
+                    <div className="grid gap-1.5">
+                        <Label htmlFor="price" className="sr-only">Price</Label>
+                        <Input id="price" type="number" placeholder="Price" value={newItem.price} onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}/>
+                    </div>
+                    <Button onClick={handleAddItem} disabled={isAddItemDisabled} className="w-full sm:w-auto">
+                        Add Item
+                    </Button>
+                </div>
+            )}
           </div>
             
           {lineItems.length > 0 && (
+            <>
             <div className="mt-4 rounded-md border">
               <Table>
                 <TableHeader>
@@ -215,6 +217,24 @@ export function CreateInvoiceDialog() {
                 </TableBody>
               </Table>
             </div>
+             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto_auto_auto]">
+                <div className="grid gap-1.5">
+                    <Label htmlFor="item-name" className="sr-only">Item Name</Label>
+                    <Input id="item-name" placeholder="Item Name" value={newItem.name} onChange={(e) => setNewItem({ ...newItem, name: e.target.value })} />
+                </div>
+                <div className="grid gap-1.5">
+                    <Label htmlFor="quantity" className="sr-only">Quantity</Label>
+                    <Input id="quantity" type="number" placeholder="Quantity" value={newItem.quantity} onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}/>
+                </div>
+                <div className="grid gap-1.5">
+                    <Label htmlFor="price" className="sr-only">Price</Label>
+                    <Input id="price" type="number" placeholder="Price" value={newItem.price} onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}/>
+                </div>
+                <Button onClick={handleAddItem} disabled={isAddItemDisabled} className="w-full sm:w-auto">
+                    Add Item
+                </Button>
+            </div>
+            </>
           )}
           <div className="mt-4 flex justify-end">
             <div className="w-full max-w-xs space-y-2">
