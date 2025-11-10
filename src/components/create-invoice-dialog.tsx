@@ -20,6 +20,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectSeparator,
 } from '@/components/ui/select';
 import {
   Table,
@@ -31,6 +32,7 @@ import {
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency } from '@/lib/utils';
+import { Separator } from '@/components/ui/separator';
 
 type LineItem = {
   name: string;
@@ -148,6 +150,7 @@ export function CreateInvoiceDialog() {
                     {desc}
                   </SelectItem>
                 ))}
+                <SelectSeparator />
                 <SelectItem value="custom">Custom Description</SelectItem>
               </SelectContent>
             </Select>
