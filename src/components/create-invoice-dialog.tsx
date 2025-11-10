@@ -29,6 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency } from '@/lib/utils';
 
 type LineItem = {
@@ -36,6 +37,19 @@ type LineItem = {
   quantity: number;
   price: number;
 };
+
+const demoDescriptions = [
+  'Web Development Services',
+  'Graphic Design Services',
+  'Consulting Services',
+  'Software License',
+  'Monthly Retainer',
+  'Project Milestone 1',
+  'Hardware purchase',
+  'SEO and Marketing',
+  'Content Creation',
+  'Support and Maintenance',
+];
 
 export function CreateInvoiceDialog() {
   const [open, setOpen] = useState(false);
@@ -45,6 +59,8 @@ export function CreateInvoiceDialog() {
     quantity: '',
     price: '',
   });
+  const [description, setDescription] = useState('');
+  const [customDescription, setCustomDescription] = useState('');
 
   const handleAddItem = () => {
     if (newItem.name && newItem.quantity && newItem.price) {
@@ -84,28 +100,29 @@ export function CreateInvoiceDialog() {
             Fill out the form below to create a new invoice.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-6 py-4">
-          <div className="grid gap-3">
-            <Label htmlFor="customer">Customer</Label>
-            <Input id="customer" type="text" placeholder="Acme Inc." />
-          </div>
+        <div className="grid max-h-[80vh] gap-6 overflow-y-auto py-4 pr-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="grid gap-3">
+              <Label htmlFor="customer">Customer Name</Label>
+              <Input id="customer" type="text" placeholder="Acme Inc." />
+            </div>
+             <div className="grid gap-3">
+              <Label htmlFor="email">Email ID</Label>
+              <Input id="email" type="email" placeholder="contact@acme.com" />
+            </div>
+          </div>
+           <div className="grid gap-3">
+            <Label htmlFor="customer-address">Customer Address</Label>
+            <Textarea id="customer-address" placeholder="123 Main St, Anytown, USA" />
+          </div>
+           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+             <div className="grid gap-3">
               <Label htmlFor="invoice-number">Invoice Number</Label>
               <Input id="invoice-number" type="text" placeholder="INV-008" />
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="status">Status</Label>
-              <Select defaultValue="Pending">
-                <SelectTrigger id="status" aria-label="Select status">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                  <SelectItem value="Paid">Paid</SelectItem>
-                  <SelectItem value="Overdue">Overdue</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="gstin">GSTIN</Label>
+              <Input id="gstin" type="text" placeholder="22AAAAA0000A1Z5" />
             </div>
           </div>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -117,6 +134,31 @@ export function CreateInvoiceDialog() {
               <Label htmlFor="due-date">Due Date</Label>
               <Input id="due-date" type="date" />
             </div>
+          </div>
+
+           <div className="grid gap-3">
+            <Label htmlFor="description">Description</Label>
+            <Select onValueChange={setDescription} value={description}>
+              <SelectTrigger id="description">
+                <SelectValue placeholder="Select a description" />
+              </SelectTrigger>
+              <SelectContent>
+                {demoDescriptions.map((desc) => (
+                  <SelectItem key={desc} value={desc}>
+                    {desc}
+                  </SelectItem>
+                ))}
+                <SelectItem value="custom">Custom Description</SelectItem>
+              </SelectContent>
+            </Select>
+            {description === 'custom' && (
+              <Textarea
+                placeholder="Enter your custom description"
+                value={customDescription}
+                onChange={(e) => setCustomDescription(e.target.value)}
+                className="mt-2"
+              />
+            )}
           </div>
 
           <div>
@@ -180,7 +222,7 @@ export function CreateInvoiceDialog() {
             </div>
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="pt-4">
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
