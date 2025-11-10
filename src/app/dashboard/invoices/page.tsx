@@ -51,9 +51,20 @@ const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
   const [invoiceToDelete, setInvoiceToDelete] = useState<string | null>(null);
+  const [invoiceToEdit, setInvoiceToEdit] = useState<Invoice | null>(null);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const handleInvoiceCreate = (newInvoice: Invoice) => {
     setInvoices((prevInvoices) => [newInvoice, ...prevInvoices]);
+  };
+
+  const handleInvoiceUpdate = (updatedInvoice: Invoice) => {
+    setInvoices((prevInvoices) =>
+      prevInvoices.map((invoice) =>
+        invoice.id === updatedInvoice.id ? updatedInvoice : invoice
+      )
+    );
+    setInvoiceToEdit(null);
   };
 
   const handleDeleteConfirm = () => {
@@ -65,6 +76,18 @@ export default function InvoicesPage() {
     }
   };
 
+  const openEditDialog = (invoice: Invoice) => {
+    setInvoiceToEdit(invoice);
+    setIsCreateDialogOpen(true);
+  };
+  
+  const handleDialogStateChange = (open: boolean) => {
+    setIsCreateDialogOpen(open);
+    if (!open) {
+      setInvoiceToEdit(null);
+    }
+  }
+
   return (
     <>
       <div className="flex min-h-0 flex-1 flex-col">
@@ -74,7 +97,13 @@ export default function InvoicesPage() {
         >
           <div className="flex items-center gap-2">
             <InvoiceUploadButton />
-            <CreateInvoiceDialog onInvoiceCreate={handleInvoiceCreate} />
+            <CreateInvoiceDialog
+              onInvoiceCreate={handleInvoiceCreate}
+              onInvoiceUpdate={handleInvoiceUpdate}
+              invoiceToEdit={invoiceToEdit}
+              open={isCreateDialogOpen}
+              onOpenChange={handleDialogStateChange}
+            />
           </div>
         </DashboardHeader>
         <main className="flex-1 space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
@@ -126,7 +155,7 @@ export default function InvoicesPage() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem>View</DropdownMenuItem>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openEditDialog(invoice)}>Edit</DropdownMenuItem>
                             <DropdownMenuItem>Download</DropdownMenuItem>
                             <DropdownMenuItem
                               className="text-destructive"

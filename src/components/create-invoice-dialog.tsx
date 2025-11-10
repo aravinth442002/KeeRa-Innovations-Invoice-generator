@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -55,10 +55,13 @@ const demoDescriptions = [
 
 type CreateInvoiceDialogProps = {
   onInvoiceCreate: (invoice: Invoice) => void;
+  onInvoiceUpdate: (invoice: Invoice) => void;
+  invoiceToEdit?: Invoice | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 };
 
-export function CreateInvoiceDialog({ onInvoiceCreate }: CreateInvoiceDialogProps) {
-  const [open, setOpen] = useState(false);
+export function CreateInvoiceDialog({ onInvoiceCreate, onInvoiceUpdate, invoiceToEdit, open, onOpenChange }: CreateInvoiceDialogProps) {
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
   const [newItem, setNewItem] = useState<{ name: string; quantity: string; price: string }>({
     name: '',
@@ -74,6 +77,42 @@ export function CreateInvoiceDialog({ onInvoiceCreate }: CreateInvoiceDialogProp
   const [gstin, setGstin] = useState('');
   const [issueDate, setIssueDate] = useState(new Date().toISOString().split('T')[0]);
   const [dueDate, setDueDate] = useState('');
+  const [status, setStatus] = useState<'Paid' | 'Pending' | 'Overdue'>('Pending');
+
+  const isEditing = !!invoiceToEdit;
+
+  useEffect(() => {
+    if (isEditing && invoiceToEdit) {
+      setCustomerName(invoiceToEdit.customer);
+      setInvoiceNumber(invoiceToEdit.id);
+      setIssueDate(invoiceToEdit.date);
+      setDueDate(''); // Assuming due date is not part of invoice data
+      setStatus(invoiceToEdit.status);
+      setLineItems([]); // Resetting line items, would need more complex logic to edit them
+      setDescription('');
+      setCustomDescription('');
+      setEmail('');
+      setCustomerAddress('');
+      setGstin('');
+      
+    } else {
+        resetForm();
+    }
+  }, [invoiceToEdit, isEditing]);
+
+  const resetForm = () => {
+    setCustomerName('');
+    setEmail('');
+    setCustomerAddress('');
+    setInvoiceNumber('');
+    setGstin('');
+    setIssueDate(new Date().toISOString().split('T')[0]);
+    setDueDate('');
+    setDescription('');
+    setCustomDescription('');
+    setLineItems([]);
+    setStatus('Pending');
+  }
 
   const handleAddItem = () => {
     if (newItem.name && newItem.quantity && newItem.price) {
@@ -99,41 +138,50 @@ export function CreateInvoiceDialog({ onInvoiceCreate }: CreateInvoiceDialogProp
   const totalAmount = lineItems.reduce((acc, item) => acc + item.quantity * item.price, 0);
 
   const handleSave = () => {
-    const newInvoice: Invoice = {
-      id: invoiceNumber || `INV-${Math.floor(Math.random() * 1000)}`,
-      customer: customerName,
-      amount: totalAmount,
-      status: 'Pending',
-      date: issueDate,
-    };
-    onInvoiceCreate(newInvoice);
-    setOpen(false);
-    // Reset form
-    setCustomerName('');
-    setEmail('');
-    setCustomerAddress('');
-    setInvoiceNumber('');
-    setGstin('');
-    setIssueDate(new Date().toISOString().split('T')[0]);
-    setDueDate('');
-    setDescription('');
-    setCustomDescription('');
-    setLineItems([]);
+    if (isEditing && invoiceToEdit) {
+      const updatedInvoice: Invoice = {
+        ...invoiceToEdit,
+        id: invoiceNumber,
+        customer: customerName,
+        amount: totalAmount > 0 ? totalAmount : invoiceToEdit.amount, // Keep original amount if no new items
+        status: status,
+        date: issueDate,
+      };
+      onInvoiceUpdate(updatedInvoice);
+    } else {
+      const newInvoice: Invoice = {
+        id: invoiceNumber || `INV-${Math.floor(Math.random() * 1000)}`,
+        customer: customerName,
+        amount: totalAmount,
+        status: status,
+        date: issueDate,
+      };
+      onInvoiceCreate(newInvoice);
+    }
+    
+    onOpenChange(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Create Invoice
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+        if (!isOpen) {
+            resetForm();
+        }
+        onOpenChange(isOpen)
+    }}>
+      {!isEditing && (
+        <DialogTrigger asChild>
+            <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Create Invoice
+            </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Create Invoice</DialogTitle>
+          <DialogTitle>{isEditing ? 'Edit Invoice' : 'Create Invoice'}</DialogTitle>
           <DialogDescription>
-            Fill out the form below to create a new invoice.
+            {isEditing ? 'Update the details for this invoice.' : 'Fill out the form below to create a new invoice.'}
           </DialogDescription>
         </DialogHeader>
         <div className="grid max-h-[70vh] gap-6 overflow-y-auto p-1 py-4">
@@ -171,6 +219,20 @@ export function CreateInvoiceDialog({ onInvoiceCreate }: CreateInvoiceDialogProp
               <Input id="due-date" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
             </div>
           </div>
+
+          <div className="grid gap-3 px-4">
+              <Label htmlFor="status">Status</Label>
+              <Select value={status} onValueChange={(value: 'Paid' | 'Pending' | 'Overdue') => setStatus(value)}>
+                <SelectTrigger id="status" aria-label="Select status">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Pending">Pending</SelectItem>
+                  <SelectItem value="Paid">Paid</SelectItem>
+                  <SelectItem value="Overdue">Overdue</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
            <div className="grid gap-3 px-4">
             <Label htmlFor="description">Description</Label>
@@ -281,7 +343,7 @@ export function CreateInvoiceDialog({ onInvoiceCreate }: CreateInvoiceDialogProp
           </div>
         </div>
         <DialogFooter className="pt-4">
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
           <Button onClick={handleSave}>Save Invoice</Button>
