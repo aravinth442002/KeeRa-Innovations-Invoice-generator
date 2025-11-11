@@ -108,7 +108,7 @@ export function CreateClientDialog({
             </div>
             <div className="grid gap-2">
                 <Label htmlFor="phone">Client/Buyer Phone</Label>
-                <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g., +1 234 567 890" />
+                <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g., +91 9876543210" />
             </div>
           </div>
           <div className="grid gap-2">
