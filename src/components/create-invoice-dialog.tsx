@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { PlusCircle, Trash2 } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,40 +12,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  SelectSeparator,
-} from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Textarea } from '@/components/ui/textarea';
-import { formatCurrency } from '@/lib/utils';
-import type { Invoice, LineItem } from '@/lib/data';
-
-const demoDescriptions = [
-  'Web Development Services',
-  'Graphic Design Services',
-  'Consulting Services',
-  'Software License',
-  'Monthly Retainer',
-  'Project Milestone 1',
-  'Hardware purchase',
-  'SEO and Marketing',
-  'Content Creation',
-  'Support and Maintenance',
-];
+import { useRouter } from 'next/navigation';
+import type { Invoice } from '@/lib/data';
 
 type CreateInvoiceDialogProps = {
   onInvoiceCreate: (invoice: Invoice) => void;
@@ -55,313 +23,44 @@ type CreateInvoiceDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-export function CreateInvoiceDialog({ onInvoiceCreate, onInvoiceUpdate, invoiceToEdit, open, onOpenChange }: CreateInvoiceDialogProps) {
-  const [lineItems, setLineItems] = useState<LineItem[]>([]);
-  const [newItem, setNewItem] = useState<{ name: string; quantity: string; price: string }>({
-    name: '',
-    quantity: '1',
-    price: '',
-  });
-  const [description, setDescription] = useState('');
-  const [customDescription, setCustomDescription] = useState('');
-  const [customerName, setCustomerName] = useState('');
-  const [email, setEmail] = useState('');
-  const [customerAddress, setCustomerAddress] = useState('');
-  const [invoiceNumber, setInvoiceNumber] = useState('');
-  const [gstin, setGstin] = useState('');
-  const [issueDate, setIssueDate] = useState(new Date().toISOString().split('T')[0]);
-  const [dueDate, setDueDate] = useState('');
-  const [status, setStatus] = useState<'Paid' | 'Pending' | 'Overdue'>('Pending');
-
+export function CreateInvoiceDialog({ onOpenChange, open, invoiceToEdit }: CreateInvoiceDialogProps) {
+  const router = useRouter();
   const isEditing = !!invoiceToEdit;
 
-  useEffect(() => {
-    if (isEditing && invoiceToEdit) {
-      setCustomerName(invoiceToEdit.customer);
-      setInvoiceNumber(invoiceToEdit.id);
-      setIssueDate(invoiceToEdit.date);
-      setDueDate(invoiceToEdit.dueDate || '');
-      setStatus(invoiceToEdit.status);
-      setLineItems(invoiceToEdit.lineItems || []);
-      setEmail(invoiceToEdit.email || '');
-      setCustomerAddress(invoiceToEdit.customerAddress || '');
-      setGstin(invoiceToEdit.gstin || '');
-
-      const isDemoDesc = demoDescriptions.includes(invoiceToEdit.description);
-      if (isDemoDesc) {
-        setDescription(invoiceToEdit.description);
-        setCustomDescription('');
-      } else {
-        setDescription('custom');
-        setCustomDescription(invoiceToEdit.description || '');
-      }
-      
-    } else {
-        resetForm();
-    }
-  }, [invoiceToEdit, isEditing]);
-
-  const resetForm = () => {
-    setCustomerName('');
-    setEmail('');
-    setCustomerAddress('');
-    setInvoiceNumber('');
-    setGstin('');
-    setIssueDate(new Date().toISOString().split('T')[0]);
-    setDueDate('');
-    setDescription('');
-    setCustomDescription('');
-    setLineItems([]);
-    setStatus('Pending');
+  const handleOpen = () => {
+    const path = isEditing ? `/dashboard/invoices/new?id=${invoiceToEdit?.id}` : '/dashboard/invoices/new';
+    router.push(path);
+    onOpenChange(false); // Close the dialog as we are navigating away
   }
 
-  const handleAddItem = () => {
-    if (newItem.name && newItem.quantity && newItem.price) {
-      setLineItems([
-        ...lineItems,
-        {
-          name: newItem.name,
-          quantity: parseInt(newItem.quantity),
-          price: parseFloat(newItem.price),
-        },
-      ]);
-      setNewItem({ name: '', quantity: '1', price: '' });
+  // Effect to handle external state changes for editing
+  useEffect(() => {
+    if (isEditing && open) {
+        handleOpen();
     }
-  };
-
-  const handleRemoveItem = (index: number) => {
-    const updatedItems = lineItems.filter((_, i) => i !== index);
-    setLineItems(updatedItems);
-  };
-  
-  const isAddItemDisabled = !newItem.name || !newItem.quantity || !newItem.price;
-
-  const totalAmount = lineItems.reduce((acc, item) => acc + item.quantity * item.price, 0);
-
-  const handleSave = () => {
-    const finalDescription = description === 'custom' ? customDescription : description;
-    
-    if (isEditing && invoiceToEdit) {
-      const updatedInvoice: Invoice = {
-        ...invoiceToEdit,
-        id: invoiceNumber,
-        customer: customerName,
-        email: email,
-        customerAddress: customerAddress,
-        gstin: gstin,
-        description: finalDescription,
-        lineItems: lineItems,
-        amount: totalAmount,
-        status: status,
-        date: issueDate,
-        dueDate: dueDate,
-      };
-      onInvoiceUpdate(updatedInvoice);
-    } else {
-      const newInvoice: Invoice = {
-        id: invoiceNumber || `INV-${Math.floor(Math.random() * 1000)}`,
-        customer: customerName,
-        email: email,
-        customerAddress: customerAddress,
-        gstin: gstin,
-        description: finalDescription,
-        lineItems: lineItems,
-        amount: totalAmount,
-        status: status,
-        date: issueDate,
-        dueDate: dueDate,
-      };
-      onInvoiceCreate(newInvoice);
-    }
-    
-    onOpenChange(false);
-  };
+  }, [isEditing, open]);
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-        if (!isOpen) {
-            resetForm();
-        }
-        onOpenChange(isOpen)
-    }}>
+    <Dialog open={open && !isEditing} onOpenChange={onOpenChange}>
       {!isEditing && (
         <DialogTrigger asChild>
-            <Button>
+            <Button onClick={() => router.push('/dashboard/invoices/new')}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Create Invoice
             </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>{isEditing ? 'Edit Invoice' : 'Create Invoice'}</DialogTitle>
-          <DialogDescription>
-            {isEditing ? 'Update the details for this invoice.' : 'Fill out the form below to create a new invoice.'}
-          </DialogDescription>
+      {/* The content is now primarily handled by the new page, but we can keep a basic dialog for other purposes if needed */}
+      <DialogContent>
+         <DialogHeader>
+            <DialogTitle>Create Invoice</DialogTitle>
+            <DialogDescription>
+                You will be redirected to the invoice creation page.
+            </DialogDescription>
         </DialogHeader>
-        <div className="grid max-h-[70vh] gap-6 overflow-y-auto p-1 py-4">
-          <div className="grid grid-cols-1 gap-6 px-4 md:grid-cols-2">
-            <div className="grid gap-3">
-              <Label htmlFor="customer">Customer Name</Label>
-              <Input id="customer" type="text" placeholder="Acme Inc." value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
-            </div>
-             <div className="grid gap-3">
-              <Label htmlFor="email">Email ID</Label>
-              <Input id="email" type="email" placeholder="contact@acme.com" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-          </div>
-           <div className="grid gap-3 px-4">
-            <Label htmlFor="customer-address">Customer Address</Label>
-            <Textarea id="customer-address" placeholder="123 Main St, Anytown, USA" value={customerAddress} onChange={(e) => setCustomerAddress(e.target.value)} />
-          </div>
-           <div className="grid grid-cols-1 gap-6 px-4 md:grid-cols-2">
-             <div className="grid gap-3">
-              <Label htmlFor="invoice-number">Invoice Number</Label>
-              <Input id="invoice-number" type="text" placeholder="INV-008" value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)}/>
-            </div>
-            <div className="grid gap-3">
-              <Label htmlFor="gstin">GSTIN</Label>
-              <Input id="gstin" type="text" placeholder="22AAAAA0000A1Z5" value={gstin} onChange={(e) => setGstin(e.target.value)} />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 gap-6 px-4 md:grid-cols-2">
-            <div className="grid gap-3">
-              <Label htmlFor="issue-date">Issue Date</Label>
-              <Input id="issue-date" type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} />
-            </div>
-            <div className="grid gap-3">
-              <Label htmlFor="due-date">Due Date</Label>
-              <Input id="due-date" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
-            </div>
-          </div>
-
-          <div className="grid gap-3 px-4">
-              <Label htmlFor="status">Status</Label>
-              <Select value={status} onValueChange={(value: 'Paid' | 'Pending' | 'Overdue') => setStatus(value)}>
-                <SelectTrigger id="status" aria-label="Select status">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                  <SelectItem value="Paid">Paid</SelectItem>
-                  <SelectItem value="Overdue">Overdue</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-           <div className="grid gap-3 px-4">
-            <Label htmlFor="description">Description</Label>
-            <Select onValueChange={setDescription} value={description}>
-              <SelectTrigger id="description">
-                <SelectValue placeholder="Select a description" />
-              </SelectTrigger>
-              <SelectContent>
-                {demoDescriptions.map((desc) => (
-                  <SelectItem key={desc} value={desc}>
-                    {desc}
-                  </SelectItem>
-                ))}
-                <SelectSeparator />
-                <SelectItem value="custom">Custom Description</SelectItem>
-              </SelectContent>
-            </Select>
-            {description === 'custom' && (
-              <Textarea
-                placeholder="Enter your custom description"
-                value={customDescription}
-                onChange={(e) => setCustomDescription(e.target.value)}
-                className="mt-2 bg-primary-gradient text-primary-foreground placeholder:text-primary-foreground/80"
-              />
-            )}
-          </div>
-
-          <div className="px-4">
-            <h3 className="text-lg font-medium">Invoice Items</h3>
-            {lineItems.length === 0 && (
-                 <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto_auto_auto]">
-                    <div className="grid gap-1.5">
-                        <Label htmlFor="item-name" className="sr-only">Item Name</Label>
-                        <Input id="item-name" placeholder="Item Name" value={newItem.name} onChange={(e) => setNewItem({ ...newItem, name: e.target.value })} />
-                    </div>
-                    <div className="grid gap-1.5">
-                        <Label htmlFor="quantity" className="sr-only">Quantity</Label>
-                        <Input id="quantity" type="number" placeholder="Quantity" value={newItem.quantity} onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}/>
-                    </div>
-                    <div className="grid gap-1.5">
-                        <Label htmlFor="price" className="sr-only">Price</Label>
-                        <Input id="price" type="number" placeholder="Price" value={newItem.price} onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}/>
-                    </div>
-                    <Button onClick={handleAddItem} disabled={isAddItemDisabled} className="w-full sm:w-auto">
-                        Add Item
-                    </Button>
-                </div>
-            )}
-          </div>
-            
-          {lineItems.length > 0 && (
-            <>
-            <div className="mt-4 rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Item Name</TableHead>
-                    <TableHead className="text-center">Quantity</TableHead>
-                    <TableHead className="text-right">Price</TableHead>
-                    <TableHead className="text-right">Total</TableHead>
-                    <TableHead><span className="sr-only">Actions</span></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {lineItems.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">{item.name}</TableCell>
-                      <TableCell className="text-center">{item.quantity}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.price)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.quantity * item.price)}</TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(index)}>
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Remove item</span>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-             <div className="mt-4 grid grid-cols-1 gap-4 px-4 sm:grid-cols-[1fr_auto_auto_auto]">
-                <div className="grid gap-1.5">
-                    <Label htmlFor="item-name" className="sr-only">Item Name</Label>
-                    <Input id="item-name" placeholder="Item Name" value={newItem.name} onChange={(e) => setNewItem({ ...newItem, name: e.target.value })} />
-                </div>
-                <div className="grid gap-1.5">
-                    <Label htmlFor="quantity" className="sr-only">Quantity</Label>
-                    <Input id="quantity" type="number" placeholder="Quantity" value={newItem.quantity} onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}/>
-                </div>
-                <div className="grid gap-1.5">
-                    <Label htmlFor="price" className="sr-only">Price</Label>
-                    <Input id="price" type="number" placeholder="Price" value={newItem.price} onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}/>
-                </div>
-                <Button onClick={handleAddItem} disabled={isAddItemDisabled} className="w-full sm:w-auto">
-                    Add Item
-                </Button>
-            </div>
-            </>
-          )}
-          <div className="mt-4 flex justify-end px-4">
-            <div className="w-full max-w-xs space-y-2">
-                <div className="flex justify-between font-medium">
-                    <span>Total</span>
-                    <span>{formatCurrency(totalAmount)}</span>
-                </div>
-            </div>
-          </div>
-        </div>
-        <DialogFooter className="pt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave}>Save Invoice</Button>
+        <DialogFooter>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button onClick={handleOpen}>Continue</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

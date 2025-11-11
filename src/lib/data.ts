@@ -2,6 +2,7 @@ export type LineItem = {
   name: string;
   quantity: number;
   price: number;
+  hsn: string;
 };
 
 export type Invoice = {
@@ -10,12 +11,18 @@ export type Invoice = {
   email: string;
   customerAddress: string;
   gstin: string;
+  seller: {
+    name: string;
+    address: string;
+    gstin: string;
+  };
   description: string;
   lineItems: LineItem[];
   amount: number;
-  status: 'Paid' | 'Pending' | 'Overdue';
-  date: string;
+  status: 'Paid' | 'Pending' | 'Overdue' | 'Draft' | 'Given' | 'Processing' | 'Received';
+  date: string; // This is the issue date
   dueDate: string;
+  issueDate?: string; // For backward compatibility or specific needs
 };
 
 export type PurchaseOrder = {
@@ -34,15 +41,29 @@ export type Quotation = {
   expiryDate: string;
 };
 
+export const demoDescriptions = [
+  'Standard refund policy applies.',
+  'Service terms and conditions as agreed.',
+  'Payment due upon receipt.',
+  '30-day net payment terms.',
+  'Hardware warranty included.',
+  'Monthly support and maintenance contract.',
+  'Consulting services rendered for Q4.',
+  'Project Alpha - Milestone 2 payment.',
+  'Annual software license renewal.',
+  'All sales are final.',
+];
+
 export const invoices: Invoice[] = [
   { 
     id: 'INV-001', 
     customer: 'KeeRa Innovations', 
     email: 'keera@innovations.com',
-    customerAddress: '123 Tech Park, Silicon Valley',
+    customerAddress: '123 Tech Park, Silicon Valley, 94002',
     gstin: '29ABCDE1234F1Z5',
+    seller: { name: 'OfficeFlow Solutions', address: '456 Flow St, Worktown, 600042', gstin: '22AAAAA0000A1Z5' },
     description: 'Web Development Services',
-    lineItems: [{ name: 'Frontend Development', quantity: 1, price: 250.0 }],
+    lineItems: [{ name: 'Frontend Development', quantity: 1, price: 250.0, hsn: '998314' }],
     amount: 250.0, 
     status: 'Paid', 
     date: '2023-10-23',
@@ -52,10 +73,11 @@ export const invoices: Invoice[] = [
     id: 'INV-002', 
     customer: 'Solutions Inc.', 
     email: 'contact@solutions.inc',
-    customerAddress: '456 Business Blvd, Metropolis',
+    customerAddress: '456 Business Blvd, Metropolis, 10001',
     gstin: '27FGHIJ5678K1Z4',
+    seller: { name: 'OfficeFlow Solutions', address: '456 Flow St, Worktown, 600042', gstin: '22AAAAA0000A1Z5' },
     description: 'Consulting Services',
-    lineItems: [{ name: 'Strategy Session', quantity: 1, price: 150.0 }],
+    lineItems: [{ name: 'Strategy Session', quantity: 1, price: 150.0, hsn: '998311' }],
     amount: 150.0, 
     status: 'Pending', 
     date: '2023-10-24',
@@ -65,10 +87,11 @@ export const invoices: Invoice[] = [
     id: 'INV-003', 
     customer: 'Tech Corp', 
     email: 'info@techcorp.com',
-    customerAddress: '789 Innovation Dr, Technocity',
+    customerAddress: '789 Innovation Dr, Technocity, 87654',
     gstin: '36LMNOP9012Q1Z3',
+    seller: { name: 'OfficeFlow Solutions', address: '456 Flow St, Worktown, 600042', gstin: '22AAAAA0000A1Z5' },
     description: 'Software License',
-    lineItems: [{ name: 'Pro License', quantity: 1, price: 350.0 }],
+    lineItems: [{ name: 'Pro License', quantity: 1, price: 350.0, hsn: '997331' }],
     amount: 350.0, 
     status: 'Paid', 
     date: '2023-10-15',
@@ -78,10 +101,11 @@ export const invoices: Invoice[] = [
     id: 'INV-004', 
     customer: 'Global Services', 
     email: 'support@globalservices.com',
-    customerAddress: '101 World Ave, Capital City',
+    customerAddress: '101 World Ave, Capital City, 12345',
     gstin: '24RSTUV3456W1Z2',
+    seller: { name: 'OfficeFlow Solutions', address: '456 Flow St, Worktown, 600042', gstin: '22AAAAA0000A1Z5' },
     description: 'Monthly Retainer',
-    lineItems: [{ name: 'Support Contract', quantity: 1, price: 450.0 }],
+    lineItems: [{ name: 'Support Contract', quantity: 1, price: 450.0, hsn: '998315' }],
     amount: 450.0, 
     status: 'Overdue', 
     date: '2023-09-01',
@@ -91,10 +115,11 @@ export const invoices: Invoice[] = [
     id: 'INV-005', 
     customer: 'KeeRa Innovations', 
     email: 'keera@innovations.com',
-    customerAddress: '123 Tech Park, Silicon Valley',
+    customerAddress: '123 Tech Park, Silicon Valley, 94002',
     gstin: '29ABCDE1234F1Z5',
+    seller: { name: 'OfficeFlow Solutions', address: '456 Flow St, Worktown, 600042', gstin: '22AAAAA0000A1Z5' },
     description: 'Project Milestone 1',
-    lineItems: [{ name: 'UI/UX Design', quantity: 1, price: 550.0 }],
+    lineItems: [{ name: 'UI/UX Design', quantity: 1, price: 550.0, hsn: '998313' }],
     amount: 550.0, 
     status: 'Pending', 
     date: '2023-10-28',
@@ -104,10 +129,11 @@ export const invoices: Invoice[] = [
     id: 'INV-006', 
     customer: 'Alpha Co', 
     email: 'contact@alphaco.com',
-    customerAddress: '210 First St, Alphaville',
+    customerAddress: '210 First St, Alphaville, 54321',
     gstin: '22XYZAB7890C1Z1',
+    seller: { name: 'OfficeFlow Solutions', address: '456 Flow St, Worktown, 600042', gstin: '22AAAAA0000A1Z5' },
     description: 'Hardware purchase',
-    lineItems: [{ name: 'Wireless Mouse', quantity: 1, price: 50.0 }],
+    lineItems: [{ name: 'Wireless Mouse', quantity: 1, price: 50.0, hsn: '847160' }],
     amount: 50.0, 
     status: 'Paid', 
     date: '2023-10-29',
@@ -117,10 +143,11 @@ export const invoices: Invoice[] = [
     id: 'INV-007', 
     customer: 'Beta Co', 
     email: 'accounts@betaco.com',
-    customerAddress: '321 Second St, Betatown',
+    customerAddress: '321 Second St, Betatown, 67890',
     gstin: '33BCDAF2345E1Z0',
+    seller: { name: 'OfficeFlow Solutions', address: '456 Flow St, Worktown, 600042', gstin: '22AAAAA0000A1Z5' },
     description: 'Support and Maintenance',
-    lineItems: [{ name: 'Annual Support', quantity: 1, price: 750.0 }],
+    lineItems: [{ name: 'Annual Support', quantity: 1, price: 750.0, hsn: '998315' }],
     amount: 750.0, 
     status: 'Pending', 
     date: '2023-11-01',

@@ -41,17 +41,22 @@ import { invoices as initialInvoices, type Invoice } from '@/lib/data';
 import { formatCurrency } from '@/lib/utils';
 import { InvoiceUploadButton } from '@/components/invoice-upload-button';
 import { CreateInvoiceDialog } from '@/components/create-invoice-dialog';
+import { useRouter } from 'next/navigation';
 
-const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
+const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' | 'outline' } = {
   Paid: 'default',
   Pending: 'secondary',
   Overdue: 'destructive',
+  Draft: 'outline',
+  Given: 'secondary',
+  Processing: 'secondary',
+  Received: 'default',
 };
 
 export default function InvoicesPage() {
+  const router = useRouter();
   const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
   const [invoiceToDelete, setInvoiceToDelete] = useState<string | null>(null);
-  const [invoiceToEdit, setInvoiceToEdit] = useState<Invoice | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const handleInvoiceCreate = (newInvoice: Invoice) => {
@@ -64,7 +69,6 @@ export default function InvoicesPage() {
         invoice.id === updatedInvoice.id ? updatedInvoice : invoice
       )
     );
-    setInvoiceToEdit(null);
   };
 
   const handleDeleteConfirm = () => {
@@ -75,17 +79,13 @@ export default function InvoicesPage() {
       setInvoiceToDelete(null);
     }
   };
-
-  const openEditDialog = (invoice: Invoice) => {
-    setInvoiceToEdit(invoice);
-    setIsCreateDialogOpen(true);
-  };
   
+  const openEditPage = (invoice: Invoice) => {
+    router.push(`/dashboard/invoices/new?id=${invoice.id}`);
+  };
+
   const handleDialogStateChange = (open: boolean) => {
     setIsCreateDialogOpen(open);
-    if (!open) {
-      setInvoiceToEdit(null);
-    }
   }
 
   return (
@@ -100,7 +100,6 @@ export default function InvoicesPage() {
             <CreateInvoiceDialog
               onInvoiceCreate={handleInvoiceCreate}
               onInvoiceUpdate={handleInvoiceUpdate}
-              invoiceToEdit={invoiceToEdit}
               open={isCreateDialogOpen}
               onOpenChange={handleDialogStateChange}
             />
@@ -133,7 +132,7 @@ export default function InvoicesPage() {
                       <TableCell className="font-medium">{invoice.id}</TableCell>
                       <TableCell>{invoice.customer}</TableCell>
                       <TableCell>
-                        <Badge variant={statusVariant[invoice.status]}>
+                        <Badge variant={statusVariant[invoice.status] || 'secondary'}>
                           {invoice.status}
                         </Badge>
                       </TableCell>
@@ -155,7 +154,7 @@ export default function InvoicesPage() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem>View</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => openEditDialog(invoice)}>Edit</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openEditPage(invoice)}>Edit</DropdownMenuItem>
                             <DropdownMenuItem>Download</DropdownMenuItem>
                             <DropdownMenuItem
                               className="text-destructive"
