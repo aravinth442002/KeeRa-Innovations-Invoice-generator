@@ -34,6 +34,7 @@ export function CreateClientDialog({
 }: CreateClientDialogProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [gstin, setGstin] = useState('');
 
@@ -43,6 +44,7 @@ export function CreateClientDialog({
     if (isEditing && clientToEdit) {
       setName(clientToEdit.name);
       setEmail(clientToEdit.email);
+      setPhone(clientToEdit.phone);
       setAddress(clientToEdit.address);
       setGstin(clientToEdit.gstin);
     } else {
@@ -53,13 +55,14 @@ export function CreateClientDialog({
   const resetForm = () => {
     setName('');
     setEmail('');
+    setPhone('');
     setAddress('');
     setGstin('');
   };
   
   const handleSave = () => {
-    if (name && email && address && gstin) {
-      const clientData = { name, email, address, gstin };
+    if (name && email && address && gstin && phone) {
+      const clientData = { name, email, phone, address, gstin };
 
       if (isEditing && clientToEdit) {
         onClientUpdate({ ...clientToEdit, ...clientData });
@@ -98,9 +101,15 @@ export function CreateClientDialog({
             <Label htmlFor="name">Client/Buyer Name</Label>
             <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g., Tech Solutions Inc." />
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="email">Client/Buyer Email</Label>
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="e.g., accounts@techsolutions.com" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid gap-2">
+                <Label htmlFor="email">Client/Buyer Email</Label>
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="e.g., accounts@techsolutions.com" />
+            </div>
+            <div className="grid gap-2">
+                <Label htmlFor="phone">Client/Buyer Phone</Label>
+                <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g., +1 234 567 890" />
+            </div>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="gstin">Client/Buyer GSTIN</Label>

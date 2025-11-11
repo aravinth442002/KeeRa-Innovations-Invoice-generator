@@ -45,6 +45,7 @@ export type Client = {
   id: string;
   name: string;
   email: string;
+  phone: string;
   address: string;
   gstin: string;
 };
@@ -185,9 +186,9 @@ export const quotations: Quotation[] = [
 ];
 
 export const clients: Client[] = [
-    { id: 'client-001', name: 'Tech Solutions Inc.', email: 'accounts@techsolutions.com', address: '123 Main St, Anytown', gstin: '27AABCT1234F1Z9' },
-    { id: 'client-002', name: 'Global Connect', email: 'contact@globalconnect.com', address: '456 Oak Ave, Somewhere', gstin: '29AABCD5678F1Z5' },
-    { id: 'client-003', name: 'Innovate LLC', email: 'info@innovatellc.com', address: '789 Pine Rd, Yourtown', gstin: '33ACDCE9012F1Z3' },
+    { id: 'client-001', name: 'Tech Solutions Inc.', email: 'accounts@techsolutions.com', phone: '+1-202-555-0176', address: '123 Main St, Anytown', gstin: '27AABCT1234F1Z9' },
+    { id: 'client-002', name: 'Global Connect', email: 'contact@globalconnect.com', phone: '+1-202-555-0154', address: '456 Oak Ave, Somewhere', gstin: '29AABCD5678F1Z5' },
+    { id: 'client-003', name: 'Innovate LLC', email: 'info@innovatellc.com', phone: '+1-202-555-0123', address: '789 Pine Rd, Yourtown', gstin: '33ACDCE9012F1Z3' },
 ];
 
 export const masterDescriptions: MasterDescription[] = [

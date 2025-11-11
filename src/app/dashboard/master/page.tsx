@@ -53,7 +53,7 @@ function ClientsTab() {
     'Innovate LLC': 8,
   });
 
-  const handleClientCreate = (newClient: Client) => {
+  const handleClientCreate = (newClient: Omit<Client, 'id'>) => {
     setClients((prev) => [{ ...newClient, id: `client-${Date.now()}` }, ...prev]);
     setInvoices(prev => ({...prev, [newClient.name]: 0}))
   };
@@ -112,6 +112,7 @@ function ClientsTab() {
               <TableHead>Buyer Name</TableHead>
               <TableHead>Buyer GSTIN</TableHead>
               <TableHead>Buyer Email</TableHead>
+              <TableHead>Buyer Phone</TableHead>
               <TableHead>Total Invoices</TableHead>
               <TableHead>
                 <span className="sr-only">Actions</span>
@@ -124,6 +125,7 @@ function ClientsTab() {
                 <TableCell className="font-medium">{client.name}</TableCell>
                 <TableCell>{client.gstin}</TableCell>
                 <TableCell>{client.email}</TableCell>
+                <TableCell>{client.phone}</TableCell>
                 <TableCell>{invoices[client.name] || 0}</TableCell>
                 <TableCell>
                   <DropdownMenu>
