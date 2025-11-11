@@ -98,25 +98,25 @@ export function CreateClientDialog({
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="name">Client/Buyer Name</Label>
+            <Label htmlFor="name">Buyer Name</Label>
             <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g., Tech Solutions Inc." />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="grid gap-2">
-                <Label htmlFor="email">Client/Buyer Email</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="e.g., accounts@techsolutions.com" />
             </div>
             <div className="grid gap-2">
-                <Label htmlFor="phone">Client/Buyer Phone</Label>
+                <Label htmlFor="phone">Phone No</Label>
                 <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g., +91 9876543210" />
             </div>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="gstin">Client/Buyer GSTIN</Label>
+            <Label htmlFor="gstin">GSTIN</Label>
             <Input id="gstin" value={gstin} onChange={(e) => setGstin(e.target.value)} placeholder="e.g., 27AABCT1234F1Z9" />
           </div>
            <div className="grid gap-2">
-            <Label htmlFor="address">Client/Buyer Address</Label>
+            <Label htmlFor="address">Address</Label>
             <Textarea id="address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="e.g., 123 Main St, Anytown" />
           </div>
         </div>

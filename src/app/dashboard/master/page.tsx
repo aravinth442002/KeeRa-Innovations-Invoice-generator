@@ -110,9 +110,9 @@ function ClientsTab() {
           <TableHeader>
             <TableRow>
               <TableHead>Buyer Name</TableHead>
-              <TableHead>Buyer GSTIN</TableHead>
-              <TableHead>Buyer Email</TableHead>
-              <TableHead>Buyer Phone</TableHead>
+              <TableHead>GSTIN</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Phone</TableHead>
               <TableHead>Total Invoices</TableHead>
               <TableHead>
                 <span className="sr-only">Actions</span>
