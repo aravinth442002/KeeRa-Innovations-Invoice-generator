@@ -41,6 +41,21 @@ export type Quotation = {
   expiryDate: string;
 };
 
+export type Client = {
+  id: string;
+  name: string;
+  email: string;
+  address: string;
+  gstin: string;
+};
+
+export type MasterDescription = {
+  id: string;
+  title: string;
+  content: string;
+};
+
+
 export const demoDescriptions = [
   'Standard refund policy applies.',
   'Service terms and conditions as agreed.',
@@ -167,4 +182,16 @@ export const quotations: Quotation[] = [
   { id: 'QUO-002', customer: 'Next Gen Web', amount: 5400.0, status: 'Accepted', expiryDate: '2023-11-01' },
   { id: 'QUO-003', customer: 'Dynamic Digital', amount: 3250.0, status: 'Expired', expiryDate: '2023-10-20' },
   { id: 'QUO-004', customer: 'Future Systems', amount: 800.0, status: 'Sent', expiryDate: '2023-11-30' },
+];
+
+export const clients: Client[] = [
+    { id: 'client-001', name: 'Tech Solutions Inc.', email: 'accounts@techsolutions.com', address: '123 Main St, Anytown', gstin: '27AABCT1234F1Z9' },
+    { id: 'client-002', name: 'Global Connect', email: 'contact@globalconnect.com', address: '456 Oak Ave, Somewhere', gstin: '29AABCD5678F1Z5' },
+    { id: 'client-003', name: 'Innovate LLC', email: 'info@innovatellc.com', address: '789 Pine Rd, Yourtown', gstin: '33ACDCE9012F1Z3' },
+];
+
+export const masterDescriptions: MasterDescription[] = [
+    { id: 'desc-001', title: 'Standard Refund Policy', content: 'All sales are final. Refunds are only provided for defective products reported within 7 days of receipt.' },
+    { id: 'desc-002', title: 'Service Terms (30 Days)', content: 'Payment is due within 30 days of the invoice date. A late fee of 2% per month will be applied to overdue balances.' },
+    { id: 'desc-003', title: 'Hardware Warranty', content: 'This product includes a 1-year limited hardware warranty covering manufacturing defects. It does not cover accidental damage.' },
 ];

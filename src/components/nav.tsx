@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Settings,
   ShoppingCart,
+  Database,
 } from 'lucide-react';
 import {
   SidebarMenu,
@@ -24,6 +25,7 @@ const navItems = [
     label: 'Purchase Orders',
   },
   { href: '/dashboard/quotations', icon: FileQuestion, label: 'Quotations' },
+  { href: '/dashboard/master', icon: Database, label: 'Master' },
   { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
 ];
 
@@ -37,7 +39,7 @@ export function Nav() {
           <Link href={item.href} passHref legacyBehavior>
             <SidebarMenuButton
               asChild
-              isActive={pathname === item.href}
+              isActive={pathname.startsWith(item.href) && (item.href !== '/dashboard' || pathname === '/dashboard')}
               tooltip={item.label}
             >
               <a>
