@@ -37,11 +37,11 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardHeader } from '@/components/dashboard-header';
-import { type Client, masterDescriptions as initialMasterDescriptions, type MasterDescription } from '@/lib/data';
+import { type Client, type MasterDescription } from '@/lib/data';
 import { CreateClientDialog } from '@/components/create-client-dialog';
 import { CreateDescriptionDialog } from '@/components/create-description-dialog';
 import { useToast } from '@/hooks/use-toast';
-import sampleData from '@/lib/sample.json';
+import sampleData from 'backend/sample.json';
 
 
 function ClientsTab() {
@@ -187,7 +187,7 @@ function ClientsTab() {
 }
 
 function DescriptionsTab() {
-    const [descriptions, setDescriptions] = useState<MasterDescription[]>(initialMasterDescriptions);
+    const [descriptions, setDescriptions] = useState<MasterDescription[]>(sampleData.descriptions);
     const [descriptionToDelete, setDescriptionToDelete] = useState<string | null>(null);
     const [descriptionToEdit, setDescriptionToEdit] = useState<MasterDescription | null>(null);
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
