@@ -5,7 +5,8 @@ const path = require('path');
 const bodyParser = require('body-parser');
 
 const sellerRoutes = require("./routes/sellerRoutes");
-const invoice3Routes = require("./routes/invoice3Routes");
+const invoiceRoutes = require("./routes/invoiceRoutes");
+const quotationRoutes = require("./routes/quotationRoutes");
 const clientRoutes = require("./routes/clientRoutes");
 const descriptionRoutes = require("./routes/descriptionRoutes");
 const adminRoutes = require("./routes/adminRoutes");
@@ -28,7 +29,8 @@ app.get('/', (req, res) => {
 
 // API Routes
 app.use("/api/sellers", sellerRoutes);
-app.use("/api/invoice3", invoice3Routes);
+app.use("/api/invoices", invoiceRoutes);
+app.use("/api/quotations", quotationRoutes);
 app.use("/api/clients", clientRoutes);
 app.use("/api/descriptions", descriptionRoutes);
 app.use("/api/auth", adminRoutes);
