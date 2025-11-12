@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -40,20 +40,13 @@ import { DashboardHeader } from '@/components/dashboard-header';
 import { type Client, masterDescriptions as initialMasterDescriptions, type MasterDescription } from '@/lib/data';
 import { CreateClientDialog } from '@/components/create-client-dialog';
 import { CreateDescriptionDialog } from '@/components/create-description-dialog';
-import { useCollection } from '@/firebase';
-import { collection, addDoc, updateDoc, deleteDoc, doc, DocumentData } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
-import { Skeleton } from '@/components/ui/skeleton';
+import sampleData from '@/lib/sample.json';
 
 
 function ClientsTab() {
   const { toast } = useToast();
-  const firestore = useFirestore();
-
-  const clientsQuery = firestore ? collection(firestore, 'clients') : null;
-  const { data: clients, loading, error } = useCollection<Client>(clientsQuery);
-  
+  const [clients, setClients] = useState<Client[]>(sampleData.clients);
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
   const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -65,40 +58,23 @@ function ClientsTab() {
     'Innovate LLC': 8,
   });
 
-  const handleClientCreate = async (newClient: Omit<Client, 'id'>) => {
-    if (!firestore) return;
-    try {
-      await addDoc(collection(firestore, 'clients'), newClient);
-      toast({ title: 'Client created', description: `${newClient.name} has been added.` });
-    } catch (e) {
-      console.error(e);
-      toast({ title: 'Error', description: 'Could not create client.', variant: 'destructive' });
-    }
+  const handleClientCreate = (newClient: Omit<Client, 'id'>) => {
+    const clientWithId = { ...newClient, id: `client-${Date.now()}` };
+    setClients(prev => [clientWithId, ...prev]);
+    toast({ title: 'Client created', description: `${newClient.name} has been added.` });
   };
 
-  const handleClientUpdate = async (updatedClient: Client) => {
-    if (!firestore || !updatedClient.id) return;
-    try {
-      const clientRef = doc(firestore, 'clients', updatedClient.id);
-      await updateDoc(clientRef, updatedClient as DocumentData);
-      toast({ title: 'Client updated', description: `${updatedClient.name} has been updated.` });
-      setClientToEdit(null);
-    } catch (e) {
-      console.error(e);
-      toast({ title: 'Error', description: 'Could not update client.', variant: 'destructive' });
-    }
+  const handleClientUpdate = (updatedClient: Client) => {
+    setClients(prev => prev.map(c => c.id === updatedClient.id ? updatedClient : c));
+    toast({ title: 'Client updated', description: `${updatedClient.name} has been updated.` });
+    setClientToEdit(null);
   }
 
-  const handleDeleteConfirm = async () => {
-    if (!firestore || !clientToDelete || !clientToDelete.id) return;
-    try {
-      await deleteDoc(doc(firestore, 'clients', clientToDelete.id));
-      toast({ title: 'Client deleted', description: `${clientToDelete.name} has been deleted.` });
-      setClientToDelete(null);
-    } catch(e) {
-       console.error(e);
-      toast({ title: 'Error', description: 'Could not delete client.', variant: 'destructive' });
-    }
+  const handleDeleteConfirm = () => {
+    if (!clientToDelete) return;
+    setClients(prev => prev.filter(c => c.id !== clientToDelete.id));
+    toast({ title: 'Client deleted', description: `${clientToDelete.name} has been deleted.` });
+    setClientToDelete(null);
   };
 
   const openEditDialog = (client: Client) => {
@@ -147,24 +123,7 @@ function ClientsTab() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
-                Array.from({length: 3}).map((_, i) => (
-                    <TableRow key={i}>
-                        <TableCell><Skeleton className="h-5 w-32"/></TableCell>
-                        <TableCell><Skeleton className="h-5 w-24"/></TableCell>
-                        <TableCell><Skeleton className="h-5 w-40"/></TableCell>
-                        <TableCell><Skeleton className="h-5 w-24"/></TableCell>
-                        <TableCell><Skeleton className="h-5 w-12"/></TableCell>
-                        <TableCell><Skeleton className="h-8 w-8"/></TableCell>
-                    </TableRow>
-                ))
-            ) : error ? (
-                <TableRow>
-                    <TableCell colSpan={6} className="text-center text-destructive">
-                        Error loading clients: {error.message}
-                    </TableCell>
-                </TableRow>
-            ) : clients && clients.length > 0 ? (
+            {clients.length > 0 ? (
               clients.map((client) => (
                 <TableRow key={client.id}>
                   <TableCell className="font-medium">{client.name}</TableCell>
