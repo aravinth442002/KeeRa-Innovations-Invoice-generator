@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { MoreHorizontal, PlusCircle } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -38,39 +37,67 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardHeader } from '@/components/dashboard-header';
-import { clients as initialClients, type Client, masterDescriptions as initialMasterDescriptions, type MasterDescription } from '@/lib/data';
+import { type Client, masterDescriptions as initialMasterDescriptions, type MasterDescription } from '@/lib/data';
 import { CreateClientDialog } from '@/components/create-client-dialog';
 import { CreateDescriptionDialog } from '@/components/create-description-dialog';
+import { useCollection } from '@/firebase';
+import { collection, addDoc, updateDoc, deleteDoc, doc, DocumentData } from 'firebase/firestore';
+import { useFirestore } from '@/firebase';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
+
 
 function ClientsTab() {
-  const [clients, setClients] = useState<Client[]>(initialClients);
-  const [clientToDelete, setClientToDelete] = useState<string | null>(null);
+  const { toast } = useToast();
+  const firestore = useFirestore();
+
+  const clientsQuery = firestore ? collection(firestore, 'clients') : null;
+  const { data: clients, loading, error } = useCollection<Client>(clientsQuery);
+  
+  const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
   const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [invoices, setInvoices] = useState<{ [key: string]: number }>({
+  
+  // This state is just for demonstration as we don't have invoice data in firestore yet
+  const [invoices] = useState<{ [key: string]: number }>({
     'Tech Solutions Inc.': 5,
     'Global Connect': 2,
     'Innovate LLC': 8,
   });
 
-  const handleClientCreate = (newClient: Omit<Client, 'id'>) => {
-    setClients((prev) => [{ ...newClient, id: `client-${Date.now()}` }, ...prev]);
-    setInvoices(prev => ({...prev, [newClient.name]: 0}))
+  const handleClientCreate = async (newClient: Omit<Client, 'id'>) => {
+    if (!firestore) return;
+    try {
+      await addDoc(collection(firestore, 'clients'), newClient);
+      toast({ title: 'Client created', description: `${newClient.name} has been added.` });
+    } catch (e) {
+      console.error(e);
+      toast({ title: 'Error', description: 'Could not create client.', variant: 'destructive' });
+    }
   };
 
-  const handleClientUpdate = (updatedClient: Client) => {
-    setClients((prev) =>
-      prev.map((c) => (c.id === updatedClient.id ? updatedClient : c))
-    );
-    setClientToEdit(null);
+  const handleClientUpdate = async (updatedClient: Client) => {
+    if (!firestore || !updatedClient.id) return;
+    try {
+      const clientRef = doc(firestore, 'clients', updatedClient.id);
+      await updateDoc(clientRef, updatedClient as DocumentData);
+      toast({ title: 'Client updated', description: `${updatedClient.name} has been updated.` });
+      setClientToEdit(null);
+    } catch (e) {
+      console.error(e);
+      toast({ title: 'Error', description: 'Could not update client.', variant: 'destructive' });
+    }
   }
 
-  const handleDeleteConfirm = () => {
-    if (clientToDelete) {
-      setClients((prev) =>
-        prev.filter((c) => c.id !== clientToDelete)
-      );
+  const handleDeleteConfirm = async () => {
+    if (!firestore || !clientToDelete || !clientToDelete.id) return;
+    try {
+      await deleteDoc(doc(firestore, 'clients', clientToDelete.id));
+      toast({ title: 'Client deleted', description: `${clientToDelete.name} has been deleted.` });
       setClientToDelete(null);
+    } catch(e) {
+       console.error(e);
+      toast({ title: 'Error', description: 'Could not delete client.', variant: 'destructive' });
     }
   };
 
@@ -120,40 +147,64 @@ function ClientsTab() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {clients.map((client) => (
-              <TableRow key={client.id}>
-                <TableCell className="font-medium">{client.name}</TableCell>
-                <TableCell>{client.gstin}</TableCell>
-                <TableCell>{client.email}</TableCell>
-                <TableCell>{client.phone}</TableCell>
-                <TableCell>{invoices[client.name] || 0}</TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        aria-haspopup="true"
-                        size="icon"
-                        variant="ghost"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Toggle menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>View</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => openEditDialog(client)}>Edit</DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-destructive"
-                        onClick={() => setClientToDelete(client.id)}
-                      >
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
+            {loading ? (
+                Array.from({length: 3}).map((_, i) => (
+                    <TableRow key={i}>
+                        <TableCell><Skeleton className="h-5 w-32"/></TableCell>
+                        <TableCell><Skeleton className="h-5 w-24"/></TableCell>
+                        <TableCell><Skeleton className="h-5 w-40"/></TableCell>
+                        <TableCell><Skeleton className="h-5 w-24"/></TableCell>
+                        <TableCell><Skeleton className="h-5 w-12"/></TableCell>
+                        <TableCell><Skeleton className="h-8 w-8"/></TableCell>
+                    </TableRow>
+                ))
+            ) : error ? (
+                <TableRow>
+                    <TableCell colSpan={6} className="text-center text-destructive">
+                        Error loading clients: {error.message}
+                    </TableCell>
+                </TableRow>
+            ) : clients && clients.length > 0 ? (
+              clients.map((client) => (
+                <TableRow key={client.id}>
+                  <TableCell className="font-medium">{client.name}</TableCell>
+                  <TableCell>{client.gstin}</TableCell>
+                  <TableCell>{client.email}</TableCell>
+                  <TableCell>{client.phone}</TableCell>
+                  <TableCell>{invoices[client.name] || 0}</TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          aria-haspopup="true"
+                          size="icon"
+                          variant="ghost"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                          <span className="sr-only">Toggle menu</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => openEditDialog(client)}>Edit</DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={() => setClientToDelete(client)}
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+                <TableRow>
+                    <TableCell colSpan={6} className="text-center text-muted-foreground">
+                        No clients found.
+                    </TableCell>
+                </TableRow>
+            )}
           </TableBody>
         </Table>
         <AlertDialog open={!!clientToDelete} onOpenChange={() => setClientToDelete(null)}>
