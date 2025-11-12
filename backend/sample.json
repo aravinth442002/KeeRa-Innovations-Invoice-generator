@@ -1,0 +1,33 @@
+{
+  "clients": [
+    {
+      "id": "client-1",
+      "name": "Tech Solutions Inc.",
+      "email": "contact@techsolutions.com",
+      "phone": "+1-202-555-0176",
+      "address": "123 Tech Park, Silicon Valley, CA 94000",
+      "gstin": "29AABCU9567M1Z5"
+    },
+    {
+      "id": "client-2",
+      "name": "Global Connect",
+      "email": "support@globalconnect.net",
+      "phone": "+44 20 7946 0958",
+      "address": "456 Business Hub, London, EC1Y 8SY, UK",
+      "gstin": "27AAGCB2489F1Z5"
+    },
+    {
+      "id": "client-3",
+      "name": "Innovate LLC",
+      "email": "hello@innovatellc.dev",
+      "phone": "+1-310-555-0182",
+      "address": "789 Innovation Drive, Los Angeles, CA 90210",
+      "gstin": "33AACCT4865L1Z8"
+    }
+  ],
+  "descriptions": [
+    { "id": "desc-001", "title": "Standard Refund Policy", "content": "All sales are final. Refunds are only provided for defective products reported within 7 days of receipt." },
+    { "id": "desc-002", "title": "Service Terms (30 Days)", "content": "Payment is due within 30 days of the invoice date. A late fee of 2% per month will be applied to overdue balances." },
+    { "id": "desc-003", "title": "Hardware Warranty", "content": "This product includes a 1-year limited hardware warranty covering manufacturing defects. It does not cover accidental damage." }
+  ]
+}
