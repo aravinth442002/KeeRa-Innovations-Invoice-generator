@@ -1,4 +1,17 @@
+
 {
+  "seller": {
+    "name": "KeeRa Innovations",
+    "address": "112-A, 3rd Ave, W Block, Anna Nagar, Chennai, Tamil Nadu 600042",
+    "phone": "+1 234 567 890",
+    "email": "keerainnovations@gmail.com",
+    "gstin": "12-3456789",
+    "bank": {
+      "name": "Global Commerce Bank",
+      "accountNumber": "**** **** **** 1234",
+      "swiftCode": "GCBKGBA"
+    }
+  },
   "clients": [
     {
       "id": "client-1",
@@ -29,5 +42,31 @@
     { "id": "desc-001", "title": "Standard Refund Policy", "content": "All sales are final. Refunds are only provided for defective products reported within 7 days of receipt." },
     { "id": "desc-002", "title": "Service Terms (30 Days)", "content": "Payment is due within 30 days of the invoice date. A late fee of 2% per month will be applied to overdue balances." },
     { "id": "desc-003", "title": "Hardware Warranty", "content": "This product includes a 1-year limited hardware warranty covering manufacturing defects. It does not cover accidental damage." }
+  ],
+  "invoices": [
+    {
+      "id": "INV-2024-001",
+      "customer": "Tech Solutions Inc.",
+      "amount": 45000.00,
+      "status": "Paid",
+      "date": "2024-05-15",
+      "dueDate": "2024-06-14"
+    },
+    {
+      "id": "INV-2024-002",
+      "customer": "Global Connect",
+      "amount": 12500.50,
+      "status": "Pending",
+      "date": "2024-05-20",
+      "dueDate": "2024-06-19"
+    },
+    {
+      "id": "INV-2024-003",
+      "customer": "Innovate LLC",
+      "amount": 7800.00,
+      "status": "Overdue",
+      "date": "2024-04-10",
+      "dueDate": "2024-05-10"
+    }
   ]
 }
