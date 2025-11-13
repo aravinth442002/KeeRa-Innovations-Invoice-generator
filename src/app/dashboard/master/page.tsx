@@ -43,7 +43,7 @@ import { CreateDescriptionDialog } from '@/components/create-description-dialog'
 import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 function ClientsTab() {
   const { toast } = useToast();
