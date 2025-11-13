@@ -113,7 +113,7 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
                     </tr>
                      <tr>
                         <td className="bg-primary/20 font-bold p-2 text-xs">Phone</td>
-                        <td className="p-2 text-xs">-</td>
+                        <td className="p-2 text-xs">{invoice.phone || '-'}</td>
                     </tr>
                     <tr>
                         <td className="bg-primary/20 font-bold p-2 text-xs">GSTIN</td>
@@ -301,3 +301,5 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
     </div>
   );
 }
+
+    
