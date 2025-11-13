@@ -9,6 +9,7 @@ export type Invoice = {
   id: string;
   customer: string;
   email: string;
+  phone?: string;
   customerAddress: string;
   gstin: string;
   seller: {
@@ -76,6 +77,7 @@ export const invoices: Invoice[] = [
       "id": "INV-2024-001",
       "customer": "Tech Solutions Inc.",
       "email": "contact@techsolutions.com",
+      "phone": "+1-202-555-0176",
       "customerAddress": "123 Tech Park, Silicon Valley, CA 94000",
       "gstin": "29AABCU9567M1Z5",
       "seller": {
@@ -94,6 +96,7 @@ export const invoices: Invoice[] = [
       "id": "INV-2024-002",
       "customer": "Global Connect",
       "email": "support@globalconnect.net",
+       "phone": "+44 20 7946 0958",
       "customerAddress": "456 Business Hub, London, EC1Y 8SY, UK",
       "gstin": "27AAGCB2489F1Z5",
       "seller": {
@@ -112,6 +115,7 @@ export const invoices: Invoice[] = [
       "id": "INV-2024-003",
       "customer": "Innovate LLC",
       "email": "hello@innovatellc.dev",
+      "phone": "+1-310-555-0182",
       "customerAddress": "789 Innovation Drive, Los Angeles, CA 90210",
       "gstin": "33AACCT4865L1Z8",
        "seller": {
@@ -161,3 +165,5 @@ export const masterDescriptions: MasterDescription[] = [
     { id: 'desc-002', title: 'Service Terms (30 Days)', content: 'Payment is due within 30 days of the invoice date. A late fee of 2% per month will be applied to overdue balances.' },
     { id: 'desc-003', title: 'Hardware Warranty', content: 'This product includes a 1-year limited hardware warranty covering manufacturing defects. It does not cover accidental damage.' },
 ];
+
+    

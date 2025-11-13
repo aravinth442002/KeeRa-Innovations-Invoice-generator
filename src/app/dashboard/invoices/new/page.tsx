@@ -54,6 +54,7 @@ function NewInvoiceForm() {
   const [customerName, setCustomerName] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
   const [customerGstin, setCustomerGstin] = useState('');
   const [description, setDescription] = useState('');
   const [customDescription, setCustomDescription] = useState('');
@@ -71,6 +72,7 @@ function NewInvoiceForm() {
         setCustomerName(invoiceToEdit.customer);
         setCustomerAddress(invoiceToEdit.customerAddress);
         setCustomerEmail(invoiceToEdit.email);
+        setCustomerPhone(invoiceToEdit.phone || '');
         setCustomerGstin(invoiceToEdit.gstin);
         setLineItems(invoiceToEdit.lineItems);
 
@@ -130,6 +132,7 @@ function NewInvoiceForm() {
     customer: customerName,
     customerAddress,
     email: customerEmail,
+    phone: customerPhone,
     gstin: customerGstin,
     seller: sellerDetails,
     description: finalDescription,
@@ -198,6 +201,7 @@ function NewInvoiceForm() {
                             <Input placeholder="Customer Name" value={customerName} onChange={e => setCustomerName(e.target.value)} />
                             <Textarea placeholder="Customer Address" value={customerAddress} onChange={e => setCustomerAddress(e.target.value)} />
                             <Input placeholder="Customer Email ID" type="email" value={customerEmail} onChange={e => setCustomerEmail(e.target.value)} />
+                            <Input placeholder="Customer Phone" type="tel" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} />
                             <Input placeholder="Customer GSTIN" value={customerGstin} onChange={e => setCustomerGstin(e.target.value)} />
                         </div>
                     </div>
@@ -320,3 +324,5 @@ export default function NewInvoicePage() {
         </Suspense>
     )
 }
+
+    
