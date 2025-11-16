@@ -1,3 +1,4 @@
+
 export type LineItem = {
   name: string;
   quantity: number;
@@ -44,6 +45,7 @@ export type Quotation = {
 
 export type Client = {
   id: string;
+  _id?: string; // from mongodb
   name: string;
   email: string;
   phone: string;

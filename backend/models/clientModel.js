@@ -8,4 +8,16 @@ const clientSchema = new mongoose.Schema({
   gstin: String,
 });
 
+// This will add a virtual 'id' property that gets the '_id'
+clientSchema.virtual('id').get(function(){
+    return this._id.toHexString();
+});
+
+clientSchema.set('toJSON', {
+    virtuals: true
+});
+
+
 module.exports = mongoose.model("Client", clientSchema);
+
+    

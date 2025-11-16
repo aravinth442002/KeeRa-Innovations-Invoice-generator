@@ -28,11 +28,22 @@ import {
   invoices as initialInvoices,
   type Invoice,
   type LineItem,
-  type Client,
 } from '@/lib/data';
 import { demoDescriptions } from '@/lib/data';
 import axios from 'axios';
 import { useToast } from '@/hooks/use-toast';
+
+// Define a specific type for Client, as the one from data.ts is for the mock data structure
+type Client = {
+  _id: string; // Assuming MongoDB uses _id
+  id: string; // Or if you transform it to id
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  gstin: string;
+};
+
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
@@ -62,13 +73,15 @@ function NewInvoiceForm() {
   
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClientId, setSelectedClientId] = useState<string>('');
+  
+  const [customerDetails, setCustomerDetails] = useState({
+      name: '',
+      address: '',
+      email: '',
+      phone: '',
+      gstin: '',
+  });
 
-  const [customerName, setCustomerName] = useState('');
-  const [customerAddress, setCustomerAddress] = useState('');
-  const [customerEmail, setCustomerEmail] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [customerGstin, setCustomerGstin] = useState('');
-  const [description, setDescription] = useState('');
   const [projectName, setProjectName] = useState('');
 
   const isEditing = !!invoiceId;
@@ -80,8 +93,13 @@ function NewInvoiceForm() {
   const fetchClients = async () => {
     try {
       const response = await axios.get(`${API_URL}/clients`);
-      if (response.data.success) {
-        setClients(response.data.data);
+      // The backend returns { success: true, data: clients }
+      // And each client has an `_id` from MongoDB. We map it to `id`.
+      if (response.data.success && Array.isArray(response.data.data)) {
+        const fetchedClients = response.data.data.map((client: any) => ({...client, id: client._id}));
+        setClients(fetchedClients);
+      } else {
+        setClients([]);
       }
     } catch (error) {
       console.error('Failed to fetch clients:', error);
@@ -90,15 +108,21 @@ function NewInvoiceForm() {
   };
 
   const handleClientSelect = (clientId: string) => {
-    const selectedClient = clients.find(client => client.id === clientId);
     setSelectedClientId(clientId);
+    const selectedClient = clients.find(client => client.id === clientId);
     if (selectedClient) {
-        setCustomerName(selectedClient.name);
-        setCustomerAddress(selectedClient.address);
-        setCustomerEmail(selectedClient.email);
-        setCustomerPhone(selectedClient.phone);
-        setCustomerGstin(selectedClient.gstin);
+        setCustomerDetails({
+            name: selectedClient.name,
+            address: selectedClient.address,
+            email: selectedClient.email,
+            phone: selectedClient.phone,
+            gstin: selectedClient.gstin,
+        });
     }
+  };
+
+  const handleCustomerDetailChange = (field: keyof typeof customerDetails, value: string) => {
+      setCustomerDetails(prev => ({...prev, [field]: value}));
   };
 
   useEffect(() => {
@@ -109,11 +133,13 @@ function NewInvoiceForm() {
         setIssueDate(invoiceToEdit.date);
         // @ts-ignore
         setStatus(invoiceToEdit.status); // Note: Statuses might not match new structure
-        setCustomerName(invoiceToEdit.customer);
-        setCustomerAddress(invoiceToEdit.customerAddress);
-        setCustomerEmail(invoiceToEdit.email);
-        setCustomerPhone(invoiceToEdit.phone || '');
-        setCustomerGstin(invoiceToEdit.gstin);
+        setCustomerDetails({
+            name: invoiceToEdit.customer,
+            address: invoiceToEdit.customerAddress,
+            email: invoiceToEdit.email,
+            phone: invoiceToEdit.phone || '',
+            gstin: invoiceToEdit.gstin,
+        });
         setLineItems(invoiceToEdit.lineItems);
         setProjectName(invoiceToEdit.description);
       }
@@ -159,11 +185,11 @@ function NewInvoiceForm() {
     id: invoiceNumber,
     issueDate,
     status,
-    customer: customerName,
-    customerAddress,
-    email: customerEmail,
-    phone: customerPhone,
-    gstin: customerGstin,
+    customer: customerDetails.name,
+    customerAddress: customerDetails.address,
+    email: customerDetails.email,
+    phone: customerDetails.phone,
+    gstin: customerDetails.gstin,
     seller: sellerDetails,
     description: projectName,
     lineItems,
@@ -241,11 +267,11 @@ function NewInvoiceForm() {
                                 ))}
                               </SelectContent>
                             </Select>
-                            <Input placeholder="Customer Name" value={customerName} onChange={e => setCustomerName(e.target.value)} />
-                            <Textarea placeholder="Customer Address" value={customerAddress} onChange={e => setCustomerAddress(e.target.value)} />
-                            <Input placeholder="Customer Email ID" type="email" value={customerEmail} onChange={e => setCustomerEmail(e.target.value)} />
-                            <Input placeholder="Customer Phone" type="tel" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} />
-                            <Input placeholder="Customer GSTIN" value={customerGstin} onChange={e => setCustomerGstin(e.target.value)} />
+                            <Input placeholder="Customer Name" value={customerDetails.name} onChange={e => handleCustomerDetailChange('name', e.target.value)} />
+                            <Textarea placeholder="Customer Address" value={customerDetails.address} onChange={e => handleCustomerDetailChange('address', e.target.value)} />
+                            <Input placeholder="Customer Email ID" type="email" value={customerDetails.email} onChange={e => handleCustomerDetailChange('email', e.target.value)} />
+                            <Input placeholder="Customer Phone" type="tel" value={customerDetails.phone} onChange={e => handleCustomerDetailChange('phone', e.target.value)} />
+                            <Input placeholder="Customer GSTIN" value={customerDetails.gstin} onChange={e => handleCustomerDetailChange('gstin', e.target.value)} />
                         </div>
                     </div>
                 </CardContent>
@@ -284,7 +310,7 @@ function NewInvoiceForm() {
                </Button>
             </div>
 
-            {/* Description */}
+            {/* Project Name */}
             <Card>
                 <CardContent className="pt-6 space-y-2">
                     <Label htmlFor="project-name">Project Name</Label>
