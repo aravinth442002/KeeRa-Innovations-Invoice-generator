@@ -90,6 +90,7 @@ function NewInvoiceForm() {
     try {
       const response = await axios.get(`${API_URL}/clients`);
       if (response.data.success && Array.isArray(response.data.data)) {
+        // Mongoose returns _id, but our components might be using id. Let's ensure both exist.
         const fetchedClients = response.data.data.map((client: any) => ({...client, id: client._id}));
         setClients(fetchedClients);
       } else {
@@ -103,7 +104,7 @@ function NewInvoiceForm() {
 
   const handleClientSelect = (clientId: string) => {
     const selectedClient = clients.find(client => client.id === clientId);
-    setSelectedClientId(clientId);
+    setSelectedClientId(clientId); // This is crucial to update the Select's controlled value
     if (selectedClient) {
         setCustomerDetails({
             name: selectedClient.name,
@@ -119,6 +120,7 @@ function NewInvoiceForm() {
       const newCustomerDetails = {...customerDetails, [field]: value};
       setCustomerDetails(newCustomerDetails);
       
+      // When user types, try to find a matching client and update dropdown, or deselect if no match
       const matchingClient = clients.find(client => 
         client.name === newCustomerDetails.name &&
         client.email === newCustomerDetails.email &&
@@ -151,9 +153,12 @@ function NewInvoiceForm() {
         };
         setCustomerDetails(currentCustomerDetails);
 
-        const matchingClient = clients.find(c => c.name === invoiceToEdit.customer);
-        if (matchingClient) {
-            setSelectedClientId(matchingClient.id);
+        // We need clients to be loaded before we can match
+        if (clients.length > 0) {
+            const matchingClient = clients.find(c => c.name === invoiceToEdit.customer);
+            if (matchingClient) {
+                setSelectedClientId(matchingClient.id);
+            }
         }
 
         setLineItems(invoiceToEdit.lineItems);
@@ -162,7 +167,7 @@ function NewInvoiceForm() {
     } else {
         setInvoiceNumber(`INV-${Math.floor(Math.random() * 10000)}`);
     }
-  }, [isEditing, invoiceId, clients]);
+  }, [isEditing, invoiceId, clients]); // Add clients to dependency array
 
   const handleLineItemChange = (
     index: number,
@@ -306,7 +311,7 @@ function NewInvoiceForm() {
                     </div>
                      <div className="space-y-1 w-24">
                         {index === 0 && <Label>Price</Label>}
-                        <Input type="number" placeholder="0.00" value={item.price} onChange={e => handleLineItemChange(index, 'price', parseFloat(e.target.value))} />
+                        <Input type="number" placeholder="0.00" value={item.price} onChange={e => handleLineItemChange(index, 'price', parseFloat(e.target.value) || 0)} />
                     </div>
                      <div className="space-y-1 w-20">
                         {index === 0 && <Label>Quantity</Label>}
