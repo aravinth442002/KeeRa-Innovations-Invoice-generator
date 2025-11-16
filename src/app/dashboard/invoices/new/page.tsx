@@ -31,7 +31,6 @@ import {
 import axios from 'axios';
 import { useToast } from '@/hooks/use-toast';
 
-// Define a specific type for Client, as the one from data.ts is for the mock data structure
 type Client = {
   _id: string; 
   id: string; 
@@ -51,7 +50,6 @@ function NewInvoiceForm() {
   const invoiceId = searchParams.get('id');
   const { toast } = useToast();
 
-  // Seller details (pulled from "settings", mocked for now)
   const sellerDetails = {
     name: 'KeeRa Innovations',
     address: '112-A, 3rd Ave, W Block, Anna Nagar, Chennai, Tamil Nadu 600042',
@@ -104,10 +102,9 @@ function NewInvoiceForm() {
   };
 
   const handleClientSelect = (clientId: string) => {
+    setSelectedClientId(clientId);
     const selectedClient = clients.find(client => client.id === clientId);
-    setSelectedClientId(clientId); // Keep track of the selected client ID
     if (selectedClient) {
-        // When a client is selected, populate all the fields
         setCustomerDetails({
             name: selectedClient.name,
             address: selectedClient.address,
@@ -116,14 +113,12 @@ function NewInvoiceForm() {
             gstin: selectedClient.gstin,
         });
     } else {
-      // If "Select a client" is chosen or something goes wrong, clear details
       setCustomerDetails({ name: '', address: '', email: '', phone: '', gstin: ''});
     }
   };
 
   const handleCustomerDetailChange = (field: keyof typeof customerDetails, value: string) => {
       setCustomerDetails(prev => ({...prev, [field]: value}));
-      // If user types in a field, it's no longer a pre-selected client
       setSelectedClientId('');
   };
 
@@ -134,7 +129,7 @@ function NewInvoiceForm() {
         setInvoiceNumber(invoiceToEdit.id);
         setIssueDate(invoiceToEdit.date);
         // @ts-ignore
-        setStatus(invoiceToEdit.status); // Note: Statuses might not match new structure
+        setStatus(invoiceToEdit.status); 
         setCustomerDetails({
             name: invoiceToEdit.customer,
             address: invoiceToEdit.customerAddress,
@@ -146,7 +141,6 @@ function NewInvoiceForm() {
         setProjectName(invoiceToEdit.description);
       }
     } else {
-        // Generate a new invoice number for creation
         setInvoiceNumber(`INV-${Math.floor(Math.random() * 10000)}`);
     }
   }, [isEditing, invoiceId]);
@@ -175,7 +169,7 @@ function NewInvoiceForm() {
     (acc, item) => acc + (item.quantity || 0) * (item.price || 0),
     0
   );
-  // Assuming a flat 18% GST for calculation preview
+  
   const gstAmount = subtotal * 0.18;
   const grandTotal = subtotal + gstAmount;
 
@@ -197,7 +191,7 @@ function NewInvoiceForm() {
     description: projectName,
     lineItems,
     amount: grandTotal,
-    dueDate: '', // This needs an input field if required.
+    dueDate: '', 
   };
 
   return (
@@ -215,9 +209,9 @@ function NewInvoiceForm() {
         </div>
       </DashboardHeader>
       <main className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 p-4 pt-0 sm:p-6 sm:pt-0">
-        {/* Left Container: Data Entry */}
+        
         <div className="flex flex-col gap-6">
-           {/* Header & Status */}
+           
            <Card>
             <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
@@ -243,7 +237,7 @@ function NewInvoiceForm() {
             </CardContent>
            </Card>
             
-            {/* Seller & Buyer Details */}
+            
             <Card>
                 <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
@@ -280,7 +274,7 @@ function NewInvoiceForm() {
                 </CardContent>
             </Card>
 
-            {/* Items List */}
+            
              <div className="flex flex-col gap-4">
               <h3 className="text-lg font-medium">Items</h3>
                {lineItems.map((item, index) => (
@@ -302,7 +296,7 @@ function NewInvoiceForm() {
                         {index === 0 && <Label>HSN/SAC</Label>}
                         <Input placeholder="998314" value={item.hsn} onChange={e => handleLineItemChange(index, 'hsn', e.target.value)} />
                     </div>
-                    <Button variant="ghost" size="icon" onClick={() => handleRemoveLineItem(index)} disabled={lineItems.length === 1}>
+                    <Button variant="ghost" size="icon" onClick={() => handleRemoveLineItem(index)}>
                         <Trash2 className="h-4 w-4"/>
                     </Button>
                   </CardContent>
@@ -313,7 +307,7 @@ function NewInvoiceForm() {
                </Button>
             </div>
 
-            {/* Project Name */}
+            
             <Card>
                 <CardContent className="pt-6 space-y-2">
                     <Label htmlFor="project-name">Project Name</Label>
@@ -328,7 +322,7 @@ function NewInvoiceForm() {
 
         </div>
 
-        {/* Right Container: Live Preview */}
+        
         <div className="sticky top-0 h-full">
             <Card className="overflow-hidden">
                 <div className="bg-muted p-4 flex items-center justify-between">
