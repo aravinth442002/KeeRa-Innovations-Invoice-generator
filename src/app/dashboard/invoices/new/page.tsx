@@ -103,8 +103,8 @@ function NewInvoiceForm() {
 
   const handleClientSelect = (clientId: string) => {
     const selectedClient = clients.find(client => client.id === clientId);
+    setSelectedClientId(clientId);
     if (selectedClient) {
-        setSelectedClientId(clientId);
         setCustomerDetails({
             name: selectedClient.name,
             address: selectedClient.address,
@@ -117,7 +117,11 @@ function NewInvoiceForm() {
 
   const handleCustomerDetailChange = (field: keyof typeof customerDetails, value: string) => {
       setCustomerDetails(prev => ({...prev, [field]: value}));
-      setSelectedClientId(''); // Deselect client if details are manually changed
+      // If user types, we de-select the client so the dropdown doesn't show a stale value
+      const matchingClient = clients.find(client => client.name === (field === 'name' ? value : customerDetails.name) && client.address === (field === 'address' ? value : customerDetails.address));
+      if (!matchingClient) {
+        setSelectedClientId(''); 
+      }
   };
 
   useEffect(() => {
@@ -190,6 +194,7 @@ function NewInvoiceForm() {
     lineItems,
     amount: grandTotal,
     dueDate: '', 
+    date: issueDate
   };
 
   return (
@@ -294,7 +299,7 @@ function NewInvoiceForm() {
                         {index === 0 && <Label>HSN/SAC</Label>}
                         <Input placeholder="998314" value={item.hsn} onChange={e => handleLineItemChange(index, 'hsn', e.target.value)} />
                     </div>
-                    <Button variant="ghost" size="icon" onClick={() => handleRemoveLineItem(index)} disabled={lineItems.length === 1}>
+                    <Button variant="ghost" size="icon" onClick={() => handleRemoveLineItem(index)}>
                         <Trash2 className="h-4 w-4"/>
                     </Button>
                   </CardContent>
