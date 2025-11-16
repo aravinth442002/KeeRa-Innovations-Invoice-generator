@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Suspense, useState, useEffect } from 'react';
@@ -27,12 +28,19 @@ import {
   invoices as initialInvoices,
   type Invoice,
   type LineItem,
+  type Client,
 } from '@/lib/data';
 import { demoDescriptions } from '@/lib/data';
+import axios from 'axios';
+import { useToast } from '@/hooks/use-toast';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+
 
 function NewInvoiceForm() {
   const searchParams = useSearchParams();
   const invoiceId = searchParams.get('id');
+  const { toast } = useToast();
 
   // Seller details (pulled from "settings", mocked for now)
   const sellerDetails = {
@@ -51,15 +59,47 @@ function NewInvoiceForm() {
   const [status, setStatus] = useState<
     'Draft' | 'Given' | 'Processing' | 'Received'
   >('Draft');
+  
+  const [clients, setClients] = useState<Client[]>([]);
+  const [selectedClientId, setSelectedClientId] = useState<string>('');
+
   const [customerName, setCustomerName] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerGstin, setCustomerGstin] = useState('');
   const [description, setDescription] = useState('');
-  const [customDescription, setCustomDescription] = useState('');
+  const [projectName, setProjectName] = useState('');
 
   const isEditing = !!invoiceId;
+
+  useEffect(() => {
+    fetchClients();
+  }, []);
+  
+  const fetchClients = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/clients`);
+      if (response.data.success) {
+        setClients(response.data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch clients:', error);
+      toast({ title: 'Error', description: 'Could not fetch clients.', variant: 'destructive' });
+    }
+  };
+
+  const handleClientSelect = (clientId: string) => {
+    const selectedClient = clients.find(client => client.id === clientId);
+    setSelectedClientId(clientId);
+    if (selectedClient) {
+        setCustomerName(selectedClient.name);
+        setCustomerAddress(selectedClient.address);
+        setCustomerEmail(selectedClient.email);
+        setCustomerPhone(selectedClient.phone);
+        setCustomerGstin(selectedClient.gstin);
+    }
+  };
 
   useEffect(() => {
     if (isEditing) {
@@ -75,15 +115,7 @@ function NewInvoiceForm() {
         setCustomerPhone(invoiceToEdit.phone || '');
         setCustomerGstin(invoiceToEdit.gstin);
         setLineItems(invoiceToEdit.lineItems);
-
-        const isDemoDesc = demoDescriptions.includes(invoiceToEdit.description);
-        if (isDemoDesc) {
-          setDescription(invoiceToEdit.description);
-          setCustomDescription('');
-        } else {
-          setDescription('custom');
-          setCustomDescription(invoiceToEdit.description);
-        }
+        setProjectName(invoiceToEdit.description);
       }
     } else {
         // Generate a new invoice number for creation
@@ -119,8 +151,6 @@ function NewInvoiceForm() {
   const gstAmount = subtotal * 0.18;
   const grandTotal = subtotal + gstAmount;
 
-  const finalDescription = description === 'custom' ? customDescription : description;
-
   const currentInvoiceData: Omit<Invoice, 'amount' | 'status' | 'date'> & {
     amount: number;
     status: 'Draft' | 'Given' | 'Processing' | 'Received';
@@ -135,7 +165,7 @@ function NewInvoiceForm() {
     phone: customerPhone,
     gstin: customerGstin,
     seller: sellerDetails,
-    description: finalDescription,
+    description: projectName,
     lineItems,
     amount: grandTotal,
     dueDate: '', // This needs an input field if required.
@@ -198,6 +228,19 @@ function NewInvoiceForm() {
                      <div className="space-y-4">
                         <h3 className="text-sm font-medium text-muted-foreground">TO</h3>
                         <div className="space-y-2">
+                            <Label htmlFor="select-client">Select a Client</Label>
+                            <Select onValueChange={handleClientSelect} value={selectedClientId}>
+                              <SelectTrigger id="select-client">
+                                <SelectValue placeholder="Select a client" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {clients.map((client) => (
+                                  <SelectItem key={client.id} value={client.id}>
+                                    {client.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                             <Input placeholder="Customer Name" value={customerName} onChange={e => setCustomerName(e.target.value)} />
                             <Textarea placeholder="Customer Address" value={customerAddress} onChange={e => setCustomerAddress(e.target.value)} />
                             <Input placeholder="Customer Email ID" type="email" value={customerEmail} onChange={e => setCustomerEmail(e.target.value)} />
@@ -244,33 +287,12 @@ function NewInvoiceForm() {
             {/* Description */}
             <Card>
                 <CardContent className="pt-6 space-y-2">
-                    <Label htmlFor="description">Description / Notes</Label>
-                    <Select onValueChange={setDescription} value={description}>
-                      <SelectTrigger id="description">
-                        <SelectValue placeholder="Select a pre-defined description" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {demoDescriptions.map((desc) => (
-                          <SelectItem key={desc} value={desc}>
-                            {desc}
-                          </SelectItem>
-                        ))}
-                        <SelectSeparator />
-                        <SelectItem value="custom">Custom Description</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    
-                    <Textarea 
-                      placeholder="Add any additional terms or notes..."
-                      value={description === 'custom' ? customDescription : description}
-                      onChange={e => {
-                        if (description === 'custom') {
-                          setCustomDescription(e.target.value);
-                        } else {
-                          setDescription('custom');
-                          setCustomDescription(e.target.value);
-                        }
-                      }}
+                    <Label htmlFor="project-name">Project Name</Label>
+                    <Input 
+                      id="project-name"
+                      placeholder="Enter project name..."
+                      value={projectName}
+                      onChange={e => setProjectName(e.target.value)}
                     />
                 </CardContent>
             </Card>
