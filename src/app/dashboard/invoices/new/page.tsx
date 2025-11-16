@@ -108,7 +108,6 @@ function NewInvoiceForm() {
   };
 
   const handleClientSelect = (clientId: string) => {
-    setSelectedClientId(clientId);
     const selectedClient = clients.find(client => client.id === clientId);
     if (selectedClient) {
         setCustomerDetails({
@@ -118,11 +117,18 @@ function NewInvoiceForm() {
             phone: selectedClient.phone,
             gstin: selectedClient.gstin,
         });
+        setSelectedClientId(clientId);
+    } else {
+      // If "Select a client" is chosen or something goes wrong, clear details
+      setCustomerDetails({ name: '', address: '', email: '', phone: '', gstin: ''});
+      setSelectedClientId('');
     }
   };
 
   const handleCustomerDetailChange = (field: keyof typeof customerDetails, value: string) => {
       setCustomerDetails(prev => ({...prev, [field]: value}));
+      // Deselect client if details are manually changed
+      setSelectedClientId('');
   };
 
   useEffect(() => {
@@ -372,5 +378,7 @@ export default function NewInvoicePage() {
         </Suspense>
     )
 }
+
+    
 
     
