@@ -90,7 +90,6 @@ function NewInvoiceForm() {
     try {
       const response = await axios.get(`${API_URL}/clients`);
       if (response.data.success && Array.isArray(response.data.data)) {
-        // Mongoose returns _id, but our components might be using id. Let's ensure both exist.
         const fetchedClients = response.data.data.map((client: any) => ({...client, id: client._id}));
         setClients(fetchedClients);
       } else {
@@ -104,7 +103,7 @@ function NewInvoiceForm() {
 
   const handleClientSelect = (clientId: string) => {
     const selectedClient = clients.find(client => client.id === clientId);
-    setSelectedClientId(clientId); // This is crucial to update the Select's controlled value
+    setSelectedClientId(clientId);
     if (selectedClient) {
         setCustomerDetails({
             name: selectedClient.name,
@@ -120,7 +119,6 @@ function NewInvoiceForm() {
       const newCustomerDetails = {...customerDetails, [field]: value};
       setCustomerDetails(newCustomerDetails);
       
-      // When user types, try to find a matching client and update dropdown, or deselect if no match
       const matchingClient = clients.find(client => 
         client.name === newCustomerDetails.name &&
         client.email === newCustomerDetails.email &&
@@ -153,7 +151,6 @@ function NewInvoiceForm() {
         };
         setCustomerDetails(currentCustomerDetails);
 
-        // We need clients to be loaded before we can match
         if (clients.length > 0) {
             const matchingClient = clients.find(c => c.name === invoiceToEdit.customer);
             if (matchingClient) {
@@ -167,7 +164,7 @@ function NewInvoiceForm() {
     } else {
         setInvoiceNumber(`INV-${Math.floor(Math.random() * 10000)}`);
     }
-  }, [isEditing, invoiceId, clients]); // Add clients to dependency array
+  }, [isEditing, invoiceId, clients]);
 
   const handleLineItemChange = (
     index: number,
@@ -394,5 +391,3 @@ export default function NewInvoicePage() {
         </Suspense>
     )
 }
-
-    
