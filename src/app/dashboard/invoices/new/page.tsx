@@ -119,7 +119,6 @@ function NewInvoiceForm() {
       const newCustomerDetails = {...customerDetails, [field]: value};
       setCustomerDetails(newCustomerDetails);
       
-      // Check if the manual entry matches any existing client
       const matchingClient = clients.find(client => 
         client.name === newCustomerDetails.name &&
         client.email === newCustomerDetails.email &&
@@ -131,7 +130,6 @@ function NewInvoiceForm() {
       if (matchingClient) {
           setSelectedClientId(matchingClient.id);
       } else {
-          // If no exact match, deselect the client in the dropdown
           setSelectedClientId('');
       }
   };
