@@ -116,11 +116,23 @@ function NewInvoiceForm() {
   };
 
   const handleCustomerDetailChange = (field: keyof typeof customerDetails, value: string) => {
-      setCustomerDetails(prev => ({...prev, [field]: value}));
-      // If user types, we de-select the client so the dropdown doesn't show a stale value
-      const matchingClient = clients.find(client => client.name === (field === 'name' ? value : customerDetails.name) && client.address === (field === 'address' ? value : customerDetails.address));
-      if (!matchingClient) {
-        setSelectedClientId(''); 
+      const newCustomerDetails = {...customerDetails, [field]: value};
+      setCustomerDetails(newCustomerDetails);
+      
+      // Check if the manual entry matches any existing client
+      const matchingClient = clients.find(client => 
+        client.name === newCustomerDetails.name &&
+        client.email === newCustomerDetails.email &&
+        client.address === newCustomerDetails.address &&
+        client.phone === newCustomerDetails.phone &&
+        client.gstin === newCustomerDetails.gstin
+      );
+
+      if (matchingClient) {
+          setSelectedClientId(matchingClient.id);
+      } else {
+          // If no exact match, deselect the client in the dropdown
+          setSelectedClientId('');
       }
   };
 
@@ -132,20 +144,27 @@ function NewInvoiceForm() {
         setIssueDate(invoiceToEdit.date);
         // @ts-ignore
         setStatus(invoiceToEdit.status); 
-        setCustomerDetails({
+        const currentCustomerDetails = {
             name: invoiceToEdit.customer,
             address: invoiceToEdit.customerAddress,
             email: invoiceToEdit.email,
             phone: invoiceToEdit.phone || '',
             gstin: invoiceToEdit.gstin,
-        });
+        };
+        setCustomerDetails(currentCustomerDetails);
+
+        const matchingClient = clients.find(c => c.name === invoiceToEdit.customer);
+        if (matchingClient) {
+            setSelectedClientId(matchingClient.id);
+        }
+
         setLineItems(invoiceToEdit.lineItems);
         setProjectName(invoiceToEdit.description);
       }
     } else {
         setInvoiceNumber(`INV-${Math.floor(Math.random() * 10000)}`);
     }
-  }, [isEditing, invoiceId]);
+  }, [isEditing, invoiceId, clients]);
 
   const handleLineItemChange = (
     index: number,
