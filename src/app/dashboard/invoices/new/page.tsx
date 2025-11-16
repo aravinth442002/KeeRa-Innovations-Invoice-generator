@@ -109,6 +109,7 @@ function NewInvoiceForm() {
 
   const handleClientSelect = (clientId: string) => {
     const selectedClient = clients.find(client => client.id === clientId);
+    setSelectedClientId(clientId);
     if (selectedClient) {
         setCustomerDetails({
             name: selectedClient.name,
@@ -117,11 +118,9 @@ function NewInvoiceForm() {
             phone: selectedClient.phone,
             gstin: selectedClient.gstin,
         });
-        setSelectedClientId(clientId);
     } else {
       // If "Select a client" is chosen or something goes wrong, clear details
       setCustomerDetails({ name: '', address: '', email: '', phone: '', gstin: ''});
-      setSelectedClientId('');
     }
   };
 
@@ -305,7 +304,7 @@ function NewInvoiceForm() {
                         {index === 0 && <Label>HSN/SAC</Label>}
                         <Input placeholder="998314" value={item.hsn} onChange={e => handleLineItemChange(index, 'hsn', e.target.value)} />
                     </div>
-                    <Button variant="ghost" size="icon" onClick={() => handleRemoveLineItem(index)} disabled={lineItems.length === 1}>
+                    <Button variant="ghost" size="icon" onClick={() => handleRemoveLineItem(index)}>
                         <Trash2 className="h-4 w-4"/>
                     </Button>
                   </CardContent>
@@ -378,7 +377,5 @@ export default function NewInvoicePage() {
         </Suspense>
     )
 }
-
-    
 
     
