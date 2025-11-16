@@ -102,9 +102,9 @@ function NewInvoiceForm() {
   };
 
   const handleClientSelect = (clientId: string) => {
-    setSelectedClientId(clientId);
     const selectedClient = clients.find(client => client.id === clientId);
     if (selectedClient) {
+        setSelectedClientId(clientId);
         setCustomerDetails({
             name: selectedClient.name,
             address: selectedClient.address,
@@ -112,14 +112,12 @@ function NewInvoiceForm() {
             phone: selectedClient.phone,
             gstin: selectedClient.gstin,
         });
-    } else {
-      setCustomerDetails({ name: '', address: '', email: '', phone: '', gstin: ''});
     }
   };
 
   const handleCustomerDetailChange = (field: keyof typeof customerDetails, value: string) => {
       setCustomerDetails(prev => ({...prev, [field]: value}));
-      setSelectedClientId('');
+      setSelectedClientId(''); // Deselect client if details are manually changed
   };
 
   useEffect(() => {
@@ -296,7 +294,7 @@ function NewInvoiceForm() {
                         {index === 0 && <Label>HSN/SAC</Label>}
                         <Input placeholder="998314" value={item.hsn} onChange={e => handleLineItemChange(index, 'hsn', e.target.value)} />
                     </div>
-                    <Button variant="ghost" size="icon" onClick={() => handleRemoveLineItem(index)}>
+                    <Button variant="ghost" size="icon" onClick={() => handleRemoveLineItem(index)} disabled={lineItems.length === 1}>
                         <Trash2 className="h-4 w-4"/>
                     </Button>
                   </CardContent>
