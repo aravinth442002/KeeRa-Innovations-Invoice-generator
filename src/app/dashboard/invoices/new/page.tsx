@@ -17,7 +17,6 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  SelectSeparator,
 } from '@/components/ui/select';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { Textarea } from '@/components/ui/textarea';
@@ -29,14 +28,13 @@ import {
   type Invoice,
   type LineItem,
 } from '@/lib/data';
-import { demoDescriptions } from '@/lib/data';
 import axios from 'axios';
 import { useToast } from '@/hooks/use-toast';
 
 // Define a specific type for Client, as the one from data.ts is for the mock data structure
 type Client = {
-  _id: string; // Assuming MongoDB uses _id
-  id: string; // Or if you transform it to id
+  _id: string; 
+  id: string; 
   name: string;
   email: string;
   phone: string;
@@ -93,8 +91,6 @@ function NewInvoiceForm() {
   const fetchClients = async () => {
     try {
       const response = await axios.get(`${API_URL}/clients`);
-      // The backend returns { success: true, data: clients }
-      // And each client has an `_id` from MongoDB. We map it to `id`.
       if (response.data.success && Array.isArray(response.data.data)) {
         const fetchedClients = response.data.data.map((client: any) => ({...client, id: client._id}));
         setClients(fetchedClients);
@@ -109,8 +105,9 @@ function NewInvoiceForm() {
 
   const handleClientSelect = (clientId: string) => {
     const selectedClient = clients.find(client => client.id === clientId);
-    setSelectedClientId(clientId);
+    setSelectedClientId(clientId); // Keep track of the selected client ID
     if (selectedClient) {
+        // When a client is selected, populate all the fields
         setCustomerDetails({
             name: selectedClient.name,
             address: selectedClient.address,
@@ -126,7 +123,7 @@ function NewInvoiceForm() {
 
   const handleCustomerDetailChange = (field: keyof typeof customerDetails, value: string) => {
       setCustomerDetails(prev => ({...prev, [field]: value}));
-      // Deselect client if details are manually changed
+      // If user types in a field, it's no longer a pre-selected client
       setSelectedClientId('');
   };
 
@@ -182,13 +179,14 @@ function NewInvoiceForm() {
   const gstAmount = subtotal * 0.18;
   const grandTotal = subtotal + gstAmount;
 
-  const currentInvoiceData: Omit<Invoice, 'amount' | 'status' | 'date'> & {
+  const currentInvoiceData: Omit<Invoice, 'amount' | 'status' | 'date' | 'dueDate'> & {
     amount: number;
     status: 'Draft' | 'Given' | 'Processing' | 'Received';
     date: string;
+    dueDate: string;
   } = {
     id: invoiceNumber,
-    issueDate,
+    issueDate: issueDate,
     status,
     customer: customerDetails.name,
     customerAddress: customerDetails.address,
@@ -304,7 +302,7 @@ function NewInvoiceForm() {
                         {index === 0 && <Label>HSN/SAC</Label>}
                         <Input placeholder="998314" value={item.hsn} onChange={e => handleLineItemChange(index, 'hsn', e.target.value)} />
                     </div>
-                    <Button variant="ghost" size="icon" onClick={() => handleRemoveLineItem(index)}>
+                    <Button variant="ghost" size="icon" onClick={() => handleRemoveLineItem(index)} disabled={lineItems.length === 1}>
                         <Trash2 className="h-4 w-4"/>
                     </Button>
                   </CardContent>
