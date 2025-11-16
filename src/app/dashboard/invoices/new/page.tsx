@@ -90,6 +90,7 @@ function NewInvoiceForm() {
     try {
       const response = await axios.get(`${API_URL}/clients`);
       if (response.data.success && Array.isArray(response.data.data)) {
+        // Mongoose returns _id, but frontend might use id. Let's ensure 'id' is present.
         const fetchedClients = response.data.data.map((client: any) => ({...client, id: client._id}));
         setClients(fetchedClients);
       } else {
@@ -103,7 +104,6 @@ function NewInvoiceForm() {
 
   const handleClientSelect = (clientId: string) => {
     const selectedClient = clients.find(client => client.id === clientId);
-    setSelectedClientId(clientId);
     if (selectedClient) {
         setCustomerDetails({
             name: selectedClient.name,
@@ -113,12 +113,15 @@ function NewInvoiceForm() {
             gstin: selectedClient.gstin,
         });
     }
+    // This state update is crucial for the Select component to show the correct value
+    setSelectedClientId(clientId);
   };
 
   const handleCustomerDetailChange = (field: keyof typeof customerDetails, value: string) => {
       const newCustomerDetails = {...customerDetails, [field]: value};
       setCustomerDetails(newCustomerDetails);
       
+      // After manual change, check if it matches an existing client
       const matchingClient = clients.find(client => 
         client.name === newCustomerDetails.name &&
         client.email === newCustomerDetails.email &&
@@ -130,6 +133,7 @@ function NewInvoiceForm() {
       if (matchingClient) {
           setSelectedClientId(matchingClient.id);
       } else {
+          // If it doesn't match anyone, deselect the client in the dropdown
           setSelectedClientId('');
       }
   };
