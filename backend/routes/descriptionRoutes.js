@@ -1,16 +1,11 @@
-
 const express = require("express");
 const router = express.Router();
-const {
-  createDescription,
-  getDescriptions,
-  updateDescription,
-  deleteDescription,
-} = require("../controllers/descriptionController");
+const descriptionController = require("../controllers/descriptionController");
 
-router.post("/", createDescription);
-router.get("/", getDescriptions);
-router.put("/:id", updateDescription);
-router.delete("/:id", deleteDescription);
+router.post("/", descriptionController.createDescription);
+router.get("/", descriptionController.getDescriptions);
+router.get("/:id", descriptionController.getDescriptionById);
+router.put("/:id", descriptionController.updateDescription);
+router.delete("/:id", descriptionController.deleteDescription);
 
 module.exports = router;

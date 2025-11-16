@@ -1,27 +1,50 @@
-const sampleData = require('../sample.json');
+const Invoice = require("../models/invoiceModel");
 
-exports.createInvoice = (req, res) => {
-  res.status(201).json({ success: true, message: "Invoice created", data: req.body });
+exports.createInvoice = async (req, res) => {
+  try {
+    const invoice = new Invoice(req.body);
+    await invoice.save();
+    res.status(201).json(invoice);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 };
 
-exports.getInvoices = (req, res) => {
-  const invoices = sampleData.invoices || [];
-  res.status(200).json({ success: true, data: invoices });
+exports.getInvoices = async (req, res) => {
+  try {
+    const invoices = await Invoice.find();
+    res.status(200).json(invoices);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
-exports.getInvoiceById = (req, res) => {
-    const invoice = sampleData.invoices.find(c => c.id === req.params.id);
-    if (invoice) {
-        res.status(200).json({ success: true, data: invoice });
-    } else {
-        res.status(404).json({ success: false, message: "Invoice not found" });
-    }
+exports.getInvoiceById = async (req, res) => {
+  try {
+    const invoice = await Invoice.findById(req.params.id);
+    if (!invoice) return res.status(404).json({ message: "Invoice not found" });
+    res.status(200).json(invoice);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
-exports.updateInvoice = (req, res) => {
-    res.status(200).json({ success: true, message: `Invoice ${req.params.id} updated`, data: req.body });
+exports.updateInvoice = async (req, res) => {
+  try {
+    const invoice = await Invoice.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!invoice) return res.status(404).json({ message: "Invoice not found" });
+    res.status(200).json(invoice);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 };
 
-exports.deleteInvoice = (req, res) => {
-    res.status(200).json({ success: true, message: `Invoice ${req.params.id} deleted` });
+exports.deleteInvoice = async (req, res) => {
+  try {
+    const invoice = await Invoice.findByIdAndDelete(req.params.id);
+    if (!invoice) return res.status(404).json({ message: "Invoice not found" });
+    res.status(200).json({ message: "Invoice deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };

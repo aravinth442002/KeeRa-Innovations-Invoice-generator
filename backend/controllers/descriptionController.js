@@ -1,24 +1,53 @@
-const sampleData = require('../sample.json');
+const Description = require("../models/descriptionModel");
 
-// Placeholder for description controller logic
-exports.createDescription = (req, res) => {
-  // This is a mock implementation. In a real app, you'd save to a database.
-  const newDescription = { id: `desc-${Date.now()}`, ...req.body };
-  sampleData.descriptions.push(newDescription);
-  res.status(201).json({ success: true, message: "Description created", data: newDescription });
+exports.createDescription = async (req, res) => {
+  try {
+    const description = new Description(req.body);
+    await description.save();
+    res.status(201).json(description);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 };
 
-exports.getDescriptions = (req, res) => {
-  const descriptions = sampleData.descriptions || [];
-  res.status(200).json({ success: true, data: descriptions });
+exports.getDescriptions = async (req, res) => {
+  try {
+    const descriptions = await Description.find();
+    res.status(200).json({
+      success: true,
+      data: descriptions
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
-exports.updateDescription = (req, res) => {
-    // This is a mock implementation.
-    res.status(200).json({ success: true, message: `Description ${req.params.id} updated`, data: req.body });
+exports.getDescriptionById = async (req, res) => {
+  try {
+    const description = await Description.findById(req.params.id);
+    if (!description) return res.status(404).json({ message: "Description not found" });
+    res.status(200).json(description);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
-exports.deleteDescription = (req, res) => {
-    // This is a mock implementation.
-    res.status(200).json({ success: true, message: `Description ${req.params.id} deleted` });
+exports.updateDescription = async (req, res) => {
+  try {
+    const description = await Description.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!description) return res.status(404).json({ message: "Description not found" });
+    res.status(200).json(description);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+exports.deleteDescription = async (req, res) => {
+  try {
+    const description = await Description.findByIdAndDelete(req.params.id);
+    if (!description) return res.status(404).json({ message: "Description not found" });
+    res.status(200).json({ message: "Description deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };

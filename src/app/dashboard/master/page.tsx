@@ -68,6 +68,7 @@ function ClientsTab() {
       if (response.data.success) {
         setClients(response.data.data);
       }
+
     } catch (error) {
       console.error('Failed to fetch clients:', error);
       toast({ title: 'Error', description: 'Could not fetch clients.', variant: 'destructive' });
