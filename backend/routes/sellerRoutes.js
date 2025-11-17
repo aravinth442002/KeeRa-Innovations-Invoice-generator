@@ -1,11 +1,21 @@
 const express = require("express");
-const router = express.Router();
-const sellerController = require("../controllers/sellerController");
+const {
+  getSellers,
+  getSeller,
+  createSeller,
+  updateSeller,
+  deleteSeller,
+} = require("../controllers/sellerController"); 
 
-router.post("/", sellerController.createSeller);
-router.get("/", sellerController.getSellers);
-router.get("/:id", sellerController.getSellerById);
-router.put("/:id", sellerController.updateSeller);
-router.delete("/:id", sellerController.deleteSeller);
+const router = express.Router();
+
+router.route("/")
+  .get(getSellers)
+  .post(createSeller);
+
+router.route("/:id")
+  .get(getSeller)
+  .put(updateSeller)
+  .delete(deleteSeller);
 
 module.exports = router;
