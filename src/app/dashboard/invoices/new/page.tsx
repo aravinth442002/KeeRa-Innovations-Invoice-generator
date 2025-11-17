@@ -290,7 +290,7 @@ function NewInvoiceForm() {
                     <div className="space-y-4">
                         <h3 className="text-sm font-medium text-muted-foreground">FROM</h3>
                         <div className="space-y-1 text-sm">
-                            <p className="font-semibold">{sellerDetails.name}</p>
+                            <p className="font-semibold">{sellerDetails.name || 'Your Company Name'}</p>
                             <p className="text-muted-foreground">{sellerDetails.address?.split(',').join(', ')}</p>
                             <p className="text-muted-foreground">GSTIN: {sellerDetails.gstin}</p>
                         </div>

@@ -126,10 +126,6 @@ function SellerDetailsTab() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="seller-name">Seller Name</Label>
-            <Input id="seller-name" value={seller.name || ''} onChange={e => handleSellerChange('name' as any, e.target.value)} placeholder="Your company's registered name" />
-          </div>
-          <div className="space-y-2">
             <Label htmlFor="seller-address">Address</Label>
             <Input id="seller-address" value={seller.address || ''} onChange={e => handleSellerChange('address', e.target.value)} placeholder="Complete registered business address" />
           </div>

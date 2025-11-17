@@ -8,7 +8,7 @@ export type LineItem = {
 
 export type Seller = {
   _id?: string;
-  name: string;
+  name?: string;
   address: string;
   phone: string;
   email: string;
