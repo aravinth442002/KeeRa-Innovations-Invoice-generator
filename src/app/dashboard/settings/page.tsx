@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,24 +22,78 @@ import {
 import { DashboardHeader } from '@/components/dashboard-header';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useToast } from '@/hooks/use-toast';
+import axios from 'axios';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+
+type Company = {
+  _id: string;
+  companyName: string;
+  address: string;
+  email: string;
+  phoneNumber: string;
+  companySignatureUrl: string;
+  companySealUrl: string;
+  taxId: string;
+  vatNumber: string;
+  bankName: string;
+  accountNumber: string;
+  swiftBicCode: string;
+};
 
 export default function SettingsPage() {
   const { toast } = useToast();
   
-  // Office State
-  const [companyName, setCompanyName] = useState('KeeRa Innovations');
-  const [address, setAddress] = useState('112-A, 3rd Ave, W Block, Anna Nagar, Chennai, Tamil Nadu 600042');
-  const [email, setEmail] = useState('keerainnovations@gmail.com');
-  const [phone, setPhone] = useState('+1 234 567 890');
-  
-  // Tax State
-  const [taxId, setTaxId] = useState('12-3456789');
-  const [vatNumber, setVatNumber] = useState('GB123456789');
-  
-  // Bank State
-  const [bankName, setBankName] = useState('Global Commerce Bank');
-  const [accountNumber, setAccountNumber] = useState('**** **** **** 1234');
-  const [swiftCode, setSwiftCode] = useState('GCBKGBA');
+  const [company, setCompany] = useState<Partial<Company>>({});
+
+  useEffect(() => {
+    fetchCompanyData();
+  }, []);
+
+  const fetchCompanyData = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/companies`);
+      // Assuming you only have one company profile to manage
+      if (response.data && response.data.length > 0) {
+        setCompany(response.data[0]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch company data:', error);
+      toast({
+        title: 'Error',
+        description: 'Could not fetch company details.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleInputChange = (field: keyof Company, value: string) => {
+    setCompany(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveChanges = async (section: string) => {
+    try {
+      if (company._id) {
+        // Update existing company
+        await axios.put(`${API_URL}/companies/${company._id}`, company);
+      } else {
+        // Create new company
+        const response = await axios.post(`${API_URL}/companies`, company);
+        setCompany(response.data); // update state with new data including _id
+      }
+      toast({
+        title: 'Settings Saved',
+        description: `Your ${section} details have been updated.`,
+      });
+    } catch (error) {
+      console.error(`Failed to save ${section} details:`, error);
+      toast({
+        title: 'Error',
+        description: `Could not save ${section} details.`,
+        variant: 'destructive',
+      });
+    }
+  };
   
   const signatureImg = PlaceHolderImages.find(
     (img) => img.id === 'company-signature'
@@ -47,15 +101,6 @@ export default function SettingsPage() {
   const sealImg = PlaceHolderImages.find(
     (img) => img.id === 'company-seal'
   );
-
-  const handleSaveChanges = (section: string) => {
-    // In a real application, you would make an API call here to save the data.
-    toast({
-      title: 'Settings Saved',
-      description: `Your ${section} details have been updated.`,
-    });
-  };
-
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -81,20 +126,20 @@ export default function SettingsPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Company Name</Label>
-                  <Input id="name" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+                  <Input id="name" value={company.companyName || ''} onChange={(e) => handleInputChange('companyName', e.target.value)} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="address">Address</Label>
-                  <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} />
+                  <Input id="address" value={company.address || ''} onChange={(e) => handleInputChange('address', e.target.value)} />
                 </div>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                    <Input id="email" type="email" value={company.email || ''} onChange={(e) => handleInputChange('email', e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number</Label>
-                    <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                    <Input id="phone" type="tel" value={company.phoneNumber || ''} onChange={(e) => handleInputChange('phoneNumber', e.target.value)} />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -125,12 +170,12 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="tax-id">Tax ID / EIN</Label>
-                  <Input id="tax-id" value={taxId} onChange={(e) => setTaxId(e.target.value)} />
+                  <Label htmlFor="tax-id">Tax ID / GSTIN</Label>
+                  <Input id="tax-id" value={company.taxId || ''} onChange={(e) => handleInputChange('taxId', e.target.value)} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="vat">VAT Number</Label>
-                  <Input id="vat" value={vatNumber} onChange={(e) => setVatNumber(e.target.value)} />
+                  <Input id="vat" value={company.vatNumber || ''} onChange={(e) => handleInputChange('vatNumber', e.target.value)} />
                 </div>
               </CardContent>
               <CardFooter>
@@ -149,15 +194,15 @@ export default function SettingsPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="bank-name">Bank Name</Label>
-                  <Input id="bank-name" value={bankName} onChange={(e) => setBankName(e.target.value)} />
+                  <Input id="bank-name" value={company.bankName || ''} onChange={(e) => handleInputChange('bankName', e.target.value)} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="account-number">Account Number</Label>
-                  <Input id="account-number" value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} />
+                  <Input id="account-number" value={company.accountNumber || ''} onChange={(e) => handleInputChange('accountNumber', e.target.value)} />
                 </div>
                  <div className="space-y-2">
                   <Label htmlFor="swift-code">SWIFT / BIC Code</Label>
-                  <Input id="swift-code" value={swiftCode} onChange={(e) => setSwiftCode(e.target.value)} />
+                  <Input id="swift-code" value={company.swiftBicCode || ''} onChange={(e) => handleInputChange('swiftBicCode', e.target.value)} />
                 </div>
               </CardContent>
               <CardFooter>

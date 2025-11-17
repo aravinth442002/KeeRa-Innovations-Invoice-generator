@@ -1,14 +1,15 @@
 const mongoose = require("mongoose");
 
 const sellerSchema = new mongoose.Schema({
-  address: String,
-  phone: Number,
-  email: String,
-  gstin: String,
+  name: { type: String, required: true },
+  address: { type: String, required: true },
+  phone: { type: String, required: true },
+  email: { type: String, required: true },
+  gstin: { type: String, required: true },
   bank: {
     name: String,
     branch: String,
-    accountNumber: Number,
+    accountNumber: String,
     ifsc: String,
     upiId: String
   },
