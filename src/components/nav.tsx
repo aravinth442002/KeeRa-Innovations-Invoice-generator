@@ -18,6 +18,7 @@ import {
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/dashboard/master', icon: Database, label: 'Master' },
   { href: '/dashboard/invoices', icon: FileText, label: 'Invoices' },
   {
     href: '/dashboard/purchase-orders',
@@ -25,7 +26,6 @@ const navItems = [
     label: 'Purchase Orders',
   },
   { href: '/dashboard/quotations', icon: FileQuestion, label: 'Quotations' },
-  { href: '/dashboard/master', icon: Database, label: 'Master' },
   { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
 ];
 
@@ -53,5 +53,3 @@ export function Nav() {
     </SidebarMenu>
   );
 }
-
-    
