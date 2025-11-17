@@ -1,3 +1,4 @@
+
 'use client';
 
 import { formatCurrency } from '@/lib/utils';
@@ -43,14 +44,8 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
   const totalQty = invoice.lineItems.reduce((acc, item) => acc + (item.quantity || 0), 0);
   const totalInWords = numberToWords(Math.round(grandTotal));
 
-  // Mock Data, as it's not in the form yet
-  const MOCK_BANK_DETAILS = {
-      name: 'Global Commerce Bank',
-      branch: 'Main Branch',
-      accNumber: '**** **** **** 1234',
-      ifsc: 'GCBKGBA',
-      upiId: 'payments@gcb'
-  };
+  const bankDetails = invoice.seller?.bank || {};
+  
   const MOCK_TERMS = [
       "Payment is due within 30 days.",
       "A late fee of 1.5% will be charged on overdue invoices.",
@@ -89,11 +84,11 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
                       </tr>
                       <tr>
                           <td className="bg-primary/20 font-bold p-2 border-r border-primary text-xs">Phone</td>
-                          <td className="p-2 text-xs">+1 234 567 890</td>
+                          <td className="p-2 text-xs">{invoice.seller.phone}</td>
                       </tr>
                       <tr>
                           <td className="bg-primary/20 font-bold p-2 border-r border-primary text-xs">Email</td>
-                          <td className="p-2 text-xs">keerainnovations@gmail.com</td>
+                          <td className="p-2 text-xs">{invoice.seller.email}</td>
                       </tr>
                   </tbody>
               </table>
@@ -218,15 +213,15 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
                       <table className="w-full border-collapse">
                           <tbody>
                             {[
-                                {label: 'Name', value: MOCK_BANK_DETAILS.name},
-                                {label: 'Branch', value: MOCK_BANK_DETAILS.branch},
-                                {label: 'Acc. Number', value: MOCK_BANK_DETAILS.accNumber},
-                                {label: 'IFSC', value: MOCK_BANK_DETAILS.ifsc},
-                                {label: 'UPI ID', value: MOCK_BANK_DETAILS.upiId},
+                                {label: 'Name', value: bankDetails.name},
+                                {label: 'Branch', value: bankDetails.branch},
+                                {label: 'Acc. Number', value: bankDetails.accountNumber},
+                                {label: 'IFSC', value: bankDetails.ifsc},
+                                {label: 'UPI ID', value: bankDetails.upiId},
                             ].map(detail => (
                                 <tr key={detail.label} style={{height: '25px'}}>
                                     <td className="bg-primary/20 font-bold p-1 border border-primary w-[25%]">{detail.label}</td>
-                                    <td className="p-1 border border-primary w-[50%]">{detail.value}</td>
+                                    <td className="p-1 border border-primary w-[50%]">{detail.value || ''}</td>
                                     {detail.label === 'Name' && (
                                         <td className="text-center p-0 border-t-0 border-b-0 border-r-0 border-l border-primary" rowSpan={5}>
                                             <div className="w-[85px] h-[85px] m-auto border border-primary flex items-center justify-center">

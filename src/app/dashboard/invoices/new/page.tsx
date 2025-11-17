@@ -27,6 +27,7 @@ import {
   invoices as initialInvoices,
   type Invoice,
   type LineItem,
+  type Seller,
 } from '@/lib/data';
 import axios from 'axios';
 import { useToast } from '@/hooks/use-toast';
@@ -50,11 +51,18 @@ function NewInvoiceForm() {
   const invoiceId = searchParams.get('id');
   const { toast } = useToast();
 
-  const sellerDetails = {
+  const [sellerDetails, setSellerDetails] = useState<Partial<Seller>>({
     name: 'KeeRa Innovations',
     address: '112-A, 3rd Ave, W Block, Anna Nagar, Chennai, Tamil Nadu 600042',
     gstin: '12-3456789',
-  };
+    bank: {
+      name: '',
+      branch: '',
+      accountNumber: '',
+      ifsc: '',
+      upiId: '',
+    },
+  });
 
   const [lineItems, setLineItems] = useState<LineItem[]>([
     { name: '', quantity: 1, price: 0, hsn: '' },
@@ -84,7 +92,20 @@ function NewInvoiceForm() {
 
   useEffect(() => {
     fetchClients();
+    fetchSellerDetails();
   }, []);
+
+  const fetchSellerDetails = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/sellers`);
+      if (response.data.success && response.data.count > 0) {
+        setSellerDetails(response.data.data[0]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch seller details:', error);
+      toast({ title: 'Error', description: 'Could not fetch seller details.', variant: 'destructive' });
+    }
+  };
   
   const fetchClients = async () => {
     try {
@@ -113,18 +134,15 @@ function NewInvoiceForm() {
         gstin: selectedClient.gstin,
       });
     } else {
-      // If for some reason client is not found, clear details
       setSelectedClientId('');
       setCustomerDetails({ name: '', address: '', email: '', phone: '', gstin: '' });
     }
   };
 
   const handleCustomerDetailChange = (field: keyof typeof customerDetails, value: string) => {
-    // When a user types in a field, update the customer details
     const newDetails = { ...customerDetails, [field]: value };
     setCustomerDetails(newDetails);
 
-    // After a manual change, check if the details now match an existing client
     const matchingClient = clients.find(
       (client) =>
         client.name === newDetails.name &&
@@ -134,8 +152,6 @@ function NewInvoiceForm() {
         client.gstin === newDetails.gstin
     );
 
-    // If it matches a client, update the dropdown to show that client is selected.
-    // If not, clear the dropdown selection.
     setSelectedClientId(matchingClient ? matchingClient.id : '');
   };
 
@@ -158,7 +174,6 @@ function NewInvoiceForm() {
         };
         setCustomerDetails(currentCustomerDetails);
 
-        // This logic needs to run *after* clients have been fetched.
         if (clients.length > 0) {
             const matchingClient = clients.find(c => c.name === invoiceToEdit.customer);
             if (matchingClient) {
@@ -174,7 +189,7 @@ function NewInvoiceForm() {
     } else {
         setInvoiceNumber(`INV-${Math.floor(Math.random() * 10000)}`);
     }
-  }, [isEditing, invoiceId, clients]); // Rerun this effect when clients are loaded
+  }, [isEditing, invoiceId, clients]);
 
   const handleLineItemChange = (
     index: number,
@@ -276,7 +291,7 @@ function NewInvoiceForm() {
                         <h3 className="text-sm font-medium text-muted-foreground">FROM</h3>
                         <div className="space-y-1 text-sm">
                             <p className="font-semibold">{sellerDetails.name}</p>
-                            <p className="text-muted-foreground">{sellerDetails.address.split(',').join(', ')}</p>
+                            <p className="text-muted-foreground">{sellerDetails.address?.split(',').join(', ')}</p>
                             <p className="text-muted-foreground">GSTIN: {sellerDetails.gstin}</p>
                         </div>
                     </div>

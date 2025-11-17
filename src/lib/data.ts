@@ -6,6 +6,22 @@ export type LineItem = {
   hsn: string;
 };
 
+export type Seller = {
+  _id?: string;
+  name: string;
+  address: string;
+  phone: string;
+  email: string;
+  gstin: string;
+  bank?: {
+    name: string;
+    branch: string;
+    accountNumber: string;
+    ifsc: string;
+    upiId: string;
+  };
+};
+
 export type Invoice = {
   id: string;
   customer: string;
@@ -13,11 +29,7 @@ export type Invoice = {
   phone?: string;
   customerAddress: string;
   gstin: string;
-  seller: {
-    name: string;
-    address: string;
-    gstin: string;
-  };
+  seller: Partial<Seller>;
   description: string;
   lineItems: LineItem[];
   amount: number;
