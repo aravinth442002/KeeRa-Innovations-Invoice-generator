@@ -55,6 +55,8 @@ function NewInvoiceForm() {
     name: 'KeeRa Innovations',
     address: '112-A, 3rd Ave, W Block, Anna Nagar, Chennai, Tamil Nadu 600042',
     gstin: '12-3456789',
+    phone: '',
+    email: '',
     bank: {
       name: '',
       branch: '',
