@@ -54,7 +54,7 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
   ];
 
   const qrCodeUrl = bankDetails.upiId 
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=upi://pay?pa=${bankDetails.upiId}&am=${grandTotal}&tn=Invoice${invoice.id}`
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=upi://pay?pa=${bankDetails.upiId}&pn=${encodeURIComponent(invoice.seller.name || 'Recipient')}&am=${grandTotal.toFixed(2)}&tn=Invoice-${invoice.id}`
     : `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=Please-add-UPI-ID`;
 
   return (
@@ -297,5 +297,7 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
     </div>
   );
 }
+
+    
 
     
