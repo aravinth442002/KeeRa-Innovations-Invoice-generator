@@ -15,7 +15,6 @@ exports.createCompany = async (req, res) => {
         }
 
         const newCompany = new Company(companyData);
-        console.log("*/*/**/*//*/*/*/", companyData); 
         const savedCompany = await newCompany.save();
         res.status(201).json(savedCompany); 
     } catch (error) {
@@ -48,11 +47,23 @@ exports.getCompanyById = async (req, res) => {
 // PUT/PATCH to update a company (Update)
 exports.updateCompany = async (req, res) => {
     try {
+        const updateData = { ...req.body };
+
+        if (req.files) {
+            if (req.files['companySignatureUrl']) {
+                updateData.companySignatureUrl = req.files['companySignatureUrl'][0].path;
+            }
+            if (req.files['companySealUrl']) {
+                updateData.companySealUrl = req.files['companySealUrl'][0].path;
+            }
+        }
+        
         const updatedCompany = await Company.findByIdAndUpdate(
             req.params.id, 
-            req.body, 
-            { new: true, runValidators: true } // Return the new document, run schema validators
+            updateData, 
+            { new: true, runValidators: true }
         );
+
         if (!updatedCompany) {
             return res.status(404).json({ message: 'Company not found' });
         }
@@ -74,3 +85,5 @@ exports.deleteCompany = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+    

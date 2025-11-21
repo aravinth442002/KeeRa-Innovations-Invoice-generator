@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
@@ -45,6 +46,8 @@ export default function SettingsPage() {
   const { toast } = useToast();
   
   const [company, setCompany] = useState<Partial<Company>>({});
+  const [signatureFile, setSignatureFile] = useState<File | null>(null);
+  const [sealFile, setSealFile] = useState<File | null>(null);
 
   useEffect(() => {
     fetchCompanyData();
@@ -53,7 +56,6 @@ export default function SettingsPage() {
   const fetchCompanyData = async () => {
     try {
       const response = await axios.get(`${API_URL}/companies`);
-      // Assuming you only have one company profile to manage
       if (response.data && response.data.length > 0) {
         setCompany(response.data[0]);
       }
@@ -71,20 +73,53 @@ export default function SettingsPage() {
     setCompany(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>, fileType: 'signature' | 'seal') => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (fileType === 'signature') {
+        setSignatureFile(file);
+      } else {
+        setSealFile(file);
+      }
+    }
+  };
+  
   const handleSaveChanges = async (section: string) => {
+    const formData = new FormData();
+
+    Object.entries(company).forEach(([key, value]) => {
+        if(value !== undefined && value !== null) {
+            formData.append(key, String(value));
+        }
+    });
+
+    if (signatureFile) {
+        formData.append('companySignatureUrl', signatureFile);
+    }
+    if (sealFile) {
+        formData.append('companySealUrl', sealFile);
+    }
+
     try {
       if (company._id) {
-        // Update existing company
-        await axios.put(`${API_URL}/companies/${company._id}`, company);
+        await axios.put(`${API_URL}/companies/${company._id}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
       } else {
-        // Create new company
-        const response = await axios.post(`${API_URL}/companies`, company);
-        setCompany(response.data); // update state with new data including _id
+        const response = await axios.post(`${API_URL}/companies`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        setCompany(response.data);
       }
       toast({
         title: 'Settings Saved',
         description: `Your ${section} details have been updated.`,
       });
+      fetchCompanyData(); // Re-fetch to display updated images if any
     } catch (error) {
       console.error(`Failed to save ${section} details:`, error);
       toast({
@@ -101,6 +136,10 @@ export default function SettingsPage() {
   const sealImg = PlaceHolderImages.find(
     (img) => img.id === 'company-seal'
   );
+
+  const displaySignatureUrl = company.companySignatureUrl ? `${process.env.NEXT_PUBLIC_API_URL?.replace('/api','/')}${company.companySignatureUrl}` : signatureImg?.imageUrl;
+  const displaySealUrl = company.companySealUrl ? `${process.env.NEXT_PUBLIC_API_URL?.replace('/api','/')}${company.companySealUrl}` : sealImg?.imageUrl;
+
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -145,13 +184,13 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div className="space-y-2">
                         <Label>Company Signature</Label>
-                        {signatureImg && <Image src={signatureImg.imageUrl} alt={signatureImg.description} width={240} height={100} className="rounded-md border p-2" data-ai-hint={signatureImg.imageHint}/>}
-                        <Input type="file" />
+                        {displaySignatureUrl && <Image src={displaySignatureUrl} alt="Company Signature" width={240} height={100} className="rounded-md border p-2" data-ai-hint="signature" unoptimized />}
+                        <Input type="file" onChange={(e) => handleFileChange(e, 'signature')} />
                     </div>
                     <div className="space-y-2">
                         <Label>Company Seal</Label>
-                        {sealImg && <Image src={sealImg.imageUrl} alt={sealImg.description} width={150} height={150} className="rounded-md border p-2" data-ai-hint={sealImg.imageHint}/>}
-                        <Input type="file" />
+                        {displaySealUrl && <Image src={displaySealUrl} alt="Company Seal" width={150} height={150} className="rounded-md border p-2" data-ai-hint="seal" unoptimized />}
+                        <Input type="file" onChange={(e) => handleFileChange(e, 'seal')} />
                     </div>
                 </div>
               </CardContent>
@@ -215,3 +254,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    
