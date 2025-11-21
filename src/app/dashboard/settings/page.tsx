@@ -26,6 +26,8 @@ import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+const BASE_URL = API_URL.replace('/api', '');
+
 
 type Company = {
   _id: string;
@@ -48,6 +50,9 @@ export default function SettingsPage() {
   const [company, setCompany] = useState<Partial<Company>>({});
   const [signatureFile, setSignatureFile] = useState<File | null>(null);
   const [sealFile, setSealFile] = useState<File | null>(null);
+  const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
+  const [sealPreview, setSealPreview] = useState<string | null>(null);
+
 
   useEffect(() => {
     fetchCompanyData();
@@ -61,11 +66,6 @@ export default function SettingsPage() {
       }
     } catch (error) {
       console.error('Failed to fetch company data:', error);
-      toast({
-        title: 'Error',
-        description: 'Could not fetch company details.',
-        variant: 'destructive',
-      });
     }
   };
 
@@ -76,10 +76,13 @@ export default function SettingsPage() {
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>, fileType: 'signature' | 'seal') => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      const previewUrl = URL.createObjectURL(file);
       if (fileType === 'signature') {
         setSignatureFile(file);
+        setSignaturePreview(previewUrl);
       } else {
         setSealFile(file);
+        setSealPreview(previewUrl);
       }
     }
   };
@@ -120,6 +123,8 @@ export default function SettingsPage() {
         description: `Your ${section} details have been updated.`,
       });
       fetchCompanyData(); // Re-fetch to display updated images if any
+      setSignaturePreview(null);
+      setSealPreview(null);
     } catch (error) {
       console.error(`Failed to save ${section} details:`, error);
       toast({
@@ -130,15 +135,19 @@ export default function SettingsPage() {
     }
   };
   
-  const signatureImg = PlaceHolderImages.find(
+  const signaturePlaceholder = PlaceHolderImages.find(
     (img) => img.id === 'company-signature'
-  );
-  const sealImg = PlaceHolderImages.find(
+  )?.imageUrl;
+  
+  const sealPlaceholder = PlaceHolderImages.find(
     (img) => img.id === 'company-seal'
-  );
+  )?.imageUrl;
 
-  const displaySignatureUrl = company.companySignatureUrl ? `${process.env.NEXT_PUBLIC_API_URL?.replace('/api','/')}${company.companySignatureUrl}` : signatureImg?.imageUrl;
-  const displaySealUrl = company.companySealUrl ? `${process.env.NEXT_PUBLIC_API_URL?.replace('/api','/')}${company.companySealUrl}` : sealImg?.imageUrl;
+  const displaySignatureUrl = signaturePreview 
+    || (company.companySignatureUrl ? `${BASE_URL}/${company.companySignatureUrl}` : signaturePlaceholder);
+  
+  const displaySealUrl = sealPreview 
+    || (company.companySealUrl ? `${BASE_URL}/${company.companySealUrl}` : sealPlaceholder);
 
 
   return (
@@ -185,12 +194,12 @@ export default function SettingsPage() {
                     <div className="space-y-2">
                         <Label>Company Signature</Label>
                         {displaySignatureUrl && <Image src={displaySignatureUrl} alt="Company Signature" width={240} height={100} className="rounded-md border p-2" data-ai-hint="signature" unoptimized />}
-                        <Input type="file" onChange={(e) => handleFileChange(e, 'signature')} />
+                        <Input type="file" accept="image/*" onChange={(e) => handleFileChange(e, 'signature')} />
                     </div>
                     <div className="space-y-2">
                         <Label>Company Seal</Label>
                         {displaySealUrl && <Image src={displaySealUrl} alt="Company Seal" width={150} height={150} className="rounded-md border p-2" data-ai-hint="seal" unoptimized />}
-                        <Input type="file" onChange={(e) => handleFileChange(e, 'seal')} />
+                        <Input type="file" accept="image/*" onChange={(e) => handleFileChange(e, 'seal')} />
                     </div>
                 </div>
               </CardContent>
@@ -254,5 +263,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-
-    
