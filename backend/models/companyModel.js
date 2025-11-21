@@ -1,4 +1,3 @@
-// models/Company.js
 const mongoose = require('mongoose');
 
 const CompanySchema = new mongoose.Schema({
@@ -27,14 +26,14 @@ const CompanySchema = new mongoose.Schema({
         required: [true, 'Phone Number is required'],
         trim: true,
     },
-    // For file path/URL, handling actual file upload is complex and omitted here
+    // These fields will store the file path/URL returned by Multer
     companySignatureUrl: {
         type: String,
-        default: 'N/A'
+        default: 'N/A' // Default can be removed if required or kept if optional
     },
     companySealUrl: {
         type: String,
-        default: 'N/A'
+        default: 'N/A' // Default can be removed if required or kept if optional
     },
 
     // --- Tax Details ---

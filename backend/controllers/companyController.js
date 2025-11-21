@@ -1,20 +1,28 @@
 // controllers/companyController.js
 const Company = require('../models/companyModel');
 
-// POST a new company (Create)
 exports.createCompany = async (req, res) => {
     try {
-        const newCompany = new Company(req.body);
-        console.log("*/*/**/*//*/*/*/", req.body);
+        const companyData = {
+            ...req.body
+        };
+
+        if (req.files && req.files['companySignatureUrl']) {
+            companyData.companySignatureUrl = req.files['companySignatureUrl'][0].path; 
+        }
+        if (req.files && req.files['companySealUrl']) {
+            companyData.companySealUrl = req.files['companySealUrl'][0].path; 
+        }
+
+        const newCompany = new Company(companyData);
+        console.log("*/*/**/*//*/*/*/", companyData); 
         const savedCompany = await newCompany.save();
-        res.status(201).json(savedCompany); // 201 Created
+        res.status(201).json(savedCompany); 
     } catch (error) {
-        // Mongoose validation errors or unique constraint errors
         res.status(400).json({ message: error.message });
     }
 };
 
-// GET all companies (Read All)
 exports.getAllCompanies = async (req, res) => {
     try {
         const companies = await Company.find();
