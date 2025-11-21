@@ -57,8 +57,7 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
     if (!(bankDetails.upiId && grandTotal > 0)) {
       return '';
     }
-    const payeeName = encodeURIComponent(invoice.seller.name || 'Recipient');
-    const upiData = `upi://pay?pa=${bankDetails.upiId}&pn=${payeeName}&am=${grandTotal.toFixed(2)}&tn=Invoice-${invoice.id}`;
+    const upiData = `upi://pay?pa=${bankDetails.upiId}&am=${grandTotal.toFixed(2)}&tn=Invoice-${invoice.id}&cu=INR`;
     return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(upiData)}`;
   })();
 
