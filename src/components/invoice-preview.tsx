@@ -53,9 +53,13 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
       "Please include the invoice number on your payment."
   ];
 
-  const qrCodeUrl = bankDetails.upiId && grandTotal > 0
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(`upi://pay?pa=${bankDetails.upiId}&pn=${encodeURIComponent(invoice.seller.name || 'Recipient')}&am=${grandTotal.toFixed(2)}&tn=Invoice-${invoice.id}`)}`
-    : '';
+  const qrCodeUrl = (() => {
+    if (!(bankDetails.upiId && grandTotal > 0)) {
+      return '';
+    }
+    const upiData = `upi://pay?pa=${bankDetails.upiId}&pn=${encodeURIComponent(invoice.seller.name || 'Recipient')}&am=${grandTotal.toFixed(2)}&tn=Invoice-${invoice.id}`;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(upiData)}`;
+  })();
 
   return (
     <div className="bg-white text-black text-[10px] w-[794px] min-h-[1123px] mx-auto my-0 p-6 font-sans border shadow-lg">
