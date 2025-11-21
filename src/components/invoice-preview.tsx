@@ -4,6 +4,7 @@
 import { formatCurrency } from '@/lib/utils';
 import type { Invoice } from '@/lib/data';
 import AppLogo from './app-logo';
+import Image from 'next/image';
 
 type InvoicePreviewProps = {
   invoice: Omit<Invoice, 'amount' | 'status' | 'date'> & {
@@ -51,6 +52,10 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
       "A late fee of 1.5% will be charged on overdue invoices.",
       "Please include the invoice number on your payment."
   ];
+
+  const qrCodeUrl = bankDetails.upiId 
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=upi://pay?pa=${bankDetails.upiId}&am=${grandTotal}&tn=Invoice${invoice.id}`
+    : `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=Please-add-UPI-ID`;
 
   return (
     <div className="bg-white text-black text-[10px] w-[794px] min-h-[1123px] mx-auto my-0 p-6 font-sans border shadow-lg">
@@ -220,8 +225,8 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
                                     <td className="p-1 border border-primary w-[50%]">{detail.value || ''}</td>
                                     {detail.label === 'Name' && (
                                         <td className="text-center p-0 border-t-0 border-b-0 border-r-0 border-l border-primary" rowSpan={5}>
-                                            <div className="w-[85px] h-[85px] m-auto border border-primary flex items-center justify-center">
-                                                {/* QR Code Placeholder */}
+                                            <div className="w-[85px] h-[85px] m-auto border border-primary flex items-center justify-center p-1">
+                                                <Image src={qrCodeUrl} alt="QR Code" width={80} height={80} unoptimized />
                                             </div>
                                             <p className="font-bold text-xs pt-1">Pay with QR</p>
                                         </td>
