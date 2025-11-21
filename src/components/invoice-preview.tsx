@@ -114,10 +114,6 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
                         <td className="bg-primary/20 font-bold p-2 text-xs">GSTIN</td>
                         <td className="p-2 text-xs">{invoice.gstin || 'N/A'}</td>
                     </tr>
-                     <tr>
-                        <td className="bg-primary/20 font-bold p-2 text-xs">Place of Supply</td>
-                        <td className="p-2 text-xs">-</td>
-                    </tr>
                     <tr>
                         <td className="bg-primary/20 font-bold p-2 text-xs">Invoice No.</td>
                         <td className="p-2 text-xs">{invoice.id}</td>
