@@ -1,4 +1,5 @@
 
+
 export type LineItem = {
   name: string;
   quantity: number;
@@ -20,6 +21,7 @@ export type Seller = {
     ifsc: string;
     upiId: string;
   };
+  companySealUrl?: string;
 };
 
 export type Invoice = {
@@ -136,5 +138,3 @@ export const masterDescriptions: MasterDescription[] = [
     { id: 'desc-002', title: 'Service Terms (30 Days)', content: 'Payment is due within 30 days of the invoice date. A late fee of 2% per month will be applied to overdue balances.' },
     { id: 'desc-003', title: 'Hardware Warranty', content: 'This product includes a 1-year limited hardware warranty covering manufacturing defects. It does not cover accidental damage.' },
 ];
-
-    

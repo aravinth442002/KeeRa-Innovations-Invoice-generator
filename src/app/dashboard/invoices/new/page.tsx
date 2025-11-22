@@ -65,6 +65,7 @@ function NewInvoiceForm() {
       ifsc: '',
       upiId: '',
     },
+    companySealUrl: '',
   });
 
   const [lineItems, setLineItems] = useState<LineItem[]>([
@@ -117,9 +118,30 @@ function NewInvoiceForm() {
 
   const fetchSellerDetails = async () => {
     try {
-      const response = await axios.get(`${API_URL}/sellers`);
-      if (response.data.success && response.data.count > 0) {
-        setSellerDetails(response.data.data[0]);
+      // First try fetching from companies, then from sellers as a fallback
+      const companyResponse = await axios.get(`${API_URL}/companies`);
+      if (companyResponse.data && companyResponse.data.length > 0) {
+        const company = companyResponse.data[0];
+        setSellerDetails({
+          name: company.companyName,
+          address: company.address,
+          gstin: company.taxId,
+          phone: company.phoneNumber,
+          email: company.email,
+          bank: {
+            name: company.bankName,
+            accountNumber: company.accountNumber,
+            ifsc: company.ifsc,
+            upiId: company.upiId,
+            branch: '', // branch is not in company model
+          },
+          companySealUrl: company.companySealUrl
+        });
+      } else {
+        const sellerResponse = await axios.get(`${API_URL}/sellers`);
+        if (sellerResponse.data.success && sellerResponse.data.count > 0) {
+          setSellerDetails(sellerResponse.data.data[0]);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch seller details:', error);
@@ -446,5 +468,3 @@ export default function NewInvoicePage() {
         </Suspense>
     )
 }
-
-    

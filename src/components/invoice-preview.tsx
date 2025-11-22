@@ -58,9 +58,11 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
       return '';
     }
     const payeeName = invoice.seller?.name || 'KeeRa Innovations';
-    const upiData = `upi://pay?pa=${bankDetails.upiId}&pn=${encodeURIComponent(payeeName)}&am=${grandTotal.toFixed(2)}&cu=INR&tn=Invoice-${invoice.id}`;
+    const upiData = `upi://pay?pa=${bankDetails.upiId}&pn=${encodeURIComponent(payeeName)}&am=${grandTotal.toFixed(2)}&cu=INR&tn=Invoice%20${invoice.id}`;
     return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(upiData)}`;
   })();
+
+  const companySealUrl = invoice.seller.companySealUrl ? `http://localhost:8080/${invoice.seller.companySealUrl}` : null;
 
   return (
     <div className="bg-white text-black text-[10px] w-[794px] min-h-[1123px] mx-auto my-0 p-6 font-sans border shadow-lg">
@@ -276,10 +278,14 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
                             </tbody>
                         </table>
                         <div className="bg-primary text-white font-bold p-2 text-left -mt-px text-sm">For KeeRa Innovations</div>
-                         <div className="h-[130px] text-center pt-4 border-x border-primary">
-                            <div className="w-24 h-24 mx-auto mb-1 border border-primary rounded-full flex items-center justify-center text-xs font-bold">
-                                {/* Seal Placeholder */}
-                            </div>
+                         <div className="h-[130px] text-center pt-4 border-x border-primary flex items-center justify-center">
+                            {companySealUrl ? (
+                                <Image src={companySealUrl} alt="Company Seal" width={96} height={96} className="object-contain" unoptimized />
+                            ) : (
+                                <div className="w-24 h-24 mx-auto border border-primary rounded-full flex items-center justify-center text-xs font-bold">
+                                    {/* Seal Placeholder */}
+                                </div>
+                            )}
                         </div>
                         <table className="w-full border-collapse border border-primary mt-[23px]">
                            <tbody>
