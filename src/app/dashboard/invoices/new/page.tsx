@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Suspense, useState, useEffect } from 'react';
@@ -95,7 +96,24 @@ function NewInvoiceForm() {
   useEffect(() => {
     fetchClients();
     fetchSellerDetails();
-  }, []);
+    if (!isEditing) {
+      fetchNextInvoiceNumber();
+    }
+  }, [isEditing]);
+
+  const fetchNextInvoiceNumber = async () => {
+    try {
+        const response = await axios.get(`${API_URL}/invoices`);
+        const existingInvoices = response.data || [];
+        const lastInvoiceNumber = existingInvoices.length > 0 
+            ? Math.max(...existingInvoices.map((inv: any) => parseInt(inv.id.split('-').pop() || '0', 10)))
+            : 0;
+        setInvoiceNumber(`INV-${(lastInvoiceNumber + 1).toString().padStart(3, '0')}`);
+    } catch (error) {
+        console.error('Failed to fetch next invoice number:', error);
+        setInvoiceNumber(`INV-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`); // Fallback
+    }
+  };
 
   const fetchSellerDetails = async () => {
     try {
@@ -159,37 +177,47 @@ function NewInvoiceForm() {
 
 
   useEffect(() => {
-    if (isEditing) {
-      const invoiceToEdit = initialInvoices.find((inv) => inv.id === invoiceId);
-      if (invoiceToEdit) {
-        setInvoiceNumber(invoiceToEdit.id);
-        setIssueDate(invoiceToEdit.date);
-        // @ts-ignore
-        setStatus(invoiceToEdit.status); 
-        
-        const currentCustomerDetails = {
-            name: invoiceToEdit.customer,
-            address: invoiceToEdit.customerAddress,
-            email: invoiceToEdit.email,
-            phone: invoiceToEdit.phone || '',
-            gstin: invoiceToEdit.gstin,
-        };
-        setCustomerDetails(currentCustomerDetails);
+    async function fetchInvoiceForEdit() {
+      if (isEditing && invoiceId) {
+        try {
+          const response = await axios.get(`${API_URL}/invoices/${invoiceId}`);
+          const invoiceToEdit = response.data;
+          
+          if (invoiceToEdit) {
+            setInvoiceNumber(invoiceToEdit.id);
+            setIssueDate(invoiceToEdit.date.split('T')[0]);
+            setStatus(invoiceToEdit.status); 
+            
+            const currentCustomerDetails = {
+                name: invoiceToEdit.customer,
+                address: invoiceToEdit.customerAddress,
+                email: invoiceToEdit.email,
+                phone: invoiceToEdit.phone || '',
+                gstin: invoiceToEdit.gstin,
+            };
+            setCustomerDetails(currentCustomerDetails);
 
-        if (clients.length > 0) {
-            const matchingClient = clients.find(c => c.name === invoiceToEdit.customer);
-            if (matchingClient) {
-                setSelectedClientId(matchingClient.id);
-            } else {
-                setSelectedClientId('');
+            if (clients.length > 0) {
+                const matchingClient = clients.find(c => c.name === invoiceToEdit.customer);
+                if (matchingClient) {
+                    setSelectedClientId(matchingClient.id);
+                } else {
+                    setSelectedClientId('');
+                }
             }
-        }
 
-        setLineItems(invoiceToEdit.lineItems);
-        setProjectName(invoiceToEdit.description);
+            setLineItems(invoiceToEdit.lineItems);
+            setProjectName(invoiceToEdit.description);
+          }
+        } catch (error) {
+          console.error('Failed to fetch invoice for editing:', error);
+          toast({ title: 'Error', description: 'Could not fetch invoice details.', variant: 'destructive' });
+        }
       }
-    } else {
-        setInvoiceNumber(`INV-${Math.floor(Math.random() * 10000)}`);
+    }
+
+    if (isEditing) {
+      fetchInvoiceForEdit();
     }
   }, [isEditing, invoiceId, clients]);
 

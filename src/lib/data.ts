@@ -86,67 +86,24 @@ export const demoDescriptions = [
 ];
 
 // This data is now managed in Firestore, so we can remove the initial mock data.
-export const invoices: Invoice[] = [
+export const invoices: Invoice[] = [];
+
+export const purchaseOrders: PurchaseOrder[] = [
     {
-      "id": "INV-2024-001",
-      "customer": "Tech Solutions Inc.",
-      "email": "contact@techsolutions.com",
-      "phone": "+1-202-555-0176",
-      "customerAddress": "123 Tech Park, Silicon Valley, CA 94000",
-      "gstin": "29AABCU9567M1Z5",
-      "seller": {
-          "name": "KeeRa Innovations",
-          "address": "112-A, 3rd Ave, W Block, Anna Nagar, Chennai, Tamil Nadu 600042",
-          "gstin": "12-3456789"
-      },
-      "description": "Annual software license renewal.",
-      "lineItems": [{ "name": "Software License", "quantity": 1, "price": 45000, "hsn": "997331" }],
-      "amount": 45000.00,
-      "status": "Paid",
-      "date": "2024-05-15",
-      "dueDate": "2024-06-14"
+      "id": "PO-001",
+      "vendor": "Office Supplies Ltd.",
+      "amount": 250.00,
+      "status": "Approved",
+      "date": "2024-05-10"
     },
     {
-      "id": "INV-2024-002",
-      "customer": "Global Connect",
-      "email": "support@globalconnect.net",
-       "phone": "+44 20 7946 0958",
-      "customerAddress": "456 Business Hub, London, EC1Y 8SY, UK",
-      "gstin": "27AAGCB2489F1Z5",
-      "seller": {
-          "name": "KeeRa Innovations",
-          "address": "112-A, 3rd Ave, W Block, Anna Nagar, Chennai, Tamil Nadu 600042",
-          "gstin": "12-3456789"
-      },
-      "description": "Consulting services rendered for Q4.",
-      "lineItems": [{ "name": "Consulting", "quantity": 50, "price": 250.01, "hsn": "998314" }],
-      "amount": 12500.50,
+      "id": "PO-002",
+      "vendor": "Cloud Services Inc.",
+      "amount": 1200.00,
       "status": "Pending",
-      "date": "2024-05-20",
-      "dueDate": "2024-06-19"
-    },
-    {
-      "id": "INV-2024-003",
-      "customer": "Innovate LLC",
-      "email": "hello@innovatellc.dev",
-      "phone": "+1-310-555-0182",
-      "customerAddress": "789 Innovation Drive, Los Angeles, CA 90210",
-      "gstin": "33AACCT4865L1Z8",
-       "seller": {
-          "name": "KeeRa Innovations",
-          "address": "112-A, 3rd Ave, W Block, Anna Nagar, Chennai, Tamil Nadu 600042",
-          "gstin": "12-3456789"
-      },
-      "description": "Hardware warranty included.",
-      "lineItems": [{ "name": "Server Rack", "quantity": 2, "price": 3900, "hsn": "847150" }],
-      "amount": 7800.00,
-      "status": "Overdue",
-      "date": "2024-04-10",
-      "dueDate": "2024-05-10"
+      "date": "2024-05-22"
     }
 ];
-
-export const purchaseOrders: PurchaseOrder[] = [];
 
 export const quotations: Quotation[] = [
     {

@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MoreHorizontal } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -42,6 +43,10 @@ import { formatCurrency } from '@/lib/utils';
 import { InvoiceUploadButton } from '@/components/invoice-upload-button';
 import { CreateInvoiceDialog } from '@/components/create-invoice-dialog';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
+import { useToast } from '@/hooks/use-toast';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' | 'outline' } = {
   Paid: 'default',
@@ -55,9 +60,30 @@ const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' | 
 
 export default function InvoicesPage() {
   const router = useRouter();
-  const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
+  const { toast } = useToast();
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [invoiceToDelete, setInvoiceToDelete] = useState<string | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+
+  useEffect(() => {
+    fetchInvoices();
+  }, []);
+
+  const fetchInvoices = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/invoices`);
+      if (Array.isArray(response.data)) {
+        setInvoices(response.data);
+      } else {
+        setInvoices([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch invoices:', error);
+      toast({ title: 'Error', description: 'Could not fetch invoices.', variant: 'destructive' });
+      setInvoices([]); // Set to empty array on error
+    }
+  };
+
 
   const handleInvoiceCreate = (newInvoice: Invoice) => {
     setInvoices((prevInvoices) => [newInvoice, ...prevInvoices]);
@@ -127,46 +153,54 @@ export default function InvoicesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {invoices.map((invoice) => (
-                    <TableRow key={invoice.id}>
-                      <TableCell className="font-medium">{invoice.id}</TableCell>
-                      <TableCell>{invoice.customer}</TableCell>
-                      <TableCell>
-                        <Badge variant={statusVariant[invoice.status] || 'secondary'}>
-                          {invoice.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {formatCurrency(invoice.amount)}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              aria-haspopup="true"
-                              size="icon"
-                              variant="ghost"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Toggle menu</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem>View</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => openEditPage(invoice)}>Edit</DropdownMenuItem>
-                            <DropdownMenuItem>Download</DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() => setInvoiceToDelete(invoice.id)}
-                            >
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                  {invoices.length > 0 ? (
+                    invoices.map((invoice) => (
+                      <TableRow key={invoice.id}>
+                        <TableCell className="font-medium">{invoice.id}</TableCell>
+                        <TableCell>{invoice.customer}</TableCell>
+                        <TableCell>
+                          <Badge variant={statusVariant[invoice.status] || 'secondary'}>
+                            {invoice.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {formatCurrency(invoice.amount)}
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                aria-haspopup="true"
+                                size="icon"
+                                variant="ghost"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Toggle menu</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem>View</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => openEditPage(invoice)}>Edit</DropdownMenuItem>
+                              <DropdownMenuItem>Download</DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onClick={() => setInvoiceToDelete(invoice.id)}
+                              >
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center h-24">
+                        No invoices found.
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
