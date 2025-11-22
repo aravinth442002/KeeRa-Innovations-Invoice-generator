@@ -47,6 +47,10 @@ const CompanySchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
+    branch:{
+        type: String,
+        trim: true,
+    },
     accountNumber: {
         type: String,
         trim: true,

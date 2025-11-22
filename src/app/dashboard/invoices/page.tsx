@@ -113,6 +113,7 @@ export default function InvoicesPage() {
   };
   
   const openEditPage = (invoice: Invoice) => {
+    console.log("===========>>>>", invoice);
     router.push(`/dashboard/invoices/new?id=${invoice.id}`);
   };
 

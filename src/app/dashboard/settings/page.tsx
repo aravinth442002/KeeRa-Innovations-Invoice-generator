@@ -39,6 +39,7 @@ type Company = {
   companySealUrl: string;
   taxId: string;
   bankName: string;
+  branch: String;
   accountNumber: string;
   ifsc: string;
   upiId: string;
@@ -239,6 +240,10 @@ export default function SettingsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="bank-name">Name</Label>
                   <Input id="bank-name" value={company.bankName || ''} onChange={(e) => handleInputChange('bankName', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="branch">Branch</Label>
+                  <Input id="branch" value={company.branch || ''} onChange={(e) => handleInputChange('branch', e.target.value)} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="account-number">Account Number</Label>

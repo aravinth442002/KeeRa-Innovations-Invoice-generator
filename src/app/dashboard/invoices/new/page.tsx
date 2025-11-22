@@ -132,7 +132,7 @@ function NewInvoiceForm() {
             accountNumber: company.accountNumber,
             ifsc: company.ifsc,
             upiId: company.upiId,
-            branch: '', 
+            branch: company.branch, 
           },
           companySealUrl: company.companySealUrl
         });
