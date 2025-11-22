@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MoreHorizontal } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -37,9 +38,14 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { DashboardHeader } from '@/components/dashboard-header';
-import { purchaseOrders as initialPurchaseOrders, type PurchaseOrder } from '@/lib/data';
+import { type PurchaseOrder } from '@/lib/data';
 import { formatCurrency } from '@/lib/utils';
 import { CreatePurchaseOrderDialog } from '@/components/create-purchase-order-dialog';
+import axios from 'axios';
+import { useToast } from '@/hooks/use-toast';
+
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
   Approved: 'default',
@@ -48,27 +54,40 @@ const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } 
 };
 
 export default function PurchaseOrdersPage() {
-  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>(initialPurchaseOrders);
-  const [poToDelete, setPoToDelete] = useState<string | null>(null);
+  const { toast } = useToast();
+  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
+  const [poToDelete, setPoToDelete] = useState<PurchaseOrder | null>(null);
   const [poToEdit, setPoToEdit] = useState<PurchaseOrder | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
+  // You would fetch real data here
+  useEffect(() => {
+    // For now, we use the initial mock data, but you can replace this with an API call.
+    // fetchPurchaseOrders();
+  }, []);
+
   const handlePurchaseOrderCreate = (newPurchaseOrder: PurchaseOrder) => {
+    // This should be an API call
     setPurchaseOrders((prev) => [newPurchaseOrder, ...prev]);
+    toast({ title: 'Success', description: 'Purchase order created.' });
   };
 
   const handlePurchaseOrderUpdate = (updatedPo: PurchaseOrder) => {
+     // This should be an API call
     setPurchaseOrders((prev) =>
       prev.map((po) => (po.id === updatedPo.id ? updatedPo : po))
     );
     setPoToEdit(null);
+    toast({ title: 'Success', description: 'Purchase order updated.' });
   }
 
   const handleDeleteConfirm = () => {
     if (poToDelete) {
+      // This should be an API call
       setPurchaseOrders((prev) =>
-        prev.filter((po) => po.id !== poToDelete)
+        prev.filter((po) => po.id !== poToDelete.id)
       );
+      toast({ title: 'Success', description: 'Purchase order deleted.' });
       setPoToDelete(null);
     }
   };
@@ -153,7 +172,7 @@ export default function PurchaseOrdersPage() {
                             <DropdownMenuItem>Download</DropdownMenuItem>
                             <DropdownMenuItem
                               className="text-destructive"
-                              onClick={() => setPoToDelete(po.id)}
+                              onClick={() => setPoToDelete(po)}
                             >
                               Delete
                             </DropdownMenuItem>

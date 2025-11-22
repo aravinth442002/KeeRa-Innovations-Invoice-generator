@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -24,7 +25,7 @@ import {
 import type { Quotation } from '@/lib/data';
 
 type CreateQuotationDialogProps = {
-  onQuotationCreate: (quotation: Quotation) => void;
+  onQuotationCreate: (quotation: Omit<Quotation, '_id'>) => void;
   onQuotationUpdate: (quotation: Quotation) => void;
   quotationToEdit?: Quotation | null;
   open: boolean;
@@ -39,7 +40,6 @@ export function CreateQuotationDialog({
   onOpenChange,
 }: CreateQuotationDialogProps) {
   const [customer, setCustomer] = useState('');
-  const [quotationId, setQuotationId] = useState('');
   const [amount, setAmount] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [status, setStatus] = useState<'Sent' | 'Accepted' | 'Expired'>('Sent');
@@ -49,34 +49,31 @@ export function CreateQuotationDialog({
   useEffect(() => {
     if (isEditing && quotationToEdit) {
       setCustomer(quotationToEdit.customer);
-      setQuotationId(quotationToEdit.id);
       setAmount(String(quotationToEdit.amount));
-      setExpiryDate(quotationToEdit.expiryDate);
+      setExpiryDate(new Date(quotationToEdit.expiryDate).toISOString().split('T')[0]);
       setStatus(quotationToEdit.status);
     } else {
       resetForm();
     }
-  }, [quotationToEdit, isEditing]);
+  }, [quotationToEdit, isEditing, open]);
 
   const resetForm = () => {
     setCustomer('');
-    setQuotationId('');
     setAmount('');
     setExpiryDate('');
     setStatus('Sent');
   };
 
   const handleSave = () => {
-    if (customer && quotationId && amount && expiryDate) {
+    if (customer && amount && expiryDate) {
       const quotationData = {
-        id: quotationId,
         customer,
         amount: parseFloat(amount),
         status,
         expiryDate,
       };
 
-      if (isEditing) {
+      if (isEditing && quotationToEdit) {
         onQuotationUpdate({ ...quotationToEdit, ...quotationData });
       } else {
         onQuotationCreate(quotationData);
@@ -114,19 +111,15 @@ export function CreateQuotationDialog({
           </div>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="grid gap-3">
-              <Label htmlFor="quotation-id">Quotation ID</Label>
-              <Input id="quotation-id" type="text" placeholder="QUO-005" value={quotationId} onChange={(e) => setQuotationId(e.target.value)} />
-            </div>
-            <div className="grid gap-3">
               <Label htmlFor="amount">Amount</Label>
               <Input id="amount" type="number" placeholder="2500.00" value={amount} onChange={(e) => setAmount(e.target.value)} />
             </div>
-          </div>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="grid gap-3">
+             <div className="grid gap-3">
               <Label htmlFor="expiry-date">Expiry Date</Label>
               <Input id="expiry-date" type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} />
             </div>
+          </div>
+          <div className="grid grid-cols-1">
             <div className="grid gap-3">
               <Label htmlFor="status">Status</Label>
               <Select value={status} onValueChange={(value: 'Sent' | 'Accepted' | 'Expired') => setStatus(value)}>

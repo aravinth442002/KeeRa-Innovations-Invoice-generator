@@ -42,6 +42,7 @@ export type Invoice = {
 };
 
 export type PurchaseOrder = {
+  _id?: string;
   id: string;
   vendor: string;
   amount: number;
@@ -50,7 +51,7 @@ export type PurchaseOrder = {
 };
 
 export type Quotation = {
-  id: string;
+  _id: string;
   customer: string;
   amount: number;
   status: 'Sent' | 'Accepted' | 'Expired';
@@ -107,29 +108,7 @@ export const purchaseOrders: PurchaseOrder[] = [
     }
 ];
 
-export const quotations: Quotation[] = [
-    {
-      "id": "QUO-2024-001",
-      "customer": "Innovate LLC",
-      "amount": 15000.00,
-      "status": "Sent",
-      "expiryDate": "2024-06-30"
-    },
-    {
-      "id": "QUO-2024-002",
-      "customer": "Tech Solutions Inc.",
-      "amount": 88000.00,
-      "status": "Accepted",
-      "expiryDate": "2024-07-15"
-    },
-    {
-      "id": "QUO-2024-003",
-      "customer": "Global Connect",
-      "amount": 25000.00,
-      "status": "Expired",
-      "expiryDate": "2024-05-31"
-    }
-];
+export const quotations: Quotation[] = [];
 
 export const clients: Client[] = [];
 

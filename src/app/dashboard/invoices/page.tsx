@@ -38,7 +38,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { DashboardHeader } from '@/components/dashboard-header';
-import { invoices as initialInvoices, type Invoice } from '@/lib/data';
+import { type Invoice } from '@/lib/data';
 import { formatCurrency } from '@/lib/utils';
 import { InvoiceUploadButton } from '@/components/invoice-upload-button';
 import { CreateInvoiceDialog } from '@/components/create-invoice-dialog';
@@ -97,12 +97,18 @@ export default function InvoicesPage() {
     );
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (invoiceToDelete) {
-      setInvoices((prevInvoices) =>
-        prevInvoices.filter((invoice) => invoice.id !== invoiceToDelete)
-      );
-      setInvoiceToDelete(null);
+      try {
+        await axios.delete(`${API_URL}/invoices/${invoiceToDelete}`);
+        toast({ title: 'Success', description: 'Invoice deleted successfully.' });
+        fetchInvoices();
+      } catch (error) {
+        console.error('Failed to delete invoice:', error);
+        toast({ title: 'Error', description: 'Could not delete invoice.', variant: 'destructive' });
+      } finally {
+        setInvoiceToDelete(null);
+      }
     }
   };
   

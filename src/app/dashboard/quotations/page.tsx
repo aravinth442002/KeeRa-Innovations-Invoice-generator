@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MoreHorizontal } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -37,9 +38,13 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { DashboardHeader } from '@/components/dashboard-header';
-import { quotations as initialQuotations, type Quotation } from '@/lib/data';
+import { type Quotation } from '@/lib/data';
 import { formatCurrency } from '@/lib/utils';
 import { CreateQuotationDialog } from '@/components/create-quotation-dialog';
+import axios from 'axios';
+import { useToast } from '@/hooks/use-toast';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
   Accepted: 'default',
@@ -48,27 +53,59 @@ const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } 
 };
 
 export default function QuotationsPage() {
-  const [quotations, setQuotations] = useState<Quotation[]>(initialQuotations);
-  const [quotationToDelete, setQuotationToDelete] = useState<string | null>(null);
+  const { toast } = useToast();
+  const [quotations, setQuotations] = useState<Quotation[]>([]);
+  const [quotationToDelete, setQuotationToDelete] = useState<Quotation | null>(null);
   const [quotationToEdit, setQuotationToEdit] = useState<Quotation | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
-  const handleQuotationCreate = (newQuotation: Quotation) => {
-    setQuotations((prev) => [newQuotation, ...prev]);
+  useEffect(() => {
+    fetchQuotations();
+  }, []);
+
+  const fetchQuotations = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/quotations`);
+      setQuotations(response.data);
+    } catch (error) {
+      console.error('Failed to fetch quotations:', error);
+      toast({ title: 'Error', description: 'Could not fetch quotations.', variant: 'destructive' });
+    }
+  };
+
+  const handleQuotationCreate = async (newQuotation: Omit<Quotation, '_id'>) => {
+    try {
+      await axios.post(`${API_URL}/quotations`, newQuotation);
+      fetchQuotations();
+      toast({ title: 'Success', description: 'Quotation created successfully.' });
+    } catch (error) {
+      console.error('Failed to create quotation:', error);
+      toast({ title: 'Error', description: 'Could not create quotation.', variant: 'destructive' });
+    }
   };
   
-  const handleQuotationUpdate = (updatedQuotation: Quotation) => {
-    setQuotations((prev) =>
-      prev.map((q) => (q.id === updatedQuotation.id ? updatedQuotation : q))
-    );
+  const handleQuotationUpdate = async (updatedQuotation: Quotation) => {
+    try {
+      await axios.put(`${API_URL}/quotations/${updatedQuotation._id}`, updatedQuotation);
+      fetchQuotations();
+      toast({ title: 'Success', description: 'Quotation updated successfully.' });
+    } catch (error) {
+      console.error('Failed to update quotation:', error);
+      toast({ title: 'Error', description: 'Could not update quotation.', variant: 'destructive' });
+    }
     setQuotationToEdit(null);
   }
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (quotationToDelete) {
-      setQuotations((prev) =>
-        prev.filter((quote) => quote.id !== quotationToDelete)
-      );
+      try {
+        await axios.delete(`${API_URL}/quotations/${quotationToDelete._id}`);
+        fetchQuotations();
+        toast({ title: 'Success', description: 'Quotation deleted successfully.' });
+      } catch (error) {
+        console.error('Failed to delete quotation:', error);
+        toast({ title: 'Error', description: 'Could not delete quotation.', variant: 'destructive' });
+      }
       setQuotationToDelete(null);
     }
   };
@@ -124,8 +161,8 @@ export default function QuotationsPage() {
                 </TableHeader>
                 <TableBody>
                   {quotations.map((quote) => (
-                    <TableRow key={quote.id}>
-                      <TableCell className="font-medium">{quote.id}</TableCell>
+                    <TableRow key={quote._id}>
+                      <TableCell className="font-medium">{quote._id}</TableCell>
                       <TableCell>{quote.customer}</TableCell>
                       <TableCell>
                         <Badge variant={statusVariant[quote.status]}>
@@ -155,7 +192,7 @@ export default function QuotationsPage() {
                             <DropdownMenuItem>Download</DropdownMenuItem>
                             <DropdownMenuItem
                               className="text-destructive"
-                              onClick={() => setQuotationToDelete(quote.id)}
+                              onClick={() => setQuotationToDelete(quote)}
                             >
                               Delete
                             </DropdownMenuItem>
