@@ -43,7 +43,7 @@ const CompanySchema = new mongoose.Schema({
     },
 
     // --- Bank Details ---
-    Name: {
+    bankName: {
         type: String,
         trim: true,
     },

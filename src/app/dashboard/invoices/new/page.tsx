@@ -128,7 +128,7 @@ function NewInvoiceForm() {
           phone: company.phoneNumber,
           email: company.email,
           bank: {
-            name: company.Name,
+            name: company.bankName,
             accountNumber: company.accountNumber,
             ifsc: company.ifsc,
             upiId: company.upiId,
@@ -136,11 +136,6 @@ function NewInvoiceForm() {
           },
           companySealUrl: company.companySealUrl
         });
-      } else {
-        const sellerResponse = await axios.get(`${API_URL}/sellers`);
-        if (sellerResponse.data.success && sellerResponse.data.count > 0) {
-          setSellerDetails(sellerResponse.data.data[0]);
-        }
       }
     } catch (error) {
       console.error('Failed to fetch seller details:', error);
