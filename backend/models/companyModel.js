@@ -41,10 +41,6 @@ const CompanySchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
-    vatNumber: {
-        type: String,
-        trim: true,
-    },
 
     // --- Bank Details ---
     bankName: {

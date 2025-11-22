@@ -38,7 +38,6 @@ type Company = {
   companySignatureUrl: string;
   companySealUrl: string;
   taxId: string;
-  vatNumber: string;
   bankName: string;
   accountNumber: string;
   ifsc: string;
@@ -221,10 +220,6 @@ export default function SettingsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="tax-id">Tax ID / GSTIN</Label>
                   <Input id="tax-id" value={company.taxId || ''} onChange={(e) => handleInputChange('taxId', e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="vat">VAT Number</Label>
-                  <Input id="vat" value={company.vatNumber || ''} onChange={(e) => handleInputChange('vatNumber', e.target.value)} />
                 </div>
               </CardContent>
               <CardFooter>
