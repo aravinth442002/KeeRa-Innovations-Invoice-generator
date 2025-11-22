@@ -280,9 +280,9 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
                         <div className="bg-primary text-white font-bold p-2 text-left -mt-px text-sm">For KeeRa Innovations</div>
                          <div className="h-[130px] text-center pt-4 border-x border-primary flex items-center justify-center">
                             {companySealUrl ? (
-                                <Image src={companySealUrl} alt="Company Seal" width={96} height={96} className="object-contain" unoptimized />
+                                <Image src={companySealUrl} alt="Company Seal" width={110} height={110} className="object-contain" unoptimized />
                             ) : (
-                                <div className="w-24 h-24 mx-auto border border-primary rounded-full flex items-center justify-center text-xs font-bold">
+                                <div className="w-28 h-28 mx-auto border border-primary rounded-full flex items-center justify-center text-xs font-bold">
                                     {/* Seal Placeholder */}
                                 </div>
                             )}
