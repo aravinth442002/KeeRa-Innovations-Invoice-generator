@@ -4,7 +4,7 @@
 
 import { Suspense, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -25,7 +25,6 @@ import { PlusCircle, Trash2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { InvoicePreview } from '@/components/invoice-preview';
 import {
-  invoices as initialInvoices,
   type Invoice,
   type LineItem,
   type Seller,
@@ -49,6 +48,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 function NewInvoiceForm() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const invoiceId = searchParams.get('id');
   const { toast } = useToast();
 
@@ -118,7 +118,6 @@ function NewInvoiceForm() {
 
   const fetchSellerDetails = async () => {
     try {
-      // First try fetching from companies, then from sellers as a fallback
       const companyResponse = await axios.get(`${API_URL}/companies`);
       if (companyResponse.data && companyResponse.data.length > 0) {
         const company = companyResponse.data[0];
@@ -133,7 +132,7 @@ function NewInvoiceForm() {
             accountNumber: company.accountNumber,
             ifsc: company.ifsc,
             upiId: company.upiId,
-            branch: '', // branch is not in company model
+            branch: '', 
           },
           companySealUrl: company.companySealUrl
         });
@@ -293,6 +292,27 @@ function NewInvoiceForm() {
     date: issueDate
   };
 
+  const handleSaveDraft = async () => {
+    const payload = {
+      ...currentInvoiceData,
+      status: 'Draft',
+    };
+    
+    try {
+      if (isEditing) {
+        await axios.put(`${API_URL}/invoices/${invoiceId}`, payload);
+        toast({ title: 'Success', description: 'Invoice draft updated successfully.' });
+      } else {
+        await axios.post(`${API_URL}/invoices`, payload);
+        toast({ title: 'Success', description: 'Invoice draft saved successfully.' });
+      }
+      router.push('/dashboard/invoices');
+    } catch (error) {
+      console.error('Failed to save draft:', error);
+      toast({ title: 'Error', description: 'Could not save invoice draft.', variant: 'destructive' });
+    }
+  };
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <DashboardHeader
@@ -303,7 +323,7 @@ function NewInvoiceForm() {
             <Button variant="outline" asChild>
                 <Link href="/dashboard/invoices">Cancel</Link>
             </Button>
-            <Button>Save Draft</Button>
+            <Button onClick={handleSaveDraft}>Save Draft</Button>
             <Button>Finalize & Send</Button>
         </div>
       </DashboardHeader>
