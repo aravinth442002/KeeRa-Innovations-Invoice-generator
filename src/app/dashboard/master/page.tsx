@@ -157,7 +157,7 @@ function SellerDetailsTab() {
         <CardContent className="space-y-4">
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="bank-name">Bank Name</Label>
+              <Label htmlFor="bank-name">Name</Label>
               <Input id="bank-name" value={seller.bank?.name || ''} onChange={e => handleBankChange('name', e.target.value)} placeholder="The name of your bank" />
             </div>
             <div className="space-y-2">
