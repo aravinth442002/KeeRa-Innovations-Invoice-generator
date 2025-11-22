@@ -59,7 +59,7 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
     }
     const payeeName = invoice.seller?.name || 'KeeRa Innovations';
     const upiData = `upi://pay?pa=${bankDetails.upiId}&pn=${encodeURIComponent(payeeName)}&am=${grandTotal.toFixed(2)}&cu=INR&tn=Invoice%20${invoice.id}`;
-    return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(upiData)}`;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${upiData}`;
   })();
 
   const companySealUrl = invoice.seller.companySealUrl ? `http://localhost:8080/${invoice.seller.companySealUrl}` : null;
@@ -278,16 +278,16 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
                             </tbody>
                         </table>
                         <div className="bg-primary text-white font-bold p-2 text-left -mt-px text-sm">For KeeRa Innovations</div>
-                         <div className="h-[130px] text-center pt-4 border-x border-primary flex items-center justify-center">
+                         <div className="h-[140px] text-center p-2 border-x border-primary flex items-center justify-center">
                             {companySealUrl ? (
-                                <Image src={companySealUrl} alt="Company Seal" width={120} height={120} className="object-contain" unoptimized />
+                                <Image src={companySealUrl} alt="Company Seal" width={130} height={130} className="object-contain" unoptimized />
                             ) : (
-                                <div className="w-28 h-28 mx-auto border border-primary rounded-full flex items-center justify-center text-xs font-bold">
+                                <div className="w-32 h-32 mx-auto border border-primary rounded-full flex items-center justify-center text-xs font-bold">
                                     {/* Seal Placeholder */}
                                 </div>
                             )}
                         </div>
-                        <table className="w-full border-collapse border border-primary mt-[23px]">
+                        <table className="w-full border-collapse border border-primary mt-[15px]">
                            <tbody>
                                <tr>
                                    <td className="text-center font-bold p-2 text-xs">
