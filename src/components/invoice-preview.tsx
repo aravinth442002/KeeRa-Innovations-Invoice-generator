@@ -59,7 +59,7 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
     }
     const payeeName = invoice.seller?.name || 'KeeRa Innovations';
     const upiData = `upi://pay?pa=${bankDetails.upiId}&pn=${encodeURIComponent(payeeName)}&am=${grandTotal.toFixed(2)}&cu=INR&tn=Invoice%20${invoice.id}`;
-    return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${upiData}`;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(upiData)}`;
   })();
 
   const companySealUrl = invoice.seller.companySealUrl ? `http://localhost:8080/${invoice.seller.companySealUrl}` : null;
