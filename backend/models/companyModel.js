@@ -55,7 +55,11 @@ const CompanySchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
-    swiftBicCode: {
+    ifsc: {
+        type: String,
+        trim: true,
+    },
+    upiId: {
         type: String,
         trim: true,
     },

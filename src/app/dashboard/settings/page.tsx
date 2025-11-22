@@ -41,7 +41,8 @@ type Company = {
   vatNumber: string;
   bankName: string;
   accountNumber: string;
-  swiftBicCode: string;
+  ifsc: string;
+  upiId: string;
 };
 
 export default function SettingsPage() {
@@ -241,7 +242,7 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="bank-name">Bank Name</Label>
+                  <Label htmlFor="bank-name">Name</Label>
                   <Input id="bank-name" value={company.bankName || ''} onChange={(e) => handleInputChange('bankName', e.target.value)} />
                 </div>
                 <div className="space-y-2">
@@ -249,8 +250,12 @@ export default function SettingsPage() {
                   <Input id="account-number" value={company.accountNumber || ''} onChange={(e) => handleInputChange('accountNumber', e.target.value)} />
                 </div>
                  <div className="space-y-2">
-                  <Label htmlFor="swift-code">SWIFT / BIC Code</Label>
-                  <Input id="swift-code" value={company.swiftBicCode || ''} onChange={(e) => handleInputChange('swiftBicCode', e.target.value)} />
+                  <Label htmlFor="ifsc-code">IFSC</Label>
+                  <Input id="ifsc-code" value={company.ifsc || ''} onChange={(e) => handleInputChange('ifsc', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="upi-id">UPI ID</Label>
+                  <Input id="upi-id" value={company.upiId || ''} onChange={(e) => handleInputChange('upiId', e.target.value)} />
                 </div>
               </CardContent>
               <CardFooter>
