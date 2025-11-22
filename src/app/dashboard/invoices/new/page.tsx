@@ -335,7 +335,7 @@ function NewInvoiceForm() {
                     </div>
                      <div className="space-y-1 w-24">
                         {index === 0 && <Label>Price</Label>}
-                        <Input type="number" placeholder="0.00" value={item.price} onChange={e => handleLineItemChange(index, 'price', parseFloat(e.target.value) || 0)} />
+                        <Input type="number" placeholder="0.00" value={item.price || ''} onChange={e => handleLineItemChange(index, 'price', parseFloat(e.target.value) || 0)} />
                     </div>
                      <div className="space-y-1 w-20">
                         {index === 0 && <Label>Quantity</Label>}
