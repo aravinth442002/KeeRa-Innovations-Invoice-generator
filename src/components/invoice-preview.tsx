@@ -57,7 +57,8 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
     if (!(bankDetails.upiId && grandTotal > 0)) {
       return '';
     }
-    const upiData = `upi://pay?pa=${bankDetails.upiId}&am=${grandTotal.toFixed(2)}&tn=Invoice-${invoice.id}&cu=INR`;
+    const payeeName = invoice.seller?.name || 'KeeRa Innovations';
+    const upiData = `upi://pay?pa=${bankDetails.upiId}&pn=${encodeURIComponent(payeeName)}&am=${grandTotal.toFixed(2)}&cu=INR&tn=Invoice-${invoice.id}`;
     return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(upiData)}`;
   })();
 
