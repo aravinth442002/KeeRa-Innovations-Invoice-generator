@@ -38,7 +38,7 @@ type Company = {
   companySignatureUrl: string;
   companySealUrl: string;
   taxId: string;
-  bankName: string;
+  name: string;
   accountNumber: string;
   ifsc: string;
   upiId: string;
@@ -238,7 +238,7 @@ export default function SettingsPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="bank-name">Name</Label>
-                  <Input id="bank-name" value={company.bankName || ''} onChange={(e) => handleInputChange('bankName', e.target.value)} />
+                  <Input id="bank-name" value={company.name || ''} onChange={(e) => handleInputChange('name', e.target.value)} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="account-number">Account Number</Label>

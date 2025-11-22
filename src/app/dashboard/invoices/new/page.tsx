@@ -128,7 +128,7 @@ function NewInvoiceForm() {
           phone: company.phoneNumber,
           email: company.email,
           bank: {
-            name: company.bankName,
+            name: company.Name,
             accountNumber: company.accountNumber,
             ifsc: company.ifsc,
             upiId: company.upiId,
