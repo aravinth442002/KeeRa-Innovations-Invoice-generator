@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { type } = require("os");
 
 const lineItemSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -19,24 +20,23 @@ const sellerSchema = new mongoose.Schema({
     accountNumber: String,
     ifsc: String,
     upiId: String
-  },
-  companySealUrl: String,
+  }
 });
 
 const invoiceSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
   customer: { type: String, required: true },
   email: { type: String, required: true },
-  phone: String,
-  customerAddress: String,
-  gstin: String,
+  phone: { type: String, required:true },
+  customerAddress: { type: String, required: true },
+  gstin: { type: String, required: true },
   seller: sellerSchema,
-  description: String,
+  description: { type: String},
   lineItems: [lineItemSchema],
   amount: { type: Number, required: true },
   status: { type: String, required: true },
   date: { type: Date, required: true },
-  dueDate: Date,
+  dueDate: { type: Date },
   issueDate: { type: Date, required: true },
 }, {
   timestamps: true,
