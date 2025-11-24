@@ -26,6 +26,9 @@ const CompanySchema = new mongoose.Schema({
         required: [true, 'Phone Number is required'],
         trim: true,
     },
+    companyLogoUrl: {
+        type: String,
+    },
     // These fields will store the file path/URL returned by Multer
     companySignatureUrl: {
         type: String,

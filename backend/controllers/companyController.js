@@ -7,6 +7,9 @@ exports.createCompany = async (req, res) => {
             ...req.body
         };
 
+        if (req.files && req.files['companyLogoUrl']) {
+            companyData.companyLogoUrl = req.files['companyLogoUrl'][0].path;
+        }
         if (req.files && req.files['companySignatureUrl']) {
             companyData.companySignatureUrl = req.files['companySignatureUrl'][0].path; 
         }
@@ -50,6 +53,9 @@ exports.updateCompany = async (req, res) => {
         const updateData = { ...req.body };
 
         if (req.files) {
+            if (req.files['companyLogoUrl']) {
+                updateData.companyLogoUrl = req.files['companyLogoUrl'][0].path;
+            }
             if (req.files['companySignatureUrl']) {
                 updateData.companySignatureUrl = req.files['companySignatureUrl'][0].path;
             }

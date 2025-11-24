@@ -177,9 +177,8 @@ export default function InvoicesPage() {
                     <TableHead>Invoice ID</TableHead>
                     <TableHead>Customer</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                    <TableHead>
-                      <span className="sr-only">Actions</span>
+                    <TableHead className="text-center">Amount</TableHead>
+                    <TableHead>Actions
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -194,7 +193,7 @@ export default function InvoicesPage() {
                             {invoice.status}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-center">
                           {formatCurrency(invoice.amount)}
                         </TableCell>
                         <TableCell>

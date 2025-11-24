@@ -62,6 +62,7 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
     return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(upiData)}`;
   })();
 
+  const companyLogoUrl = invoice.seller.companyLogoUrl ? `http://localhost:8080/${invoice.seller.companyLogoUrl}` : null;
   const companySealUrl = invoice.seller.companySealUrl ? `http://localhost:8080/${invoice.seller.companySealUrl}` : null;
   const companySignatureUrl = invoice.seller.companySignatureUrl ? `http://localhost:8080/${invoice.seller.companySignatureUrl}` : null;
 
@@ -75,13 +76,16 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
         <tbody>
           <tr>
             <td className="w-[45%] p-0 border-r border-primary align-top">
-              <div className="flex items-center p-2">
-                <div className="w-[70px] h-[70px] mr-2">
-                    {/* Placeholder for Logo */}
+              <div className="flex items-center p-2 min-h-[86px]">
+                <div className="w-[70px] h-[70px] mr-2 flex-shrink-0">
+                    {companyLogoUrl ? (
+                        <Image src={companyLogoUrl} alt="Company Logo" width={70} height={70} className="object-contain" unoptimized />
+                    ) : (
+                        <div className="w-full h-full bg-gray-200"></div>
+                    )}
                 </div>
                 <div>
-                   <h1 className="text-4xl font-bold m-0 leading-none bg-clip-text text-transparent bg-primary-gradient">KeeRa</h1>
-                   <p className="text-sm uppercase font-bold m-0 -mt-1 bg-clip-text text-transparent bg-primary-gradient">Innovations</p>
+                   <h1 className="text-xl font-bold m-0 leading-tight">{invoice.seller.name}</h1>
                 </div>
               </div>
               <table className="w-full border-t border-primary border-collapse">

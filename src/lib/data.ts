@@ -21,6 +21,7 @@ export type Seller = {
     ifsc: string;
     upiId: string;
   };
+  companyLogoUrl?: string;
   companySealUrl?: string;
 };
 
