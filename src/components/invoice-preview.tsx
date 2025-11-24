@@ -52,13 +52,6 @@ const DefaultTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] 
         "Please include the invoice number on your payment."
     ];
 
-    const qrCodeUrl = (() => {
-        if (!(bankDetails.upiId && grandTotal > 0)) return '';
-        const payeeName = invoice.seller?.name || 'KeeRa Innovations';
-        const upiData = `upi://pay?pa=${bankDetails.upiId}&pn=${encodeURIComponent(payeeName)}&am=${grandTotal.toFixed(2)}&cu=INR&tn=Invoice%20${invoice.id}`;
-        return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(upiData)}`;
-    })();
-
     const getFileUrl = (filePath?: string) => {
         if (!filePath) return null;
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
@@ -68,6 +61,14 @@ const DefaultTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] 
 
     const companyLogoUrl = getFileUrl(invoice.seller.companyLogoUrl);
     const companySealUrl = getFileUrl(invoice.seller.companySealUrl);
+    const companySignatureUrl = getFileUrl(invoice.seller.companySignatureUrl);
+
+    const qrCodeUrl = (() => {
+        if (!(bankDetails.upiId && grandTotal > 0)) return '';
+        const payeeName = invoice.seller?.name || 'KeeRa Innovations';
+        const upiData = `upi://pay?pa=${bankDetails.upiId}&pn=${encodeURIComponent(payeeName)}&am=${grandTotal.toFixed(2)}&cu=INR&tn=Invoice%20${invoice.id}`;
+        return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(upiData)}`;
+    })();
 
     return (
         <div className="bg-white text-black text-[10px] w-full min-h-[1123px] mx-auto my-0 p-6 font-sans border shadow-lg scale-[0.8] origin-top">
@@ -269,7 +270,7 @@ const DefaultTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] 
                                             <td className="text-right p-2 text-sm w-[50%]">{formatCurrency(grandTotal)}</td>
                                         </tr>
                                         <tr>
-                                            <td className="text-right font-bold p-2 border border-primary" colSpan={2}>(E & O.E.)</td>
+                                            <td className="text-right font-bold p-2 border border-primary" colSpan={2}>(E &amp; O.E.)</td>
                                         </tr>
                                         <tr>
                                             <td className="text-left font-bold text-xs p-2 border border-primary h-[30px]" colSpan={2}>
@@ -279,14 +280,9 @@ const DefaultTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] 
                                     </tbody>
                                 </table>
                                 <div className="bg-primary text-white font-bold p-2 text-left -mt-px text-sm">For {invoice.seller.name}</div>
-                                <div className="h-[140px] text-center p-2 border-x border-primary flex items-center justify-center">
-                                    {companySealUrl ? (
-                                        <Image src={companySealUrl} alt="Company Seal" width={140} height={140} className="object-contain" unoptimized />
-                                    ) : (
-                                        <div className="w-32 h-32 mx-auto border border-primary rounded-full flex items-center justify-center text-xs font-bold">
-                                            {/* Seal Placeholder */}
-                                        </div>
-                                    )}
+                                <div className="h-[140px] text-center p-2 border-x border-primary flex flex-col items-center justify-center">
+                                    {companySignatureUrl && <Image src={companySignatureUrl} alt="Company Signature" width={140} height={60} className="object-contain" unoptimized />}
+                                    {companySealUrl && <Image src={companySealUrl} alt="Company Seal" width={100} height={100} className="object-contain" unoptimized />}
                                 </div>
                                 <table className="w-full border-collapse border border-primary mt-[15px]">
                                 <tbody>
@@ -326,8 +322,16 @@ const ClassicTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] 
     const BASE_URL = API_URL.replace('/api', '');
     return `${BASE_URL}/${filePath}`;
   }
+  
+  const qrCodeUrl = (() => {
+    if (!(seller.bank?.upiId && grandTotal > 0)) return '';
+    const payeeName = seller?.name || 'KeeRa Innovations';
+    const upiData = `upi://pay?pa=${seller.bank.upiId}&pn=${encodeURIComponent(payeeName)}&am=${grandTotal.toFixed(2)}&cu=INR&tn=Invoice%20${id}`;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(upiData)}`;
+  })();
 
   const logoUrl = getFileUrl(seller.companyLogoUrl);
+  const sealUrl = getFileUrl(seller.companySealUrl);
 
   const customerAddressParts = customerAddress?.split(',').map(p => p.trim()) || [];
   const sellerAddressParts = seller?.address?.split(',').map(p => p.trim()) || [];
@@ -367,11 +371,11 @@ const ClassicTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] 
                 </p>
                 <p>
                   <span className="font-bold w-20 inline-block text-right">Date:</span>
-                  <span className="ml-2">{new Date(issueDate).toLocaleDateString() || '01/02/2025'}</span>
+                  <span className="ml-2">{new Date(issueDate || Date.now()).toLocaleDateString() }</span>
                 </p>
                 <p>
                   <span className="font-bold w-20 inline-block text-right">Due Date:</span>
-                  <span className="ml-2">{new Date(dueDate).toLocaleDateString() || '30/02/2025'}</span>
+                  <span className="ml-2">{dueDate ? new Date(dueDate).toLocaleDateString() : 'N/A'}</span>
                 </p>
               </div>
             </div>
@@ -383,9 +387,7 @@ const ClassicTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] 
             <div>
               <h3 className="text-lg font-bold text-gray-700 mb-2 border-b-2 border-purple-300 inline-block pb-1">Our Details</h3>
               <h4 className="text-base font-extrabold text-purple-700 mt-2">{seller.name || 'Keera Innovations'}</h4>
-              <p className="text-sm mt-1">{sellerAddressParts[0]}</p>
-              <p className="text-sm">{sellerAddressParts[1]}</p>
-              <p className="text-sm">{sellerAddressParts[2]}</p>
+              {sellerAddressParts.map((part, i) => <p key={i} className="text-sm">{part}</p>)}
               <p className="text-sm mt-2">📞 {seller.phone || '+91-951 461 9276'}</p>
               <p className="text-sm font-light mt-1">
                 <span className="font-semibold mr-1">GSTIN:</span> {seller.gstin || 'N/A'}
@@ -432,12 +434,20 @@ const ClassicTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] 
           <div className="flex justify-between mt-8">
             <div className="w-1/2 pr-10">
               <h3 className="text-sm font-bold mb-3 text-purple-700 border-b border-purple-300 pb-1">PAYMENT DETAILS</h3>
-              <div className="text-xs space-y-1 w-full p-3 bg-purple-200 rounded shadow-inner">
-                <p><span className="font-bold w-20 inline-block">A/C NAME:</span> {seller.bank?.accHolderName || ''}</p>
-                <p><span className="font-bold w-20 inline-block">BRANCH:</span> {seller.bank?.branch || ''}</p>
-                <p><span className="font-bold w-20 inline-block">ACC. NO:</span> {seller.bank?.accountNumber || ''}</p>
-                <p><span className="font-bold w-20 inline-block">IFSC:</span> {seller.bank?.ifsc || ''}</p>
-                <p className="mt-2 font-bold text-purple-700">UPI ID: {seller.bank?.upiId || ''}</p>
+              <div className="flex justify-between items-start">
+                  <div className="text-xs space-y-1 w-2/3 p-3 bg-purple-200 rounded shadow-inner">
+                    <p><span className="font-bold w-20 inline-block">A/C NAME:</span> {seller.bank?.accHolderName || ''}</p>
+                    <p><span className="font-bold w-20 inline-block">BRANCH:</span> {seller.bank?.branch || ''}</p>
+                    <p><span className="font-bold w-20 inline-block">ACC. NO:</span> {seller.bank?.accountNumber || ''}</p>
+                    <p><span className="font-bold w-20 inline-block">IFSC:</span> {seller.bank?.ifsc || ''}</p>
+                    <p className="mt-2 font-bold text-purple-700">UPI ID: {seller.bank?.upiId || ''}</p>
+                  </div>
+                  {qrCodeUrl && (
+                     <div className="w-1/3 flex flex-col items-center justify-center p-2 bg-white border border-purple-300 rounded shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                        <Image src={qrCodeUrl} alt="QR Code" width={80} height={80} unoptimized />
+                        <p className="mt-1 text-xs font-semibold text-gray-700">Scan for UPI</p>
+                    </div>
+                  )}
               </div>
               <h3 className="text-sm font-bold mb-2 mt-8 text-purple-700 border-b border-purple-300 pb-1">TERMS AND CONDITIONS</h3>
               <ul className="text-xs text-gray-800 leading-relaxed list-disc list-inside space-y-1 pl-2">
@@ -455,8 +465,8 @@ const ClassicTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] 
                 <TotalRow label="Amount Due" value={grandTotal} isGrandTotal={true} />
               </div>
               <div className="flex flex-col mt-8 pt-4 w-full items-end">
-                 {getFileUrl(seller.companySealUrl) ? (
-                    <Image src={getFileUrl(seller.companySealUrl)!} alt="Seal" width={128} height={128} className="mb-4" unoptimized/>
+                 {sealUrl ? (
+                    <Image src={sealUrl} alt="Seal" width={128} height={128} className="mb-4" unoptimized/>
                  ) : (
                     <div className="w-32 h-32 mb-4 flex items-center justify-center mr-16 border-4 border-purple-400 rounded-full bg-white shadow-lg">
                         <span className="text-sm font-bold text-gray-700 text-center uppercase tracking-wider">
@@ -692,9 +702,5 @@ export function InvoicePreview({ invoice, template }: InvoicePreviewProps) {
       return <DefaultTemplate invoice={invoice} />;
   }
 }
-
-    
-
-    
 
     
