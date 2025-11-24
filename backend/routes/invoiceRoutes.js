@@ -34,11 +34,16 @@ router.get('/:id/pdf', async (req, res) => {
         const gstAmount = subtotal * 0.18;
         const grandTotal = subtotal + gstAmount;
 
-        // Correctly construct absolute paths for local image files
-        const getFileUrl = (filePath) => {
+        const getFileAsBase64 = (filePath) => {
             if (!filePath) return null;
-            // Use file:// protocol for local paths when rendering with Puppeteer
-            return `file://${path.resolve(__dirname, '..', filePath)}`;
+            const absolutePath = path.resolve(__dirname, '..', filePath);
+            if (!fs.existsSync(absolutePath)) {
+                console.warn(`File not found: ${absolutePath}`);
+                return null;
+            }
+            const file = fs.readFileSync(absolutePath);
+            const mimeType = `image/${path.extname(absolutePath).substring(1)}`;
+            return `data:${mimeType};base64,${file.toString('base64')}`;
         };
         
         const data = {
@@ -57,7 +62,7 @@ router.get('/:id/pdf', async (req, res) => {
                 const upiData = `upi://pay?pa=${invoice.seller.bank.upiId}&pn=${encodeURIComponent(payeeName)}&am=${grandTotal.toFixed(2)}&cu=INR&tn=Invoice%20${invoice.id}`;
                 return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(upiData)}`;
             })(),
-            companySealUrl: getFileUrl(invoice.seller.companySealUrl),
+            companySealUrl: invoice.seller && invoice.seller.companySealUrl ? getFileAsBase64(invoice.seller.companySealUrl) : null,
             issueDate: new Date(invoice.issueDate).toLocaleDateString(),
             MOCK_TERMS: [
                 "Payment is due within 30 days.",
@@ -91,7 +96,7 @@ router.get('/:id/pdf', async (req, res) => {
         res.send(pdf);
     } catch (error) {
         console.error('Error generating PDF:', error);
-        res.status(500).send('Error generating PDF');
+        res.status(500).send(`Error generating PDF: ${error.message}`);
     }
 });
 
