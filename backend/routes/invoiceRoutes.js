@@ -34,6 +34,13 @@ router.get('/:id/pdf', async (req, res) => {
         const gstAmount = subtotal * 0.18;
         const grandTotal = subtotal + gstAmount;
 
+        // Correctly construct absolute paths for local image files
+        const getFileUrl = (filePath) => {
+            if (!filePath) return null;
+            // Use file:// protocol for local paths when rendering with Puppeteer
+            return `file://${path.resolve(__dirname, '..', filePath)}`;
+        };
+        
         const data = {
             ...invoice,
             subtotal,
@@ -50,7 +57,7 @@ router.get('/:id/pdf', async (req, res) => {
                 const upiData = `upi://pay?pa=${invoice.seller.bank.upiId}&pn=${encodeURIComponent(payeeName)}&am=${grandTotal.toFixed(2)}&cu=INR&tn=Invoice%20${invoice.id}`;
                 return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(upiData)}`;
             })(),
-            companySealUrl: invoice.seller.companySealUrl ? `http://localhost:8080/${invoice.seller.companySealUrl}` : null,
+            companySealUrl: getFileUrl(invoice.seller.companySealUrl),
             issueDate: new Date(invoice.issueDate).toLocaleDateString(),
             MOCK_TERMS: [
                 "Payment is due within 30 days.",
