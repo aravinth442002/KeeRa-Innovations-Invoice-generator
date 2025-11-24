@@ -287,7 +287,7 @@ function NewInvoiceForm() {
     date: issueDate
   };
 
-  const handleSaveDraft = async () => {
+  const handleSave = async () => {
     const payload = {
       ...currentInvoiceData,
       status: 'Draft',
@@ -318,7 +318,9 @@ function NewInvoiceForm() {
             <Button variant="outline" asChild>
                 <Link href="/dashboard/invoices">Cancel</Link>
             </Button>
-            <Button onClick={handleSaveDraft}>Save Draft</Button>
+            <Button onClick={handleSave}>
+              {isEditing ? 'Update Draft' : 'Save Draft'}
+            </Button>
             <Button>Finalize & Send</Button>
         </div>
       </DashboardHeader>
@@ -483,3 +485,5 @@ export default function NewInvoicePage() {
         </Suspense>
     )
 }
+
+    
