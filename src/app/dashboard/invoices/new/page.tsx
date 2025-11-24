@@ -59,7 +59,7 @@ function NewInvoiceForm() {
     phone: '',
     email: '',
     bank: {
-      name: '',
+      accountHoldername: '',
       branch: '',
       accountNumber: '',
       ifsc: '',
@@ -128,7 +128,7 @@ function NewInvoiceForm() {
           phone: company.phoneNumber,
           email: company.email,
           bank: {
-            name: company.bankName,
+            accHolderName: company.accHolderName,
             accountNumber: company.accountNumber,
             ifsc: company.ifsc,
             upiId: company.upiId,
