@@ -61,7 +61,9 @@ const DefaultTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] 
 
     const getFileUrl = (filePath?: string) => {
         if (!filePath) return null;
-        return `http://localhost:8080/${filePath}`;
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+        const BASE_URL = API_URL.replace('/api', '');
+        return `${BASE_URL}/${filePath}`;
     }
 
     const companyLogoUrl = getFileUrl(invoice.seller.companyLogoUrl);
@@ -313,14 +315,16 @@ const DefaultTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] 
 
 
 const ClassicTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] }) => {
-  const { seller, customer, lineItems, description, issueDate, id } = invoice;
+  const { seller, customer, customerAddress, lineItems, description, issueDate, id, dueDate, gstin } = invoice;
   const subtotal = lineItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.price || 0), 0);
   const gstAmount = subtotal * 0.18; // Assuming flat 18%
   const grandTotal = subtotal + gstAmount;
 
   const getFileUrl = (filePath?: string) => {
     if (!filePath) return null;
-    return `http://localhost:8080/${filePath}`;
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+    const BASE_URL = API_URL.replace('/api', '');
+    return `${BASE_URL}/${filePath}`;
   }
 
   const logoUrl = getFileUrl(seller.companyLogoUrl);
@@ -367,7 +371,7 @@ const ClassicTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] 
                 </p>
                 <p>
                   <span className="font-bold w-20 inline-block text-right">Due Date:</span>
-                  <span className="ml-2">{new Date(invoice.dueDate).toLocaleDateString() || '30/02/2025'}</span>
+                  <span className="ml-2">{new Date(dueDate).toLocaleDateString() || '30/02/2025'}</span>
                 </p>
               </div>
             </div>
@@ -392,7 +396,7 @@ const ClassicTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] 
               <h4 className="text-2xl font-bold text-purple-700 mt-2">{customer || 'N/A'}</h4>
               {customerAddressParts.map((part, i) => <p key={i} className="text-sm mt-1">{part}</p>)}
               <p className="text-sm font-light mt-1 text-gray-800">
-                <span className="font-semibold mr-1">GSTIN:</span> {invoice.gstin || 'N/A'}
+                <span className="font-semibold mr-1">GSTIN:</span> {gstin || 'N/A'}
               </p>
               <p className="text-sm pt-4 font-bold text-gray-800">
                 PROJECT: <span className="font-normal">{description || 'N/A'}</span>
@@ -488,11 +492,19 @@ const ModernTemplate = ({ invoice: inv }: { invoice: InvoicePreviewProps['invoic
 
     const getFileUrl = (filePath?: string) => {
         if (!filePath) return null;
-        return `http://localhost:8080/${filePath}`;
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+        const BASE_URL = API_URL.replace('/api', '');
+        return `${BASE_URL}/${filePath}`;
     }
 
     const companyLogoUrl = getFileUrl(inv.seller.companyLogoUrl);
     const companySealUrl = getFileUrl(inv.seller.companySealUrl);
+    const qrCodeUrl = (() => {
+        if (!(bankDetails.upiId && grandTotal > 0)) return null;
+        const payeeName = inv.seller?.name || 'KeeRa Innovations';
+        const upiData = `upi://pay?pa=${bankDetails.upiId}&pn=${encodeURIComponent(payeeName)}&am=${grandTotal.toFixed(2)}&cu=INR&tn=Invoice%20${inv.id}`;
+        return `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(upiData)}`;
+    })();
 
     return (
      <div className="invoice-container max-w-[800px] mx-auto shadow-2xl bg-white min-h-screen font-sans scale-[0.8] origin-top">
@@ -591,6 +603,16 @@ const ModernTemplate = ({ invoice: inv }: { invoice: InvoicePreviewProps['invoic
                     <p>IFSC: <span className="font-extrabold text-gray-900">{bankDetails.ifsc}</span></p>
                     <p>UPI ID: <span className="font-extrabold text-gray-900">{bankDetails.upiId}</span></p>
                   </div>
+                   <div className="w-1/3 flex flex-col items-center">
+                    {qrCodeUrl ? (
+                      <Image src={qrCodeUrl} alt="QR Code" width={80} height={80} unoptimized />
+                    ) : (
+                      <div className="w-20 h-20 border border-fuchsia-400 flex items-center justify-center text-[8px] text-fuchsia-600 bg-white">
+                        [QR CODE]
+                      </div>
+                    )}
+                    <p className="text-[10px] px-5 mt-1 text-gray-700 font-semibold">Scan to Pay</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -670,6 +692,8 @@ export function InvoicePreview({ invoice, template }: InvoicePreviewProps) {
       return <DefaultTemplate invoice={invoice} />;
   }
 }
+
+    
 
     
 
