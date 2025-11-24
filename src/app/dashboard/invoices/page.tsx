@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -120,19 +121,19 @@ export default function InvoicesPage() {
     setIsCreateDialogOpen(open);
   }
 
-  const viewPdf = (invoiceId: string) => {
-    window.open(`${API_URL}/invoices/${invoiceId}/pdf`, '_blank');
+  const viewPdf = (invoiceId: string, template: string = 'default') => {
+    window.open(`${API_URL}/invoices/${invoiceId}/pdf?template=${template}`, '_blank');
   };
 
-  const downloadPdf = async (invoiceId: string) => {
+  const downloadPdf = async (invoiceId: string, template: string = 'default') => {
     try {
-      const response = await axios.get(`${API_URL}/invoices/${invoiceId}/pdf`, {
+      const response = await axios.get(`${API_URL}/invoices/${invoiceId}/pdf?template=${template}`, {
         responseType: 'blob',
       });
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `invoice-${invoiceId}.pdf`);
+      link.setAttribute('download', `invoice-${invoiceId}-${template}.pdf`);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -211,10 +212,16 @@ export default function InvoicesPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem onClick={() => viewPdf(invoice.id)}>View</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => viewPdf(invoice.id, 'default')}>View Default</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => viewPdf(invoice.id, 'classic')}>View Classic</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => viewPdf(invoice.id, 'modern')}>View Modern</DropdownMenuItem>
                               <DropdownMenuItem onClick={() => openEditPage(invoice)}>Edit</DropdownMenuItem>
                                {invoice.status === 'Received' && (
-                                <DropdownMenuItem onClick={() => downloadPdf(invoice.id)}>Download</DropdownMenuItem>
+                                <>
+                                  <DropdownMenuItem onClick={() => downloadPdf(invoice.id, 'default')}>Download Default</DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => downloadPdf(invoice.id, 'classic')}>Download Classic</DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => downloadPdf(invoice.id, 'modern')}>Download Modern</DropdownMenuItem>
+                                </>
                               )}
                               <DropdownMenuItem
                                 className="text-destructive"

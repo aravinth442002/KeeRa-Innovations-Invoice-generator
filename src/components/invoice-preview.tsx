@@ -12,6 +12,7 @@ type InvoicePreviewProps = {
     status: 'Draft' | 'Processing' | 'Received';
     date: string;
   };
+  template: string;
 };
 
 // Helper to convert number to words. This is a simplified version.
@@ -33,288 +34,320 @@ function numberToWords(num: number): string {
     return str.trim().split(/\s+/).map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ') + ' Only';
 }
 
+const DefaultTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] }) => {
+    const subtotal = invoice.lineItems.reduce(
+        (acc, item) => acc + (item.quantity || 0) * (item.price || 0),
+        0
+    );
+    const gstAmount = subtotal * 0.18; // Assuming 18% GST
+    const grandTotal = subtotal + gstAmount;
 
-export function InvoicePreview({ invoice }: InvoicePreviewProps) {
-    console.log(invoice);
-  const subtotal = invoice.lineItems.reduce(
-    (acc, item) => acc + (item.quantity || 0) * (item.price || 0),
-    0
-  );
-  const gstAmount = subtotal * 0.18; // Assuming 18% GST
-  const grandTotal = subtotal + gstAmount;
+    const totalQty = invoice.lineItems.reduce((acc, item) => acc + (item.quantity || 0), 0);
+    const totalInWords = numberToWords(grandTotal);
+    const bankDetails = invoice.seller?.bank || {};
+    
+    const MOCK_TERMS = [
+        "Payment is due within 30 days.",
+        "A late fee of 1.5% will be charged on overdue invoices.",
+        "Please include the invoice number on your payment."
+    ];
 
-  const totalQty = invoice.lineItems.reduce((acc, item) => acc + (item.quantity || 0), 0);
-  const totalInWords = numberToWords(grandTotal);
+    const qrCodeUrl = (() => {
+        if (!(bankDetails.upiId && grandTotal > 0)) return '';
+        const payeeName = invoice.seller?.name || 'KeeRa Innovations';
+        const upiData = `upi://pay?pa=${bankDetails.upiId}&pn=${encodeURIComponent(payeeName)}&am=${grandTotal.toFixed(2)}&cu=INR&tn=Invoice%20${invoice.id}`;
+        return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(upiData)}`;
+    })();
 
-  const bankDetails = invoice.seller?.bank || {};
-  
-  const MOCK_TERMS = [
-      "Payment is due within 30 days.",
-      "A late fee of 1.5% will be charged on overdue invoices.",
-      "Please include the invoice number on your payment."
-  ];
-
-  const qrCodeUrl = (() => {
-    if (!(bankDetails.upiId && grandTotal > 0)) {
-      return '';
+    const getFileUrl = (filePath?: string) => {
+        if (!filePath) return null;
+        return `http://localhost:8080/${filePath}`;
     }
-    const payeeName = invoice.seller?.name || 'KeeRa Innovations';
-    const upiData = `upi://pay?pa=${bankDetails.upiId}&pn=${encodeURIComponent(payeeName)}&am=${grandTotal.toFixed(2)}&cu=INR&tn=Invoice%20${invoice.id}`;
-    return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(upiData)}`;
-  })();
 
-  const companyLogoUrl = invoice.seller.companyLogoUrl ? `http://localhost:8080/${invoice.seller.companyLogoUrl}` : null;
-  const companySealUrl = invoice.seller.companySealUrl ? `http://localhost:8080/${invoice.seller.companySealUrl}` : null;
-  const companySignatureUrl = invoice.seller.companySignatureUrl ? `http://localhost:8080/${invoice.seller.companySignatureUrl}` : null;
+    const companyLogoUrl = getFileUrl(invoice.seller.companyLogoUrl);
+    const companySealUrl = getFileUrl(invoice.seller.companySealUrl);
 
-  return (
-    <div className="bg-white text-black text-[10px] w-[794px] min-h-[1123px] mx-auto my-0 p-6 font-sans border shadow-lg">
-      <div className="bg-primary text-white font-bold text-center text-4xl py-2" style={{height: '48px', lineHeight: '32px'}}>
-        TAX INVOICE
-      </div>
-      
-      <table className="w-full border-collapse border border-primary -mt-px">
-        <tbody>
-          <tr>
-            <td className="w-[45%] p-0 border-r border-primary align-top">
-              <div className="flex items-center p-2 min-h-[86px]">
-                <div className="w-[70px] h-[70px] mr-2 flex-shrink-0">
-                    {companyLogoUrl ? (
-                        <Image src={companyLogoUrl} alt="Company Logo" width={70} height={70} className="object-contain" unoptimized />
-                    ) : (
-                        <div className="w-full h-full bg-gray-200"></div>
-                    )}
-                </div>
-                <div>
-                   <h1 className="text-xl font-bold m-0 leading-tight">{invoice.seller.name}</h1>
-                </div>
-              </div>
-              <table className="w-full border-t border-primary border-collapse">
-                  <tbody>
-                      <tr><td className="p-2 text-sm leading-normal">{invoice.seller.address}</td></tr>
-                  </tbody>
-              </table>
-              <table className="w-full border-t border-primary border-collapse">
-                  <tbody>
-                      <tr>
-                          <td className="bg-primary/20 font-bold p-2 border-r border-primary w-[30%] text-xs">GSTIN</td>
-                          <td className="p-2 text-xs">{invoice.seller.gstin}</td>
-                      </tr>
-                      <tr>
-                          <td className="bg-primary/20 font-bold p-2 border-r border-primary text-xs">Phone</td>
-                          <td className="p-2 text-xs">{invoice.seller.phone}</td>
-                      </tr>
-                      <tr>
-                          <td className="bg-primary/20 font-bold p-2 border-r border-primary text-xs">Email</td>
-                          <td className="p-2 text-xs">{invoice.seller.email}</td>
-                      </tr>
-                  </tbody>
-              </table>
-            </td>
-
-            <td className="w-[55%] p-0 align-top">
-              <div className="bg-primary/20 font-bold text-center py-1 text-base">Customer Detail</div>
-              <table className="w-full border-t border-primary border-collapse">
+    return (
+        <div className="bg-white text-black text-[10px] w-full min-h-[1123px] mx-auto my-0 p-6 font-sans border shadow-lg scale-[0.8] origin-top">
+            <div className="bg-primary text-white font-bold text-center text-4xl py-2" style={{height: '48px', lineHeight: '32px'}}>
+                TAX INVOICE
+            </div>
+            
+            <table className="w-full border-collapse border border-primary -mt-px">
                 <tbody>
-                    <tr>
-                        <td className="bg-primary/20 font-bold p-2 w-[25%] text-xs">Name</td>
-                        <td className="p-2 text-xs">{invoice.customer || 'N/A'}</td>
-                    </tr>
-                    <tr>
-                        <td className="bg-primary/20 font-bold p-2 text-xs">Address</td>
-                        <td className="p-2 text-xs leading-tight">{invoice.customerAddress || 'N/A'}</td>
-                    </tr>
-                     <tr>
-                        <td className="bg-primary/20 font-bold p-2 text-xs">Phone</td>
-                        <td className="p-2 text-xs">{invoice.phone || '-'}</td>
-                    </tr>
-                    <tr>
-                        <td className="bg-primary/20 font-bold p-2 text-xs">GSTIN</td>
-                        <td className="p-2 text-xs">{invoice.gstin || 'N/A'}</td>
-                    </tr>
-                    <tr>
-                        <td className="bg-primary/20 font-bold p-2 text-xs">Invoice No.</td>
-                        <td className="p-2 text-xs">{invoice.id}</td>
-                    </tr>
-                    <tr>
-                        <td className="bg-primary/20 font-bold p-2 text-xs">Invoice Date</td>
-                        <td className="p-2 text-xs">{new Date(invoice.issueDate || Date.now()).toLocaleDateString()}</td>
-                    </tr>
-                </tbody>
-              </table>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table className="w-full border-collapse border border-primary -mt-px">
-        <tbody>
-            <tr className="bg-primary/20">
-                <td className="font-bold p-2 border-r border-primary w-[13%] text-xs">Project Name</td>
-                <td className="p-2 text-xs">{invoice.description}</td>
-            </tr>
-        </tbody>
-      </table>
-
-      {/* ITEMS TABLE */}
-      <div className="mt-1">
-        <table className="w-full border-collapse border border-primary text-xs">
-            <thead>
-                <tr className="bg-primary text-white font-bold">
-                    <th className="p-2 text-left w-[8%] text-sm">Sr. No.</th>
-                    <th className="p-2 text-left w-[42%] text-sm">Name of Product / Service</th>
-                    <th className="p-2 text-center w-[10%] text-sm">Qty</th>
-                    <th className="p-2 text-right w-[20%] text-sm">Rate</th>
-                    <th className="p-2 text-right w-[20%] text-sm">Total (Excl. Tax)</th>
-                </tr>
-            </thead>
-            <tbody>
-                {invoice.lineItems.map((item, index) => (
-                    <tr key={index} style={{height: '32px'}}>
-                        <td className="border border-primary p-2 text-center text-sm">{index + 1}</td>
-                        <td className="border border-primary p-2 font-bold text-sm">{item.name}</td>
-                        <td className="border border-primary p-2 text-center text-sm">{item.quantity}</td>
-                        <td className="border border-primary p-2 text-right text-sm">{formatCurrency(item.price)}</td>
-                        <td className="border border-primary p-2 text-right text-sm">{formatCurrency(item.price * item.quantity)}</td>
-                    </tr>
-                ))}
-                {/* Filler rows */}
-                {Array.from({ length: Math.max(0, 7 - invoice.lineItems.length) }).map((_, i) => (
-                    <tr key={`filler-${i}`} style={{height: '32px'}}>
-                        <td className="border border-primary">&nbsp;</td>
-                        <td className="border border-primary">&nbsp;</td>
-                        <td className="border border-primary">&nbsp;</td>
-                        <td className="border border-primary">&nbsp;</td>
-                        <td className="border border-primary">&nbsp;</td>
-                    </tr>
-                ))}
-                <tr className="bg-primary/20 font-bold text-sm">
-                    <td colSpan={2} className="border border-primary p-2 text-right">Total</td>
-                    <td className="border border-primary p-2 text-center">{totalQty}</td>
-                    <td className="border border-primary p-2"></td>
-                    <td className="border border-primary p-2 text-right">{formatCurrency(subtotal)}</td>
-                </tr>
-            </tbody>
-        </table>
-      </div>
-
-       {/* FOOTER */}
-       <div className="mt-1">
-          <table className="w-full border-collapse border border-primary -mt-px text-xs">
-              <tbody>
-                  <tr style={{height: '28px'}}>
-                      <td className="bg-primary/20 font-bold text-center text-sm p-1 w-[60%]" rowSpan={3}>
-                          {totalInWords}
-                      </td>
-                      <td className="bg-primary/20 font-bold p-1 border-b border-primary w-[20%]">Amount without Tax</td>
-                      <td className="font-bold text-right p-1 border-b border-primary w-[20%]">{formatCurrency(subtotal)}</td>
-                  </tr>
-                  <tr>
-                      <td className="p-1">Add CGST @ 9%</td>
-                      <td className="font-bold text-right p-1">{formatCurrency(gstAmount/2)}</td>
-                  </tr>
-                  <tr>
-                      <td className="p-1 border-b border-primary">Add SGST @ 9%</td>
-                      <td className="font-bold text-right p-1 border-b border-primary">{formatCurrency(gstAmount/2)}</td>
-                  </tr>
-              </tbody>
-          </table>
-
-           <table className="w-full border-collapse border border-primary -mt-px text-xs">
-              <tbody>
                 <tr>
-                  <td className="p-0 w-[60%] align-top">
-                      <div className="bg-primary text-white font-bold p-2 text-center text-sm">Bank Details</div>
-                      <table className="w-full border-collapse">
-                          <tbody>
-                            {[
-                                {label: 'Name', value: bankDetails.accHolderName},
-                                {label: 'Branch', value: bankDetails.branch},
-                                {label: 'Acc. Number', value: bankDetails.accountNumber},
-                                {label: 'IFSC', value: bankDetails.ifsc},
-                                {label: 'UPI ID', value: bankDetails.upiId},
-                            ].map(detail => (
-                                <tr key={detail.label} style={{height: '25px'}}>
-                                    <td className="bg-primary/20 font-bold p-1 border border-primary w-[25%]">{detail.label}</td>
-                                    <td className="p-1 border border-primary w-[50%]">{detail.value || ''}</td>
-                                    {detail.label === 'Name' && (
-                                        <td className="text-center p-0 border-t-0 border-b-0 border-r-0 border-l border-primary" rowSpan={5}>
-                                          {qrCodeUrl && (
-                                            <>
-                                              <div className="w-[85px] h-[85px] m-auto border border-primary flex items-center justify-center p-1">
-                                                  <Image src={qrCodeUrl} alt="QR Code" width={80} height={80} unoptimized />
-                                              </div>
-                                              <p className="font-bold text-xs pt-1">Pay with QR</p>
-                                            </>
-                                          )}
-                                        </td>
-                                    )}
-                                </tr>
-                            ))}
-                          </tbody>
-                      </table>
-
-                      <div className="bg-primary text-white font-bold p-2 text-center -mt-px text-sm">Terms and Conditions</div>
-                       <table className="w-full border-collapse border border-primary -mt-px">
-                          <tbody>
-                            <tr>
-                                <td>
-                                    <ol className="font-bold list-decimal ml-4 p-2 text-xs space-y-1">
-                                        {MOCK_TERMS.map((term, i) => <li key={i}>{term}</li>)}
-                                    </ol>
-                                </td>
-                            </tr>
-                          </tbody>
-                      </table>
-                  </td>
-                  <td className="p-0 w-[40%] align-top">
-                        <table className="w-full border-collapse border-l-0">
-                            <tbody>
-                                <tr className="bg-primary text-white font-bold">
-                                    <td className="text-left p-2 text-sm w-[50%]">Total Amount</td>
-                                    <td className="text-right p-2 text-sm w-[50%]">{formatCurrency(grandTotal)}</td>
-                                </tr>
-                                <tr>
-                                    <td className="text-right font-bold p-2 border border-primary" colSpan={2}>(E & O.E.)</td>
-                                </tr>
-                                <tr>
-                                    <td className="text-left font-bold text-xs p-2 border border-primary h-[30px]" colSpan={2}>
-                                        Certified that the particulars given above are true and correct.
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div className="bg-primary text-white font-bold p-2 text-left -mt-px text-sm">For KeeRa Innovations</div>
-                         <div className="h-[140px] text-center p-2 border-x border-primary flex items-center justify-center">
-                            {companySealUrl ? (
-                                <Image src={companySealUrl} alt="Company Seal" width={140} height={140} className="object-contain" unoptimized />
+                    <td className="w-[45%] p-0 border-r border-primary align-top">
+                    <div className="flex items-center p-2 min-h-[86px]">
+                        <div className="w-[70px] h-[70px] mr-2 flex-shrink-0">
+                            {companyLogoUrl ? (
+                                <Image src={companyLogoUrl} alt="Company Logo" width={70} height={70} className="object-contain" unoptimized />
                             ) : (
-                                <div className="w-32 h-32 mx-auto border border-primary rounded-full flex items-center justify-center text-xs font-bold">
-                                    {/* Seal Placeholder */}
-                                </div>
+                                <div className="w-full h-full bg-gray-200"></div>
                             )}
                         </div>
-                        <table className="w-full border-collapse border border-primary mt-[15px]">
-                           <tbody>
-                               <tr>
-                                   <td className="text-center font-bold p-2 text-xs">
-                                       Company Seal / Authorised Signatory
-                                   </td>
-                               </tr>
-                           </tbody>
-                        </table>
-                  </td>
-                </tr>
-              </tbody>
-           </table>
+                        <div>
+                        <h1 className="text-xl font-bold m-0 leading-tight">{invoice.seller.name}</h1>
+                        </div>
+                    </div>
+                    <table className="w-full border-t border-primary border-collapse">
+                        <tbody>
+                            <tr><td className="p-2 text-sm leading-normal">{invoice.seller.address}</td></tr>
+                        </tbody>
+                    </table>
+                    <table className="w-full border-t border-primary border-collapse">
+                        <tbody>
+                            <tr>
+                                <td className="bg-primary/20 font-bold p-2 border-r border-primary w-[30%] text-xs">GSTIN</td>
+                                <td className="p-2 text-xs">{invoice.seller.gstin}</td>
+                            </tr>
+                            <tr>
+                                <td className="bg-primary/20 font-bold p-2 border-r border-primary text-xs">Phone</td>
+                                <td className="p-2 text-xs">{invoice.seller.phone}</td>
+                            </tr>
+                            <tr>
+                                <td className="bg-primary/20 font-bold p-2 border-r border-primary text-xs">Email</td>
+                                <td className="p-2 text-xs">{invoice.seller.email}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </td>
 
+                    <td className="w-[55%] p-0 align-top">
+                    <div className="bg-primary/20 font-bold text-center py-1 text-base">Customer Detail</div>
+                    <table className="w-full border-t border-primary border-collapse">
+                        <tbody>
+                            <tr>
+                                <td className="bg-primary/20 font-bold p-2 w-[25%] text-xs">Name</td>
+                                <td className="p-2 text-xs">{invoice.customer || 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <td className="bg-primary/20 font-bold p-2 text-xs">Address</td>
+                                <td className="p-2 text-xs leading-tight">{invoice.customerAddress || 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <td className="bg-primary/20 font-bold p-2 text-xs">Phone</td>
+                                <td className="p-2 text-xs">{invoice.phone || '-'}</td>
+                            </tr>
+                            <tr>
+                                <td className="bg-primary/20 font-bold p-2 text-xs">GSTIN</td>
+                                <td className="p-2 text-xs">{invoice.gstin || 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <td className="bg-primary/20 font-bold p-2 text-xs">Invoice No.</td>
+                                <td className="p-2 text-xs">{invoice.id}</td>
+                            </tr>
+                            <tr>
+                                <td className="bg-primary/20 font-bold p-2 text-xs">Invoice Date</td>
+                                <td className="p-2 text-xs">{new Date(invoice.issueDate || Date.now()).toLocaleDateString()}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
             <table className="w-full border-collapse border border-primary -mt-px">
                 <tbody>
                     <tr className="bg-primary/20">
-                        <td className="text-center font-semibold p-2 text-base">Thank you for Working with us!</td>
+                        <td className="font-bold p-2 border-r border-primary w-[13%] text-xs">Project Name</td>
+                        <td className="p-2 text-xs">{invoice.description}</td>
                     </tr>
                 </tbody>
             </table>
-       </div>
-    </div>
-  );
+            <div className="mt-1">
+                <table className="w-full border-collapse border border-primary text-xs">
+                    <thead>
+                        <tr className="bg-primary text-white font-bold">
+                            <th className="p-2 text-left w-[8%] text-sm">Sr. No.</th>
+                            <th className="p-2 text-left w-[42%] text-sm">Name of Product / Service</th>
+                            <th className="p-2 text-center w-[10%] text-sm">Qty</th>
+                            <th className="p-2 text-right w-[20%] text-sm">Rate</th>
+                            <th className="p-2 text-right w-[20%] text-sm">Total (Excl. Tax)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {invoice.lineItems.map((item, index) => (
+                            <tr key={index} style={{height: '32px'}}>
+                                <td className="border border-primary p-2 text-center text-sm">{index + 1}</td>
+                                <td className="border border-primary p-2 font-bold text-sm">{item.name}</td>
+                                <td className="border border-primary p-2 text-center text-sm">{item.quantity}</td>
+                                <td className="border border-primary p-2 text-right text-sm">{formatCurrency(item.price)}</td>
+                                <td className="border border-primary p-2 text-right text-sm">{formatCurrency(item.price * item.quantity)}</td>
+                            </tr>
+                        ))}
+                        {Array.from({ length: Math.max(0, 7 - invoice.lineItems.length) }).map((_, i) => (
+                            <tr key={`filler-${i}`} style={{height: '32px'}}>
+                                <td className="border border-primary">&nbsp;</td>
+                                <td className="border border-primary">&nbsp;</td>
+                                <td className="border border-primary">&nbsp;</td>
+                                <td className="border border-primary">&nbsp;</td>
+                                <td className="border border-primary">&nbsp;</td>
+                            </tr>
+                        ))}
+                        <tr className="bg-primary/20 font-bold text-sm">
+                            <td colSpan={2} className="border border-primary p-2 text-right">Total</td>
+                            <td className="border border-primary p-2 text-center">{totalQty}</td>
+                            <td className="border border-primary p-2"></td>
+                            <td className="border border-primary p-2 text-right">{formatCurrency(subtotal)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div className="mt-1">
+                <table className="w-full border-collapse border border-primary -mt-px text-xs">
+                    <tbody>
+                        <tr style={{height: '28px'}}>
+                            <td className="bg-primary/20 font-bold text-center text-sm p-1 w-[60%]" rowSpan={3}>
+                                {totalInWords}
+                            </td>
+                            <td className="bg-primary/20 font-bold p-1 border-b border-primary w-[20%]">Amount without Tax</td>
+                            <td className="font-bold text-right p-1 border-b border-primary w-[20%]">{formatCurrency(subtotal)}</td>
+                        </tr>
+                        <tr>
+                            <td className="p-1">Add CGST @ 9%</td>
+                            <td className="font-bold text-right p-1">{formatCurrency(gstAmount/2)}</td>
+                        </tr>
+                        <tr>
+                            <td className="p-1 border-b border-primary">Add SGST @ 9%</td>
+                            <td className="font-bold text-right p-1 border-b border-primary">{formatCurrency(gstAmount/2)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table className="w-full border-collapse border border-primary -mt-px text-xs">
+                    <tbody>
+                        <tr>
+                        <td className="p-0 w-[60%] align-top">
+                            <div className="bg-primary text-white font-bold p-2 text-center text-sm">Bank Details</div>
+                            <table className="w-full border-collapse">
+                                <tbody>
+                                    {[
+                                        {label: 'Name', value: bankDetails.accHolderName},
+                                        {label: 'Branch', value: bankDetails.branch},
+                                        {label: 'Acc. Number', value: bankDetails.accountNumber},
+                                        {label: 'IFSC', value: bankDetails.ifsc},
+                                        {label: 'UPI ID', value: bankDetails.upiId},
+                                    ].map(detail => (
+                                        <tr key={detail.label} style={{height: '25px'}}>
+                                            <td className="bg-primary/20 font-bold p-1 border border-primary w-[25%]">{detail.label}</td>
+                                            <td className="p-1 border border-primary w-[50%]">{detail.value || ''}</td>
+                                            {detail.label === 'Name' && (
+                                                <td className="text-center p-0 border-t-0 border-b-0 border-r-0 border-l border-primary" rowSpan={5}>
+                                                {qrCodeUrl && (
+                                                    <>
+                                                    <div className="w-[85px] h-[85px] m-auto border border-primary flex items-center justify-center p-1">
+                                                        <Image src={qrCodeUrl} alt="QR Code" width={80} height={80} unoptimized />
+                                                    </div>
+                                                    <p className="font-bold text-xs pt-1">Pay with QR</p>
+                                                    </>
+                                                )}
+                                                </td>
+                                            )}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                            <div className="bg-primary text-white font-bold p-2 text-center -mt-px text-sm">Terms and Conditions</div>
+                            <table className="w-full border-collapse border border-primary -mt-px">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <ol className="font-bold list-decimal ml-4 p-2 text-xs space-y-1">
+                                                {MOCK_TERMS.map((term, i) => <li key={i}>{term}</li>)}
+                                            </ol>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                        <td className="p-0 w-[40%] align-top">
+                                <table className="w-full border-collapse border-l-0">
+                                    <tbody>
+                                        <tr className="bg-primary text-white font-bold">
+                                            <td className="text-left p-2 text-sm w-[50%]">Total Amount</td>
+                                            <td className="text-right p-2 text-sm w-[50%]">{formatCurrency(grandTotal)}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="text-right font-bold p-2 border border-primary" colSpan={2}>(E & O.E.)</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="text-left font-bold text-xs p-2 border border-primary h-[30px]" colSpan={2}>
+                                                Certified that the particulars given above are true and correct.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div className="bg-primary text-white font-bold p-2 text-left -mt-px text-sm">For {invoice.seller.name}</div>
+                                <div className="h-[140px] text-center p-2 border-x border-primary flex items-center justify-center">
+                                    {companySealUrl ? (
+                                        <Image src={companySealUrl} alt="Company Seal" width={140} height={140} className="object-contain" unoptimized />
+                                    ) : (
+                                        <div className="w-32 h-32 mx-auto border border-primary rounded-full flex items-center justify-center text-xs font-bold">
+                                            {/* Seal Placeholder */}
+                                        </div>
+                                    )}
+                                </div>
+                                <table className="w-full border-collapse border border-primary mt-[15px]">
+                                <tbody>
+                                    <tr>
+                                        <td className="text-center font-bold p-2 text-xs">
+                                            Company Seal / Authorised Signatory
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                </table>
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table className="w-full border-collapse border border-primary -mt-px">
+                    <tbody>
+                        <tr className="bg-primary/20">
+                            <td className="text-center font-semibold p-2 text-base">Thank you for Working with us!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
+
+const ClassicTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] }) => {
+    const subtotal = invoice.lineItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.price || 0), 0);
+    const gstAmount = subtotal * 0.18;
+    const grandTotal = subtotal + gstAmount;
+
+    return (
+      <div className="p-4 md:p-8 bg-gray-100 min-h-screen font-sans">
+        <div className="bg-white mx-auto max-w-5xl shadow-2xl pb-10 rounded-xl overflow-hidden">
+          {/* Header */}
+        </div>
+      </div>
+    );
+};
+
+const ModernTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] }) => {
+    const subtotal = invoice.lineItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.price || 0), 0);
+    const gstAmount = subtotal * 0.18;
+    const grandTotal = subtotal + gstAmount;
+
+    return (
+        <div className="p-4 md:p-8 bg-gray-100 min-h-screen font-sans">
+            <div className="bg-white mx-auto max-w-5xl shadow-2xl pb-10 rounded-xl overflow-hidden">
+              {/* Header */}
+            </div>
+        </div>
+    );
+};
+
+
+export function InvoicePreview({ invoice, template }: InvoicePreviewProps) {
+  switch (template) {
+    case 'classic':
+      return <ClassicTemplate invoice={invoice} />;
+    case 'modern':
+      return <ModernTemplate invoice={invoice} />;
+    default:
+      return <DefaultTemplate invoice={invoice} />;
+  }
 }

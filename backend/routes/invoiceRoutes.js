@@ -7,10 +7,16 @@ const path = require('path');
 const fs = require('fs');
 const numberToWords = require('number-to-words');
 const Invoice = require('../models/invoiceModel'); 
-const Company = require('../models/companyModel'); // Assuming you have a company model
+const Company = require('../models/companyModel');
 
 // Helper function to format currency
 const formatCurrency = (amount) => {
+    if (amount === undefined || amount === null) {
+        return new Intl.NumberFormat("en-IN", {
+            style: "currency",
+            currency: "INR",
+        }).format(0);
+    }
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency: "INR",
@@ -31,12 +37,7 @@ router.get('/:id/pdf', async (req, res) => {
             return res.status(404).send('Invoice not found');
         }
 
-        // Fetch the first company to get accHolderName
         const company = await Company.findOne().lean();
-
-        const subtotal = invoice.lineItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.price || 0), 0);
-        const gstAmount = subtotal * 0.18;
-        const grandTotal = subtotal + gstAmount;
 
         const getFileAsBase64 = (filePath) => {
             if (!filePath) return null;
@@ -45,21 +46,33 @@ router.get('/:id/pdf', async (req, res) => {
                 console.warn(`File not found: ${absolutePath}`);
                 return null;
             }
-            const file = fs.readFileSync(absolutePath);
-            const mimeType = `image/${path.extname(absolutePath).substring(1)}`;
-            return `data:${mimeType};base64,${file.toString('base64')}`;
+            try {
+                const file = fs.readFileSync(absolutePath);
+                const mimeType = `image/${path.extname(absolutePath).substring(1)}`;
+                return `data:${mimeType};base64,${file.toString('base64')}`;
+            } catch (e) {
+                console.error(`Error reading file ${absolutePath}:`, e);
+                return null;
+            }
         };
-        
-        // Ensure seller object and its nested properties exist
+
         const seller = invoice.seller || {};
         seller.bank = seller.bank || {};
         
-        const data = {
+        const subtotal = invoice.lineItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.price || 0), 0);
+        const gstAmount = subtotal * 0.18;
+        const grandTotal = subtotal + gstAmount;
+
+        const dataForTemplate = {
             invoice: {
               ...invoice,
+              issueDate: new Date(invoice.issueDate || Date.now()).toLocaleDateString('en-IN'),
               seller: {
                   ...seller,
-                  accHolderName: company ? company.accHolderName : (seller.name || '')
+                  accHolderName: company ? company.accHolderName : (seller.name || ''),
+                  companyLogoUrl: getFileAsBase64(company?.companyLogoUrl),
+                  companySealUrl: getFileAsBase64(company?.companySealUrl),
+                  companySignatureUrl: getFileAsBase64(company?.companySignatureUrl),
               }
             },
             subtotal: subtotal,
@@ -76,20 +89,31 @@ router.get('/:id/pdf', async (req, res) => {
                 const upiData = `upi://pay?pa=${seller.bank.upiId}&pn=${encodeURIComponent(payeeName)}&am=${grandTotal.toFixed(2)}&cu=INR&tn=Invoice%20${invoice.id}`;
                 return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(upiData)}`;
             })(),
-            companySealUrl: seller.companySealUrl ? getFileAsBase64(seller.companySealUrl) : null,
-            companySignatureUrl: seller.companySignatureUrl ? getFileAsBase64(seller.companySignatureUrl) : null,
-            companyLogoUrl: seller.companyLogoUrl ? getFileAsBase64(seller.companyLogoUrl) : null,
-            issueDate: invoice.issueDate ? new Date(invoice.issueDate).toLocaleDateString() : new Date().toLocaleDateString(),
             MOCK_TERMS: [
                 "Payment is due within 30 days.",
                 "A late fee of 1.5% will be charged on overdue invoices.",
                 "Please include the invoice number on your payment."
-            ]
+            ],
         };
+        
+        // --- Template Selection ---
+        const templateName = req.query.template || 'default';
+        let templatePath;
 
-        const templatePath = path.resolve(__dirname, '../views/invoice-template.ejs');
+        if (templateName === 'classic') {
+            templatePath = path.resolve(__dirname, '../views/classic-template.ejs');
+        } else if (templateName === 'modern') {
+            templatePath = path.resolve(__dirname, '../views/modern-template.ejs');
+        } else {
+            templatePath = path.resolve(__dirname, '../views/invoice-template.ejs');
+        }
+
+        if (!fs.existsSync(templatePath)) {
+            return res.status(404).send(`Template not found: ${templateName}`);
+        }
+        
         const templateContent = fs.readFileSync(templatePath, 'utf-8');
-        const html = ejs.render(templateContent, data);
+        const html = ejs.render(templateContent, dataForTemplate);
 
         const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
         const page = await browser.newPage();
@@ -98,12 +122,7 @@ router.get('/:id/pdf', async (req, res) => {
         const pdf = await page.pdf({
             format: 'A4',
             printBackground: true,
-            margin: {
-                top: '0.5in',
-                right: '0.5in',
-                bottom: '0.5in',
-                left: '0.5in'
-            }
+            margin: { top: '0in', right: '0in', bottom: '0in', left: '0in' }
         });
 
         await browser.close();
