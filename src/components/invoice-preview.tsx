@@ -9,7 +9,7 @@ import Image from 'next/image';
 type InvoicePreviewProps = {
   invoice: Omit<Invoice, 'amount' | 'status' | 'date'> & {
     amount: number;
-    status: 'Draft' | 'Given' | 'Processing' | 'Received';
+    status: 'Draft' | 'Processing' | 'Received';
     date: string;
   };
 };
@@ -20,7 +20,7 @@ function numberToWords(num: number): string {
     const a = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
     const b = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
     
-    if ((num = num.toString()).length > 9) return 'overflow';
+    if ((num = Math.round(num)).toString().length > 9) return 'overflow';
     const n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
     if (!n) return '';
     let str = '';
@@ -43,7 +43,7 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
   const grandTotal = subtotal + gstAmount;
 
   const totalQty = invoice.lineItems.reduce((acc, item) => acc + (item.quantity || 0), 0);
-  const totalInWords = numberToWords(Math.round(grandTotal));
+  const totalInWords = numberToWords(grandTotal);
 
   const bankDetails = invoice.seller?.bank || {};
   
@@ -63,6 +63,7 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
   })();
 
   const companySealUrl = invoice.seller.companySealUrl ? `http://localhost:8080/${invoice.seller.companySealUrl}` : null;
+  const companySignatureUrl = invoice.seller.companySignatureUrl ? `http://localhost:8080/${invoice.seller.companySignatureUrl}` : null;
 
   return (
     <div className="bg-white text-black text-[10px] w-[794px] min-h-[1123px] mx-auto my-0 p-6 font-sans border shadow-lg">

@@ -46,7 +46,6 @@ router.get('/:id/pdf', async (req, res) => {
             return `data:${mimeType};base64,${file.toString('base64')}`;
         };
         
-        // Correctly structured data object without duplicates
         const data = {
             invoice: invoice,
             subtotal: subtotal,
@@ -64,6 +63,7 @@ router.get('/:id/pdf', async (req, res) => {
                 return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(upiData)}`;
             })(),
             companySealUrl: invoice.seller && invoice.seller.companySealUrl ? getFileAsBase64(invoice.seller.companySealUrl) : null,
+            companySignatureUrl: invoice.seller && invoice.seller.companySignatureUrl ? getFileAsBase64(invoice.seller.companySignatureUrl) : null,
             issueDate: new Date(invoice.issueDate || invoice.date).toLocaleDateString(),
             MOCK_TERMS: [
                 "Payment is due within 30 days.",
