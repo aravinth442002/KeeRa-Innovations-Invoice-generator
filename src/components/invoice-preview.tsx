@@ -318,7 +318,7 @@ const ClassicTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] 
     const grandTotal = subtotal + gstAmount;
 
     return (
-      <div className="p-4 md:p-8 bg-gray-100 min-h-screen font-sans">
+      <div className="p-4 md:p-8 bg-gray-100 min-h-screen font-sans scale-[0.8] origin-top">
         <div className="bg-white mx-auto max-w-5xl shadow-2xl pb-10 rounded-xl overflow-hidden">
           {/* Header */}
         </div>
@@ -326,20 +326,193 @@ const ClassicTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] 
     );
 };
 
-const ModernTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] }) => {
-    const subtotal = invoice.lineItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.price || 0), 0);
+const ModernTemplate = ({ invoice: inv }: { invoice: InvoicePreviewProps['invoice'] }) => {
+    const subtotal = inv.lineItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.price || 0), 0);
     const gstAmount = subtotal * 0.18;
     const grandTotal = subtotal + gstAmount;
+    const cgstAmount = gstAmount / 2;
+    const sgstAmount = gstAmount / 2;
+    const bankDetails = inv.seller?.bank || {};
+    
+    const termPoints = [
+        "Payment to be made within 7 days from the date of invoice.",
+        "Project deliverables and warranty are valid only after full payment.",
+        "All disputes are subject to Chennai jurisdiction.",
+    ];
+
+    const getFileUrl = (filePath?: string) => {
+        if (!filePath) return null;
+        return `http://localhost:8080/${filePath}`;
+    }
+
+    const companyLogoUrl = getFileUrl(inv.seller.companyLogoUrl);
+    const companySealUrl = getFileUrl(inv.seller.companySealUrl);
 
     return (
-        <div className="p-4 md:p-8 bg-gray-100 min-h-screen font-sans">
-            <div className="bg-white mx-auto max-w-5xl shadow-2xl pb-10 rounded-xl overflow-hidden">
-              {/* Header */}
+     <div className="invoice-container max-w-[800px] mx-auto shadow-2xl bg-white min-h-screen font-sans scale-[0.8] origin-top">
+
+        <header className="px-10 pt-10 pb-6 bg-purple-800 text-white relative overflow-hidden">
+
+          <div className="absolute top-0 left-0 w-1/2 h-full opacity-30"
+            style={{
+              backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)',
+              backgroundSize: '10px 10px',
+              WebkitMaskImage: 'linear-gradient(to right, black 80%, transparent)',
+              maskImage: 'linear-gradient(to right, black 80%, transparent)'
+            }}>
+          </div>
+
+          <div className="flex justify-between z-10 relative">
+            <div className="flex flex-col w-1/2">
+              <div className="flex items-end mb-4">
+                 <div className="w-10 h-10 mr-2 rounded-full flex items-center justify-center text-white">
+                    {companyLogoUrl ? <Image src={companyLogoUrl} alt="logo" width={40} height={40} className="rounded-full" unoptimized /> : 'LOGO' }
+                 </div>
+                 <span className="text-4xl font-extrabold tracking-tight text-fuchsia-300"
+                   style={{ fontFamily: 'Georgia, serif', lineHeight: '1' }}>
+                   {inv.seller.name || 'KeeRa'}
+                 </span>
+                 <span className="text-sm font-semibold tracking-widest text-white ml-1 uppercase"
+                   style={{ fontFamily: 'Arial, sans-serif' }}>
+                   INNOVATIONS
+                 </span>
+               </div>
+              <h1 className="text-6xl font-extrabold tracking-tight mb-3">TAX INVOICE</h1>
+              <p className="text-sm font-semibold text-fuchsia-300">
+                 INVOICE DATE: <span className="font-bold tracking-wider">{new Date(inv.issueDate || Date.now()).toLocaleDateString()}</span>
+              </p>
+              
+               <p className="text-sm font-semibold tracking-wide text-white mt-1">
+                 PROJECT NAME: <span className="font-bold">{inv.description}</span>
+               </p>
+
             </div>
+
+            <div className="flex flex-col text-right space-y-1 text-xs w-1/2 font-semibold text-purple-200">
+               <p>{inv.seller.phone}</p>
+               <p className="font-bold text-fuchsia-300">{inv.seller.email}</p>
+              <div className="mt-2 pt-2 text-sm space-y-0.5">
+                 {inv.seller.address.split(',').map((line, index) => <span key={index} className="block">{line}</span>)}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="bg-white pb-10 p-5">
+
+          <div className="pt-4 border border-fuchsia-300 shadow-purple-800 rounded-lg overflow-hidden shadow-sm">
+
+            <div className="flex text-sm font-extrabold text-gray-900 uppercase pb-2 border-b-2 border-fuchsia-500 px-3">
+              <span className="w-6/12 text-fuchsia-600">PRODUCT DESCRIPTION</span>
+              <span className="w-2/12 text-fuchsia-600 text-right">PRICE</span>
+              <span className="w-2/12 text-fuchsia-600 text-center">QTY.</span>
+              <span className="w-2/12 text-fuchsia-600 text-right">TOTAL</span>
+            </div>
+
+            <div className="divide-y divide-gray-200">
+              {inv.lineItems.map((item, index) => (
+                <div
+                  className={`flex py-3 text-sm font-semibold px-3 ${index % 2 === 0 ? 'bg-purple-300 text-gray-800' : 'bg-fuchsia-50 text-gray-900'
+                    }`}
+                  key={index}
+                >
+                  <span className="w-6/12">{item.name}</span>
+                  <span className="w-2/12 text-right">{formatCurrency(item.price)}</span>
+                  <span className="w-2/12 text-center">{item.quantity}</span>
+                  <span className="w-2/12 text-right">{formatCurrency(item.price * item.quantity)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <footer className="flex mt-8 justify-between px-10">
+            <div className="flex flex-col w-7/12 pt-6">
+              <div className="bill-to-section mb-6 text-gray-700">
+                <h3 className="text-base font-bold uppercase mb-2 text-fuchsia-600">INVOICE TO:</h3>
+                <p className="text-sm font-extrabold text-gray-900">{inv.customer}</p>
+                <p className="text-sm font-semibold">{inv.customerAddress}</p>
+                <p className="text-sm font-semibold">{inv.phone}</p>
+                <p className="text-sm font-extrabold text-fuchsia-600">{inv.email}</p>
+              </div>
+
+              <div className="payment-details-section mt-4 p-4 border shadow-purple-900 rounded-lg border-fuchsia-600 overflow-hidden shadow-sm">
+                <h3 className="text-sm font-bold uppercase mb-2 text-fuchsia-600 border-b border-gray-300 pb-1">Payment Details</h3>
+                <div className="flex justify-between items-start text-gray-700">
+                  <div className="text-xs space-y-1 w-2/3 font-semibold">
+                    <p>A/C Name: <span className="font-extrabold text-gray-900">{bankDetails.accHolderName}</span></p>
+                    <p>Branch: <span className="font-extrabold text-gray-900">{bankDetails.branch}</span></p>
+                    <p>A/C No: <span className="font-extrabold text-gray-900">{bankDetails.accountNumber}</span></p>
+                    <p>IFSC: <span className="font-extrabold text-gray-900">{bankDetails.ifsc}</span></p>
+                    <p>UPI ID: <span className="font-extrabold text-gray-900">{bankDetails.upiId}</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="totals-section w-4/12 flex flex-col items-end pt-4">
+              <div className="w-full text-sm text-gray-800 font-bold bg-white rounded-md overflow-hidden border border-gray-300 shadow-lg">
+
+                <div className="flex justify-between py-2 px-4 bg-gray-50 border-b border-gray-200">
+                  <span className="font-extrabold text-gray-900">Amount without Tax</span>
+                  <span className="font-extrabold text-gray-900">{formatCurrency(subtotal)}</span>
+                </div>
+
+                <div className="flex">
+                  <div className="w-1/4 flex items-start justify-center pt-6 text-xs font-extrabold text-gray-800">
+                    ADD
+                  </div>
+                  <div className="w-3/4 divide-y divide-fuchsia-100">
+                    <div className="flex justify-between py-1.5 px-2">
+                      <span className="font-semibold text-gray-700">CGST - 9%</span>
+                      <span className="font-bold text-gray-800">{formatCurrency(cgstAmount)}</span>
+                    </div>
+                    <div className="flex justify-between py-1.5 px-2 border-b border-gray-300">
+                      <span className="font-semibold text-gray-700">SGST - 9%</span>
+                      <span className="font-bold text-gray-800">{formatCurrency(sgstAmount)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="total-row final-total-box w-full py-2 px-4 flex justify-between bg-fuchsia-700 text-white font-extrabold text-lg relative overflow-hidden shadow-xl">
+                  <div className="absolute inset-0 opacity-20"
+                    style={{
+                      backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)',
+                      backgroundSize: '10px 10px'
+                    }}>
+                  </div>
+                  <span className="final-total-text z-10">Total Amount</span>
+                  <span className="final-total-amount z-10">{formatCurrency(grandTotal)}</span>
+                </div>
+              </div>
+
+              <div className="mt-8 text-center text-gray-700">
+                <div className="w-32 h-32 mx-auto border-4 border-purple-400 rounded-full flex items-center justify-center text-xs font-bold bg-white mb-2 p-2 shadow-inner">
+                  {companySealUrl ? <Image src={companySealUrl} alt="Seal" width={128} height={128} className="rounded-full" unoptimized/> : '[COMPANY SEAL HERE]'}
+                </div>
+                <p className="font-bold text-lg text-fuchsia-600">Authorized Signature</p>
+                <p className="text-sm text-gray-600">Thank you for your business!</p>
+              </div>
+
+            </div>
+          </footer>
+
+          <div className="mt-12 w-full">
+            <div className="w-full bg-fuchsia-700 text-white font-bold text-center text-xl py-3 px-10">
+              Terms and Conditions
+            </div>
+
+            <div className="px-10 py-4 bg-white border-b border-l border-r border-fuchsia-700/50">
+              <ol className="list-decimal list-outside text-base ml-6 space-y-1 text-gray-900 font-semibold">
+                {termPoints.map((point, index) => (
+                  <li key={index} className="pl-2">{point}</li>
+                ))}
+              </ol>
+            </div>
+          </div>
         </div>
+      </div>
     );
 };
-
 
 export function InvoicePreview({ invoice, template }: InvoicePreviewProps) {
   switch (template) {
@@ -351,3 +524,5 @@ export function InvoicePreview({ invoice, template }: InvoicePreviewProps) {
       return <DefaultTemplate invoice={invoice} />;
   }
 }
+
+    
