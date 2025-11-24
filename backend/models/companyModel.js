@@ -46,10 +46,6 @@ const CompanySchema = new mongoose.Schema({
     },
 
     // --- Bank Details ---
-    bankName: {
-        type: String,
-        trim: true,
-    },
     branch:{
         type: String,
         trim: true,

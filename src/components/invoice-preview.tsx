@@ -226,7 +226,7 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
                       <table className="w-full border-collapse">
                           <tbody>
                             {[
-                                {label: 'Name', value: bankDetails.name},
+                                {label: 'Name', value: bankDetails.companyName},
                                 {label: 'Branch', value: bankDetails.branch},
                                 {label: 'Acc. Number', value: bankDetails.accountNumber},
                                 {label: 'IFSC', value: bankDetails.ifsc},

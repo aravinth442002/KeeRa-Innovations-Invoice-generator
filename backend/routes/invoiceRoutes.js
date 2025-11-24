@@ -64,6 +64,7 @@ router.get('/:id/pdf', async (req, res) => {
             })(),
             companySealUrl: invoice.seller && invoice.seller.companySealUrl ? getFileAsBase64(invoice.seller.companySealUrl) : null,
             companySignatureUrl: invoice.seller && invoice.seller.companySignatureUrl ? getFileAsBase64(invoice.seller.companySignatureUrl) : null,
+            companyLogoUrl: invoice.seller && invoice.seller.companyLogoUrl ? getFileAsBase64(invoice.seller.companyLogoUrl) : null,
             issueDate: new Date(invoice.issueDate || invoice.date).toLocaleDateString(),
             MOCK_TERMS: [
                 "Payment is due within 30 days.",
