@@ -46,11 +46,12 @@ router.get('/:id/pdf', async (req, res) => {
             return `data:${mimeType};base64,${file.toString('base64')}`;
         };
         
+        // Correctly structured data object without duplicates
         const data = {
-            ...invoice,
-            subtotal,
-            gstAmount,
-            grandTotal,
+            invoice: invoice,
+            subtotal: subtotal,
+            gstAmount: gstAmount,
+            grandTotal: grandTotal,
             totalInWords: numberToWords.toWords(grandTotal).replace(/\b\w/g, char => char.toUpperCase()) + ' Only',
             totalQty: invoice.lineItems.reduce((acc, item) => acc + (item.quantity || 0), 0),
             formatCurrency: formatCurrency,
@@ -63,7 +64,7 @@ router.get('/:id/pdf', async (req, res) => {
                 return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(upiData)}`;
             })(),
             companySealUrl: invoice.seller && invoice.seller.companySealUrl ? getFileAsBase64(invoice.seller.companySealUrl) : null,
-            issueDate: new Date(invoice.issueDate).toLocaleDateString(),
+            issueDate: new Date(invoice.issueDate || invoice.date).toLocaleDateString(),
             MOCK_TERMS: [
                 "Payment is due within 30 days.",
                 "A late fee of 1.5% will be charged on overdue invoices.",
