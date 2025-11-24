@@ -112,13 +112,16 @@ export default function InvoicesPage() {
   };
   
   const openEditPage = (invoice: Invoice) => {
-    console.log("===========>>>>", invoice);
     router.push(`/dashboard/invoices/new?id=${invoice.id}`);
   };
 
   const handleDialogStateChange = (open: boolean) => {
     setIsCreateDialogOpen(open);
   }
+
+  const viewPdf = (invoiceId: string) => {
+    window.open(`${API_URL}/invoices/${invoiceId}/pdf`, '_blank');
+  };
 
   return (
     <>
@@ -186,7 +189,7 @@ export default function InvoicesPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem>View</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => viewPdf(invoice.id)}>View</DropdownMenuItem>
                               <DropdownMenuItem onClick={() => openEditPage(invoice)}>Edit</DropdownMenuItem>
                                {invoice.status === 'Received' && (
                                 <DropdownMenuItem>Download</DropdownMenuItem>
