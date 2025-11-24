@@ -313,18 +313,164 @@ const DefaultTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] 
 
 
 const ClassicTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] }) => {
-    const subtotal = invoice.lineItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.price || 0), 0);
-    const gstAmount = subtotal * 0.18;
-    const grandTotal = subtotal + gstAmount;
+  const { seller, customer, lineItems, description, issueDate, id } = invoice;
+  const subtotal = lineItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.price || 0), 0);
+  const gstAmount = subtotal * 0.18; // Assuming flat 18%
+  const grandTotal = subtotal + gstAmount;
 
-    return (
-      <div className="p-4 md:p-8 bg-gray-100 min-h-screen font-sans scale-[0.8] origin-top">
-        <div className="bg-white mx-auto max-w-5xl shadow-2xl pb-10 rounded-xl overflow-hidden">
-          {/* Header */}
+  const getFileUrl = (filePath?: string) => {
+    if (!filePath) return null;
+    return `http://localhost:8080/${filePath}`;
+  }
+
+  const logoUrl = getFileUrl(seller.companyLogoUrl);
+
+  const customerAddressParts = customerAddress?.split(',').map(p => p.trim()) || [];
+  const sellerAddressParts = seller?.address?.split(',').map(p => p.trim()) || [];
+
+  const TotalRow = ({ label, value, isGrandTotal = false }: { label: string; value: number, isGrandTotal?: boolean }) => (
+    <div className={`flex justify-between py-1 px-4 ${isGrandTotal ? 'bg-purple-700 text-white text-lg font-extrabold mt-3 rounded' : 'border-b border-gray-200'}`}>
+      <span className={`font-semibold ${isGrandTotal ? 'text-white' : 'text-gray-600'}`}>{label}</span>
+      <span className={`font-bold ${isGrandTotal ? 'text-white' : 'text-gray-800'}`}>{formatCurrency(value)}</span>
+    </div>
+  );
+
+  return (
+    <div className="p-4 md:p-8 bg-gray-100 min-h-screen font-sans scale-[0.8] origin-top">
+      <div className="bg-white mx-auto max-w-5xl shadow-2xl pb-10 rounded-xl overflow-hidden">
+        <header className="text-white relative overflow-hidden bg-purple-700">
+          <div className="flex justify-between items-center p-8">
+            <div className="flex flex-col items-start">
+              {logoUrl && (
+                <Image
+                  src={logoUrl}
+                  alt={`${seller.name} Logo`}
+                  width={48}
+                  height={48}
+                  className="mb-2"
+                  style={{ filter: 'drop-shadow(0 0 5px rgba(255, 255, 255, 0.5))' }}
+                  unoptimized
+                />
+              )}
+              <h1 className="text-2xl font-extrabold tracking-tight">{seller.name || 'KEERA INNOVATIONS'}</h1>
+            </div>
+            <div className="text-right">
+              <h2 className="text-4xl font-extrabold tracking-wider mb-2">TAX INVOICE</h2>
+              <div className="text-xs space-y-1">
+                <p>
+                  <span className="font-bold w-20 inline-block text-right">Invoice No:</span>
+                  <span className="ml-2 font-extrabold text-yellow-300">{id || '565254'}</span>
+                </p>
+                <p>
+                  <span className="font-bold w-20 inline-block text-right">Date:</span>
+                  <span className="ml-2">{new Date(issueDate).toLocaleDateString() || '01/02/2025'}</span>
+                </p>
+                <p>
+                  <span className="font-bold w-20 inline-block text-right">Due Date:</span>
+                  <span className="ml-2">{new Date(invoice.dueDate).toLocaleDateString() || '30/02/2025'}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <section className="px-8 pt-6 pb-6 text-gray-800 border-b border-gray-200">
+          <div className="grid grid-cols-2 gap-8 text-sm">
+            <div>
+              <h3 className="text-lg font-bold text-gray-700 mb-2 border-b-2 border-purple-300 inline-block pb-1">Our Details</h3>
+              <h4 className="text-base font-extrabold text-purple-700 mt-2">{seller.name || 'Keera Innovations'}</h4>
+              <p className="text-sm mt-1">{sellerAddressParts[0]}</p>
+              <p className="text-sm">{sellerAddressParts[1]}</p>
+              <p className="text-sm">{sellerAddressParts[2]}</p>
+              <p className="text-sm mt-2">📞 {seller.phone || '+91-951 461 9276'}</p>
+              <p className="text-sm font-light mt-1">
+                <span className="font-semibold mr-1">GSTIN:</span> {seller.gstin || 'N/A'}
+              </p>
+            </div>
+            <div className="text-right">
+              <h3 className="text-lg font-bold text-gray-700 mb-2 border-b-2 border-purple-300 inline-block pb-1">Bill To</h3>
+              <h4 className="text-2xl font-bold text-purple-700 mt-2">{customer || 'N/A'}</h4>
+              {customerAddressParts.map((part, i) => <p key={i} className="text-sm mt-1">{part}</p>)}
+              <p className="text-sm font-light mt-1 text-gray-800">
+                <span className="font-semibold mr-1">GSTIN:</span> {invoice.gstin || 'N/A'}
+              </p>
+              <p className="text-sm pt-4 font-bold text-gray-800">
+                PROJECT: <span className="font-normal">{description || 'N/A'}</span>
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="px-8 mt-6">
+          <table className="min-w-full text-sm border-collapse">
+            <thead>
+              <tr className="bg-purple-700 text-white font-bold text-xs uppercase tracking-wider">
+                <th className="py-3 px-4 text-left w-1/2 rounded-tl-lg">Description</th>
+                <th className="py-3 px-4 text-center w-[15%]">Rate</th>
+                <th className="py-3 px-4 text-center w-[10%]">Qty</th>
+                <th className="py-3 px-4 text-right w-[25%] rounded-tr-lg">Amount (₹)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {lineItems.map((item, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-white hover:bg-purple-50 transition-colors' : 'bg-purple-50 hover:bg-purple-100 transition-colors'}>
+                  <td className="py-3 px-4 text-left border-b border-gray-200">{item.name}</td>
+                  <td className="py-3 px-4 text-center border-b border-gray-200">{formatCurrency(item.price)}</td>
+                  <td className="py-3 px-4 text-center border-b border-gray-200">{item.quantity}</td>
+                  <td className="py-3 px-4 text-right font-bold text-purple-700 border-b border-gray-200">{formatCurrency(item.price * item.quantity)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+
+        <div className="px-8 pb-8 text-xs">
+          <div className="flex justify-between mt-8">
+            <div className="w-1/2 pr-10">
+              <h3 className="text-sm font-bold mb-3 text-purple-700 border-b border-purple-300 pb-1">PAYMENT DETAILS</h3>
+              <div className="text-xs space-y-1 w-full p-3 bg-purple-200 rounded shadow-inner">
+                <p><span className="font-bold w-20 inline-block">A/C NAME:</span> {seller.bank?.accHolderName || ''}</p>
+                <p><span className="font-bold w-20 inline-block">BRANCH:</span> {seller.bank?.branch || ''}</p>
+                <p><span className="font-bold w-20 inline-block">ACC. NO:</span> {seller.bank?.accountNumber || ''}</p>
+                <p><span className="font-bold w-20 inline-block">IFSC:</span> {seller.bank?.ifsc || ''}</p>
+                <p className="mt-2 font-bold text-purple-700">UPI ID: {seller.bank?.upiId || ''}</p>
+              </div>
+              <h3 className="text-sm font-bold mb-2 mt-8 text-purple-700 border-b border-purple-300 pb-1">TERMS AND CONDITIONS</h3>
+              <ul className="text-xs text-gray-800 leading-relaxed list-disc list-inside space-y-1 pl-2">
+                <li className="pl-1 font-semibold">Payment is due within 7 days from the invoice date.</li>
+                <li className="pl-1 font-semibold">All project deliverables and warranty claims require full payment.</li>
+                <li className="pl-1 font-semibold">Disputes, if any, shall be subject to Chennai jurisdiction.</li>
+              </ul>
+            </div>
+            <div className="w-1/2 pl-10 flex flex-col items-end">
+              <div className="w-80 text-sm bg-gray-50 p-4 rounded-lg shadow-md">
+                <TotalRow label="Sub Total" value={subtotal} />
+                <TotalRow label={`Tax (18%)`} value={gstAmount} />
+                <TotalRow label={`CGST (9%)`} value={gstAmount / 2} />
+                <TotalRow label={`SGST (9%)`} value={gstAmount / 2} />
+                <TotalRow label="Amount Due" value={grandTotal} isGrandTotal={true} />
+              </div>
+              <div className="flex flex-col mt-8 pt-4 w-full items-end">
+                 {getFileUrl(seller.companySealUrl) ? (
+                    <Image src={getFileUrl(seller.companySealUrl)!} alt="Seal" width={128} height={128} className="mb-4" unoptimized/>
+                 ) : (
+                    <div className="w-32 h-32 mb-4 flex items-center justify-center mr-16 border-4 border-purple-400 rounded-full bg-white shadow-lg">
+                        <span className="text-sm font-bold text-gray-700 text-center uppercase tracking-wider">
+                            [SEAL]
+                        </span>
+                    </div>
+                 )}
+                <p className="text-2xl font-bold text-purple-700 mt-2">Authorized Signature</p>
+                <p className="font-normal text-gray-600 text-center text-sm mt-1">Thank you for your business!</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    );
+    </div>
+  );
 };
+
 
 const ModernTemplate = ({ invoice: inv }: { invoice: InvoicePreviewProps['invoice'] }) => {
     const subtotal = inv.lineItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.price || 0), 0);
@@ -524,5 +670,7 @@ export function InvoicePreview({ invoice, template }: InvoicePreviewProps) {
       return <DefaultTemplate invoice={invoice} />;
   }
 }
+
+    
 
     
