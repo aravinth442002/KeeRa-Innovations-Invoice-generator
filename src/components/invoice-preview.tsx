@@ -35,6 +35,7 @@ function numberToWords(num: number): string {
 
 
 export function InvoicePreview({ invoice }: InvoicePreviewProps) {
+    console.log(invoice);
   const subtotal = invoice.lineItems.reduce(
     (acc, item) => acc + (item.quantity || 0) * (item.price || 0),
     0
@@ -226,7 +227,7 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
                       <table className="w-full border-collapse">
                           <tbody>
                             {[
-                                {label: 'Name', value: invoice.seller.accHolderName},
+                                {label: 'Name', value: bankDetails.accHolderName},
                                 {label: 'Branch', value: bankDetails.branch},
                                 {label: 'Acc. Number', value: bankDetails.accountNumber},
                                 {label: 'IFSC', value: bankDetails.ifsc},
