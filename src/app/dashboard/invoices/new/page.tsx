@@ -76,7 +76,7 @@ function NewInvoiceForm() {
     new Date().toISOString().split('T')[0]
   );
   const [status, setStatus] = useState<
-    'Draft' | 'Given' | 'Processing' | 'Received'
+    'Draft' | 'Processing' | 'Received'
   >('Draft');
   
   const [clients, setClients] = useState<Client[]>([]);
@@ -267,7 +267,7 @@ function NewInvoiceForm() {
 
   const currentInvoiceData: Omit<Invoice, 'amount' | 'status' | 'date' | 'dueDate'> & {
     amount: number;
-    status: 'Draft' | 'Given' | 'Processing' | 'Received';
+    status: 'Draft' | 'Processing' | 'Received';
     date: string;
     dueDate: string;
   } = {
@@ -339,11 +339,10 @@ function NewInvoiceForm() {
                 </div>
                  <div className="space-y-2">
                     <Label htmlFor="status">Status</Label>
-                    <Select value={status} onValueChange={(value: 'Draft' | 'Given' | 'Processing' | 'Received') => setStatus(value)}>
+                    <Select value={status} onValueChange={(value: 'Draft' | 'Processing' | 'Received') => setStatus(value)}>
                         <SelectTrigger id="status"><SelectValue /></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="Draft">Draft</SelectItem>
-                            <SelectItem value="Given">Given</SelectItem>
                             <SelectItem value="Processing">Processing</SelectItem>
                             <SelectItem value="Received">Received</SelectItem>
                         </SelectContent>
@@ -484,5 +483,3 @@ export default function NewInvoicePage() {
         </Suspense>
     )
 }
-
-    

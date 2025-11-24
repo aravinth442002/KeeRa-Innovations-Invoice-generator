@@ -39,7 +39,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { type Invoice } from '@/lib/data';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, cn } from '@/lib/utils';
 import { InvoiceUploadButton } from '@/components/invoice-upload-button';
 import { CreateInvoiceDialog } from '@/components/create-invoice-dialog';
 import { useRouter } from 'next/navigation';
@@ -48,14 +48,13 @@ import { useToast } from '@/hooks/use-toast';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
-const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' | 'outline' } = {
-  Paid: 'default',
-  Pending: 'secondary',
-  Overdue: 'destructive',
-  Draft: 'outline',
-  Given: 'secondary',
-  Processing: 'secondary',
-  Received: 'default',
+const statusVariant: { [key: string]: string } = {
+  Paid: 'bg-green-100 text-green-800',
+  Pending: 'bg-yellow-100 text-yellow-800',
+  Overdue: 'bg-red-100 text-red-800',
+  Draft: 'bg-red-100 text-red-800',
+  Processing: 'bg-yellow-100 text-yellow-800',
+  Received: 'bg-green-100 text-green-800',
 };
 
 export default function InvoicesPage() {
@@ -166,7 +165,7 @@ export default function InvoicesPage() {
                         <TableCell className="font-medium">{invoice.id}</TableCell>
                         <TableCell>{invoice.customer}</TableCell>
                         <TableCell>
-                          <Badge variant={statusVariant[invoice.status] || 'secondary'}>
+                          <Badge className={cn('border-transparent', statusVariant[invoice.status] || 'bg-gray-100 text-gray-800')}>
                             {invoice.status}
                           </Badge>
                         </TableCell>

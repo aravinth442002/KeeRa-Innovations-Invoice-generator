@@ -35,7 +35,7 @@ export type Invoice = {
   description: string;
   lineItems: LineItem[];
   amount: number;
-  status: 'Paid' | 'Pending' | 'Overdue' | 'Draft' | 'Given' | 'Processing' | 'Received';
+  status: 'Paid' | 'Pending' | 'Overdue' | 'Draft' | 'Processing' | 'Received';
   date: string; // This is the issue date
   dueDate: string;
   issueDate?: string; // For backward compatibility or specific needs
