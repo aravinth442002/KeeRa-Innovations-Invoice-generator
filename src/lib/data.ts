@@ -15,13 +15,15 @@ export type Seller = {
   email: string;
   gstin: string;
   bank?: {
-    name: string;
+    accHolderName: string;
     branch: string;
     accountNumber: string;
     ifsc: string;
     upiId: string;
   };
+  companyLogoUrl?: string;
   companySealUrl?: string;
+  accHolderName?: string;
 };
 
 export type Invoice = {

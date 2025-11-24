@@ -19,6 +19,7 @@ router.route('/')
     .get(companyController.getAllCompanies)
     .post(
         upload.fields([
+            { name: 'companyLogoUrl', maxCount: 1 },
             { name: 'companySignatureUrl', maxCount: 1 },
             { name: 'companySealUrl', maxCount: 1 },
             { name: 'companyLogo', maxCount: 1 }
@@ -31,6 +32,7 @@ router.route('/:id')
     .get(companyController.getCompanyById)
     .put(
         upload.fields([
+            { name: 'companyLogoUrl', maxCount: 1 },
             { name: 'companySignatureUrl', maxCount: 1 },
             { name: 'companySealUrl', maxCount: 1 },
             { name: 'companyLogo', maxCount: 1 }
@@ -40,5 +42,3 @@ router.route('/:id')
     .delete(companyController.deleteCompany);
 
 module.exports = router;
-
-    

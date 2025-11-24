@@ -35,10 +35,11 @@ type Company = {
   address: string;
   email: string;
   phoneNumber: string;
+  companyLogoUrl: string;
   companySignatureUrl: string;
   companySealUrl: string;
   taxId: string;
-  bankName: string;
+  accHolderName: String;
   branch: String;
   accountNumber: string;
   ifsc: string;
@@ -49,8 +50,10 @@ export default function SettingsPage() {
   const { toast } = useToast();
   
   const [company, setCompany] = useState<Partial<Company>>({});
+  const [logoFile, setLogoFile] = useState<File | null>(null);
   const [signatureFile, setSignatureFile] = useState<File | null>(null);
   const [sealFile, setSealFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
   const [sealPreview, setSealPreview] = useState<string | null>(null);
 
@@ -74,11 +77,14 @@ export default function SettingsPage() {
     setCompany(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>, fileType: 'signature' | 'seal') => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>, fileType: 'logo' | 'signature' | 'seal') => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       const previewUrl = URL.createObjectURL(file);
-      if (fileType === 'signature') {
+      if (fileType === 'logo') {
+        setLogoFile(file);
+        setLogoPreview(previewUrl);
+      } else if (fileType === 'signature') {
         setSignatureFile(file);
         setSignaturePreview(previewUrl);
       } else {
@@ -97,6 +103,9 @@ export default function SettingsPage() {
         }
     });
 
+    if (logoFile) {
+        formData.append('companyLogoUrl', logoFile);
+    }
     if (signatureFile) {
         formData.append('companySignatureUrl', signatureFile);
     }
@@ -124,6 +133,7 @@ export default function SettingsPage() {
         description: `Your ${section} details have been updated.`,
       });
       fetchCompanyData(); // Re-fetch to display updated images if any
+      setLogoPreview(null);
       setSignaturePreview(null);
       setSealPreview(null);
     } catch (error) {
@@ -136,6 +146,10 @@ export default function SettingsPage() {
     }
   };
   
+  const logoPlaceholder = PlaceHolderImages.find(
+    (img) => img.id === 'company-logo'
+  )?.imageUrl || 'https://icon-library.com/images/image-placeholder-icon/image-placeholder-icon-3.jpg';
+
   const signaturePlaceholder = PlaceHolderImages.find(
     (img) => img.id === 'company-signature'
   )?.imageUrl;
@@ -143,6 +157,9 @@ export default function SettingsPage() {
   const sealPlaceholder = PlaceHolderImages.find(
     (img) => img.id === 'company-seal'
   )?.imageUrl;
+
+  const displayLogoUrl = logoPreview
+    || (company.companyLogoUrl ? `${BASE_URL}/${company.companyLogoUrl}` : logoPlaceholder);
 
   const displaySignatureUrl = signaturePreview 
     || (company.companySignatureUrl ? `${BASE_URL}/${company.companySignatureUrl}` : signaturePlaceholder);
@@ -191,7 +208,12 @@ export default function SettingsPage() {
                     <Input id="phone" type="tel" value={company.phoneNumber || ''} onChange={(e) => handleInputChange('phoneNumber', e.target.value)} />
                   </div>
                 </div>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                    <div className="space-y-2">
+                        <Label>Company Logo</Label>
+                        {displayLogoUrl && <Image src={displayLogoUrl} alt="Company Logo" width={100} height={100} className="rounded-md border p-2" data-ai-hint="logo" unoptimized />}
+                        <Input type="file" accept="image/*" onChange={(e) => handleFileChange(e, 'logo')} />
+                    </div>
                     <div className="space-y-2">
                         <Label>Company Signature</Label>
                         {displaySignatureUrl && <Image src={displaySignatureUrl} alt="Company Signature" width={240} height={100} className="rounded-md border p-2" data-ai-hint="signature" unoptimized />}
@@ -238,8 +260,8 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="bank-name">Name</Label>
-                  <Input id="bank-name" value={company.bankName || ''} onChange={(e) => handleInputChange('bankName', e.target.value)} />
+                  <Label htmlFor="acc-Holder-Name">Account Holder Name</Label>
+                  <Input id="acc-Holder-Name" value={company.accHolderName || ''} onChange={(e) => handleInputChange('companyName', e.target.value)} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="branch">Branch</Label>
