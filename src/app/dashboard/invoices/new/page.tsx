@@ -290,21 +290,21 @@ function NewInvoiceForm() {
   const handleSave = async () => {
     const payload = {
       ...currentInvoiceData,
-      status: 'Draft',
+      status: status, // Use the status from the dropdown
     };
     
     try {
       if (isEditing) {
         await axios.put(`${API_URL}/invoices/${invoiceId}`, payload);
-        toast({ title: 'Success', description: 'Invoice draft updated successfully.' });
+        toast({ title: 'Success', description: 'Invoice updated successfully.' });
       } else {
         await axios.post(`${API_URL}/invoices`, payload);
-        toast({ title: 'Success', description: 'Invoice draft saved successfully.' });
+        toast({ title: 'Success', description: 'Invoice saved successfully.' });
       }
       router.push('/dashboard/invoices');
     } catch (error) {
-      console.error('Failed to save draft:', error);
-      toast({ title: 'Error', description: 'Could not save invoice draft.', variant: 'destructive' });
+      console.error('Failed to save invoice:', error);
+      toast({ title: 'Error', description: 'Could not save invoice.', variant: 'destructive' });
     }
   };
 
@@ -319,9 +319,8 @@ function NewInvoiceForm() {
                 <Link href="/dashboard/invoices">Cancel</Link>
             </Button>
             <Button onClick={handleSave}>
-              {isEditing ? 'Update Draft' : 'Save Draft'}
+              {isEditing ? 'Update' : 'Save'}
             </Button>
-            <Button>Finalize & Send</Button>
         </div>
       </DashboardHeader>
       <main className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 p-4 pt-0 sm:p-6 sm:pt-0">
