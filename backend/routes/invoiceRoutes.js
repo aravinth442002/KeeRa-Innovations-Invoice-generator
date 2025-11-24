@@ -23,127 +23,75 @@ router.get("/:id", invoiceController.getInvoiceById);
 router.put("/:id", invoiceController.updateInvoice);
 router.delete("/:id", invoiceController.deleteInvoice);
 
-router.get("/:id/pdf", async (req, res) => {
+router.get('/:id/pdf', async (req, res) => {
     try {
         const invoice = await Invoice.findOne({ id: req.params.id }).lean();
         if (!invoice) {
-            return res.status(404).send("Invoice not found");
+            return res.status(404).send('Invoice not found');
         }
 
-        // --- CALCULATIONS ---
-        const subtotal = invoice.lineItems.reduce(
-            (acc, item) => acc + (item.quantity || 0) * (item.price || 0),
-            0
-        );
-
+        const subtotal = invoice.lineItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.price || 0), 0);
         const gstAmount = subtotal * 0.18;
         const grandTotal = subtotal + gstAmount;
 
-        // --- SAFELY CONVERT IMAGE TO BASE64 ---
-        const getFileAsBase64 = (filePath) => {
-            try {
-                if (!filePath) return null;
-
-                const absolutePath = path.resolve(__dirname, "..", filePath);
-
-                if (!fs.existsSync(absolutePath)) {
-                    console.warn(`File not found: ${absolutePath}`);
-                    return null;
-                }
-
-                const file = fs.readFileSync(absolutePath);
-                const ext = path.extname(absolutePath).substring(1);
-                return `data:image/${ext};base64,${file.toString("base64")}`;
-            } catch (err) {
-                console.error("Base64 file error:", err);
-                return null;
-            }
+        // Correctly construct absolute paths for local image files
+        const getFileUrl = (filePath) => {
+            if (!filePath) return null;
+            // Use file:// protocol for local paths when rendering with Puppeteer
+            return `file://${path.resolve(__dirname, '..', filePath)}`;
         };
-
-        // --- QR CODE ---
-        const qrCodeUrl =
-            invoice?.seller?.bank?.upiId && grandTotal > 0
-                ? `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(
-                      `upi://pay?pa=${invoice.seller.bank.upiId}&pn=${encodeURIComponent(
-                          invoice.seller.name || "KeeRa Innovations"
-                      )}&am=${grandTotal.toFixed(
-                          2
-                      )}&cu=INR&tn=Invoice%20${invoice.id}`
-                  )}`
-                : "";
-
-        // --- TEMPLATE DATA ---
+        
         const data = {
-            invoice,
+            ...invoice,
             subtotal,
             gstAmount,
             grandTotal,
-            totalInWords:
-                numberToWords
-                    .toWords(grandTotal)
-                    .replace(/\b\w/g, (c) => c.toUpperCase()) + " Only",
-            totalQty: invoice.lineItems.reduce(
-                (acc, item) => acc + (item.quantity || 0),
-                0
-            ),
-            formatCurrency,
-            qrCodeUrl,
-            companySealUrl:
-                invoice.seller?.companySealUrl &&
-                getFileAsBase64(invoice.seller.companySealUrl),
-            issueDate: new Date(invoice.issueDate || invoice.date).toLocaleDateString(),
+            totalInWords: numberToWords.toWords(grandTotal).replace(/\b\w/g, char => char.toUpperCase()) + ' Only',
+            totalQty: invoice.lineItems.reduce((acc, item) => acc + (item.quantity || 0), 0),
+            formatCurrency: formatCurrency,
+            qrCodeUrl: (() => {
+                if (!(invoice.seller?.bank?.upiId && grandTotal > 0)) {
+                  return '';
+                }
+                const payeeName = invoice.seller?.name || 'KeeRa Innovations';
+                const upiData = `upi://pay?pa=${invoice.seller.bank.upiId}&pn=${encodeURIComponent(payeeName)}&am=${grandTotal.toFixed(2)}&cu=INR&tn=Invoice%20${invoice.id}`;
+                return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(upiData)}`;
+            })(),
+            companySealUrl: getFileUrl(invoice.seller.companySealUrl),
+            issueDate: new Date(invoice.issueDate).toLocaleDateString(),
             MOCK_TERMS: [
                 "Payment is due within 30 days.",
                 "A late fee of 1.5% will be charged on overdue invoices.",
-                "Please include the invoice number on your payment.",
-            ],
+                "Please include the invoice number on your payment."
+            ]
         };
 
-        // --- LOAD EJS TEMPLATE ---
-        const templatePath = path.resolve(
-            __dirname,
-            "../views/invoice-template.ejs"
-        );
-
-        const templateContent = fs.readFileSync(templatePath, "utf8");
+        const templatePath = path.resolve(__dirname, '../views/invoice-template.ejs');
+        const templateContent = fs.readFileSync(templatePath, 'utf-8');
         const html = ejs.render(templateContent, data);
 
-        // --- GENERATE PDF USING PUPPETEER ---
-        const browser = await puppeteer.launch({
-            headless: "new",
-            args: ["--no-sandbox", "--disable-setuid-sandbox"],
-        });
-
+        const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
         const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: "networkidle0" });
-
-        // Fix for external QR images not loading
-        // await page.waitForTimeout(500);
-
-        const pdfBuffer = await page.pdf({
-            format: "A4",
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+        
+        const pdf = await page.pdf({
+            format: 'A4',
             printBackground: true,
             margin: {
-                top: "0.5in",
-                right: "0.5in",
-                bottom: "0.5in",
-                left: "0.5in",
-            },
+                top: '0.5in',
+                right: '0.5in',
+                bottom: '0.5in',
+                left: '0.5in'
+            }
         });
 
         await browser.close();
 
-        // --- SEND PDF INLINE FOR BROWSER PREVIEW ---
-        res.set({
-            "Content-Type": "application/pdf",
-            "Content-Disposition": `inline; filename=Invoice-${invoice.id}.pdf`,
-            "Content-Length": pdfBuffer.length,
-        });
-
-        res.send(pdfBuffer);
+        res.contentType('application/pdf');
+        res.send(pdf);
     } catch (error) {
-        console.error("Error generating PDF:", error);
-        res.status(500).send(`Error generating PDF: ${error.message}`);
+        console.error('Error generating PDF:', error);
+        res.status(500).send('Error generating PDF');
     }
 });
 
