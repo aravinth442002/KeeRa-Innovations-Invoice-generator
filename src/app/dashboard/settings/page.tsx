@@ -39,6 +39,7 @@ type Company = {
   companySignatureUrl: string;
   companySealUrl: string;
   taxId: string;
+  accHolderName: String;
   branch: String;
   accountNumber: string;
   ifsc: string;
@@ -259,8 +260,8 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="company-name">Account Holder Name</Label>
-                  <Input id="company-name" value={company.companyName || ''} onChange={(e) => handleInputChange('companyName', e.target.value)} />
+                  <Label htmlFor="acc-Holder-Name">Account Holder Name</Label>
+                  <Input id="acc-Holder-Name" value={company.accHolderName || ''} onChange={(e) => handleInputChange('companyName', e.target.value)} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="branch">Branch</Label>

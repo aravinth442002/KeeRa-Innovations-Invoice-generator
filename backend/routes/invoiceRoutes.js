@@ -7,6 +7,7 @@ const path = require('path');
 const fs = require('fs');
 const numberToWords = require('number-to-words');
 const Invoice = require('../models/invoiceModel'); 
+const Company = require('../models/companyModel'); // Assuming you have a company model
 
 // Helper function to format currency
 const formatCurrency = (amount) => {
@@ -30,6 +31,9 @@ router.get('/:id/pdf', async (req, res) => {
             return res.status(404).send('Invoice not found');
         }
 
+        // Fetch the first company to get accHolderName
+        const company = await Company.findOne().lean();
+
         const subtotal = invoice.lineItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.price || 0), 0);
         const gstAmount = subtotal * 0.18;
         const grandTotal = subtotal + gstAmount;
@@ -46,8 +50,18 @@ router.get('/:id/pdf', async (req, res) => {
             return `data:${mimeType};base64,${file.toString('base64')}`;
         };
         
+        // Ensure seller object and its nested properties exist
+        const seller = invoice.seller || {};
+        seller.bank = seller.bank || {};
+        
         const data = {
-            invoice: invoice,
+            invoice: {
+              ...invoice,
+              seller: {
+                  ...seller,
+                  accHolderName: company ? company.accHolderName : (seller.name || '')
+              }
+            },
             subtotal: subtotal,
             gstAmount: gstAmount,
             grandTotal: grandTotal,
@@ -55,17 +69,17 @@ router.get('/:id/pdf', async (req, res) => {
             totalQty: invoice.lineItems.reduce((acc, item) => acc + (item.quantity || 0), 0),
             formatCurrency: formatCurrency,
             qrCodeUrl: (() => {
-                if (!(invoice.seller?.bank?.upiId && grandTotal > 0)) {
+                if (!(seller.bank.upiId && grandTotal > 0)) {
                   return '';
                 }
-                const payeeName = invoice.seller?.name || 'KeeRa Innovations';
-                const upiData = `upi://pay?pa=${invoice.seller.bank.upiId}&pn=${encodeURIComponent(payeeName)}&am=${grandTotal.toFixed(2)}&cu=INR&tn=Invoice%20${invoice.id}`;
+                const payeeName = seller.name || 'KeeRa Innovations';
+                const upiData = `upi://pay?pa=${seller.bank.upiId}&pn=${encodeURIComponent(payeeName)}&am=${grandTotal.toFixed(2)}&cu=INR&tn=Invoice%20${invoice.id}`;
                 return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(upiData)}`;
             })(),
-            companySealUrl: invoice.seller && invoice.seller.companySealUrl ? getFileAsBase64(invoice.seller.companySealUrl) : null,
-            companySignatureUrl: invoice.seller && invoice.seller.companySignatureUrl ? getFileAsBase64(invoice.seller.companySignatureUrl) : null,
-            companyLogoUrl: invoice.seller && invoice.seller.companyLogoUrl ? getFileAsBase64(invoice.seller.companyLogoUrl) : null,
-            issueDate: new Date(invoice.issueDate || invoice.date).toLocaleDateString(),
+            companySealUrl: seller.companySealUrl ? getFileAsBase64(seller.companySealUrl) : null,
+            companySignatureUrl: seller.companySignatureUrl ? getFileAsBase64(seller.companySignatureUrl) : null,
+            companyLogoUrl: seller.companyLogoUrl ? getFileAsBase64(seller.companyLogoUrl) : null,
+            issueDate: invoice.issueDate ? new Date(invoice.issueDate).toLocaleDateString() : new Date().toLocaleDateString(),
             MOCK_TERMS: [
                 "Payment is due within 30 days.",
                 "A late fee of 1.5% will be charged on overdue invoices.",
