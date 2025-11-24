@@ -44,7 +44,6 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
 
   const totalQty = invoice.lineItems.reduce((acc, item) => acc + (item.quantity || 0), 0);
   const totalInWords = numberToWords(grandTotal);
-
   const bankDetails = invoice.seller?.bank || {};
   
   const MOCK_TERMS = [
@@ -226,7 +225,7 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
                       <table className="w-full border-collapse">
                           <tbody>
                             {[
-                                {label: 'Name', value: invoice.seller.accHolderName},
+                                {label: 'Name', value: bankDetails.accHolderName},
                                 {label: 'Branch', value: bankDetails.branch},
                                 {label: 'Acc. Number', value: bankDetails.accountNumber},
                                 {label: 'IFSC', value: bankDetails.ifsc},

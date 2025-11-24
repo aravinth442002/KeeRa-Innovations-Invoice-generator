@@ -21,8 +21,7 @@ router.route('/')
         upload.fields([
             { name: 'companyLogoUrl', maxCount: 1 },
             { name: 'companySignatureUrl', maxCount: 1 },
-            { name: 'companySealUrl', maxCount: 1 },
-            { name: 'companyLogo', maxCount: 1 }
+            { name: 'companySealUrl', maxCount: 1 }
 
         ]),
         companyController.createCompany 
@@ -34,8 +33,7 @@ router.route('/:id')
         upload.fields([
             { name: 'companyLogoUrl', maxCount: 1 },
             { name: 'companySignatureUrl', maxCount: 1 },
-            { name: 'companySealUrl', maxCount: 1 },
-            { name: 'companyLogo', maxCount: 1 }
+            { name: 'companySealUrl', maxCount: 1 }
         ]),
         companyController.updateCompany
     )

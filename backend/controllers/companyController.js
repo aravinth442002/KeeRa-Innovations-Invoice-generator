@@ -16,9 +16,6 @@ exports.createCompany = async (req, res) => {
         if (req.files && req.files['companySealUrl']) {
             companyData.companySealUrl = req.files['companySealUrl'][0].path; 
         }
-        if (req.files && req.files['companyLogo']) {
-            companyData.companyLogo = req.files['companyLogo'][0].path; 
-        }
 
         const newCompany = new Company(companyData);
         const savedCompany = await newCompany.save();
@@ -64,9 +61,6 @@ exports.updateCompany = async (req, res) => {
             }
             if (req.files['companySealUrl']) {
                 updateData.companySealUrl = req.files['companySealUrl'][0].path;
-            }
-            if (req.files['companyLogo']) {
-                updateData.companyLogo = req.files['companyLogo'][0].path;
             }
         }
         
