@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { type } = require('os');
 
 const CompanySchema = new mongoose.Schema({
     // --- Office Details ---
@@ -35,6 +36,10 @@ const CompanySchema = new mongoose.Schema({
         type: String,
         default: 'N/A' // Default can be removed if required or kept if optional
     },
+    companyLogo: {
+        type: String,
+        default: 'N/A'
+    },
 
     // --- Tax Details ---
     taxId: {
@@ -43,7 +48,7 @@ const CompanySchema = new mongoose.Schema({
     },
 
     // --- Bank Details ---
-    bankName: {
+    accHolderName: {
         type: String,
         trim: true,
     },

@@ -1,7 +1,6 @@
 const Invoice = require("../models/invoiceModel");
 
 exports.createInvoice = async (req, res) => {
-  console.log("%%%%%%%%%%%%",req.body)
 
   try {
     // Check if an invoice with this ID already exists to prevent duplicates
@@ -39,7 +38,6 @@ exports.getInvoiceById = async (req, res) => {
 };
 
 exports.updateInvoice = async (req, res) => {
-  console.log("%%%%%%%%%%%%",req.body)
   try {
     // Use the custom `id` field for lookup
     const invoice = await Invoice.findOneAndUpdate({ id: req.params.id }, req.body, { new: true, runValidators: true });
