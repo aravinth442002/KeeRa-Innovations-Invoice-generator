@@ -702,5 +702,3 @@ export function InvoicePreview({ invoice, template }: InvoicePreviewProps) {
       return <DefaultTemplate invoice={invoice} />;
   }
 }
-
-    
