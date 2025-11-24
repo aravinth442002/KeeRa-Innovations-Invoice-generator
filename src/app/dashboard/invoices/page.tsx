@@ -123,6 +123,28 @@ export default function InvoicesPage() {
     window.open(`${API_URL}/invoices/${invoiceId}/pdf`, '_blank');
   };
 
+  const downloadPdf = async (invoiceId: string) => {
+    try {
+      const response = await axios.get(`${API_URL}/invoices/${invoiceId}/pdf`, {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `invoice-${invoiceId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      toast({
+        title: 'Download Failed',
+        description: 'Could not download the invoice PDF.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <>
       <div className="flex min-h-0 flex-1 flex-col">
@@ -192,7 +214,7 @@ export default function InvoicesPage() {
                               <DropdownMenuItem onClick={() => viewPdf(invoice.id)}>View</DropdownMenuItem>
                               <DropdownMenuItem onClick={() => openEditPage(invoice)}>Edit</DropdownMenuItem>
                                {invoice.status === 'Received' && (
-                                <DropdownMenuItem>Download</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => downloadPdf(invoice.id)}>Download</DropdownMenuItem>
                               )}
                               <DropdownMenuItem
                                 className="text-destructive"
