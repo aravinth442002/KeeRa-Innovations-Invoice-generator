@@ -188,7 +188,9 @@ export default function InvoicesPage() {
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
                               <DropdownMenuItem>View</DropdownMenuItem>
                               <DropdownMenuItem onClick={() => openEditPage(invoice)}>Edit</DropdownMenuItem>
-                              <DropdownMenuItem>Download</DropdownMenuItem>
+                               {invoice.status === 'Received' && (
+                                <DropdownMenuItem>Download</DropdownMenuItem>
+                              )}
                               <DropdownMenuItem
                                 className="text-destructive"
                                 onClick={() => setInvoiceToDelete(invoice.id)}
