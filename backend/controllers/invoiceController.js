@@ -19,8 +19,8 @@ exports.createInvoice = async (req, res) => {
 
 exports.getInvoices = async (req, res) => {
   try {
-    // Sort by id descending to get the newest invoices first
-    const invoices = await Invoice.find().sort({ id: -1 });
+    // Sort by id ascending to get the oldest invoices first
+    const invoices = await Invoice.find().sort({ id: 1 });
     res.status(200).json(invoices);
   } catch (err) {
     res.status(500).json({ message: err.message });
