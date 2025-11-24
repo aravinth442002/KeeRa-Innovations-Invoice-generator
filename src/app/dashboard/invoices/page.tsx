@@ -71,6 +71,7 @@ export default function InvoicesPage() {
   const fetchInvoices = async () => {
     try {
       const response = await axios.get(`${API_URL}/invoices`);
+      console.log('Response data:', response.data);
       if (Array.isArray(response.data)) {
         setInvoices(response.data);
       } else {
