@@ -59,12 +59,13 @@ function NewInvoiceForm() {
     phone: '',
     email: '',
     bank: {
-      name: '',
+      accHolderName: '',
       branch: '',
       accountNumber: '',
       ifsc: '',
       upiId: '',
     },
+    companyLogoUrl: '',
     companySealUrl: '',
   });
 
@@ -91,6 +92,7 @@ function NewInvoiceForm() {
   });
 
   const [projectName, setProjectName] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState('default');
 
   const isEditing = !!invoiceId;
 
@@ -128,13 +130,15 @@ function NewInvoiceForm() {
           phone: company.phoneNumber,
           email: company.email,
           bank: {
-            name: company.bankName,
+            accHolderName: company.accHolderName,
             accountNumber: company.accountNumber,
             ifsc: company.ifsc,
             upiId: company.upiId,
             branch: company.branch, 
           },
-          companySealUrl: company.companySealUrl
+          companyLogoUrl: company.companyLogoUrl,
+          companySealUrl: company.companySealUrl,
+          companySignatureUrl: company.companySignatureUrl,
         });
       }
     } catch (error) {
@@ -441,7 +445,7 @@ function NewInvoiceForm() {
             <Card className="overflow-hidden">
                 <div className="bg-muted p-4 flex items-center justify-between">
                     <Label>Template Selector</Label>
-                     <Select defaultValue="default">
+                     <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
                         <SelectTrigger className="w-48">
                             <SelectValue />
                         </SelectTrigger>
@@ -453,7 +457,7 @@ function NewInvoiceForm() {
                     </Select>
                 </div>
                 <div className="p-6 h-[calc(100vh-200px)] overflow-y-auto">
-                    <InvoicePreview invoice={currentInvoiceData} />
+                    <InvoicePreview invoice={currentInvoiceData} template={selectedTemplate} />
                 </div>
                 <div className="p-6 border-t bg-muted/50 space-y-2">
                     <div className="flex justify-between text-sm">
