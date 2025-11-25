@@ -59,50 +59,15 @@ router.delete("/:id", invoiceController.deleteInvoice);
 //         const seller = invoice.seller || {};
 //         seller.bank = seller.bank || {};
         
-//         const subtotal = invoice.lineItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.price || 0), 0);
-//         const gstAmount = subtotal * 0.18;
-//         const grandTotal = subtotal + gstAmount;
-
-<<<<<<< HEAD
-//         const dataForTemplate = {
-//             invoice: {
-//               ...invoice,
-//               issueDate: new Date(invoice.issueDate || Date.now()).toLocaleDateString('en-IN'),
-//               seller: {
-//                   ...seller,
-//                   accHolderName: company ? company.accHolderName : (seller.name || ''),
-//                   companyLogoUrl: getFileAsBase64(company?.companyLogoUrl),
-//                   companySealUrl: getFileAsBase64(company?.companySealUrl),
-//                   companySignatureUrl: getFileAsBase64(company?.companySignatureUrl),
-//               }
-//             },
-//             subtotal: subtotal,
-//             gstAmount: gstAmount,
-//             grandTotal: grandTotal,
-//             totalInWords: numberToWords.toWords(grandTotal).replace(/\b\w/g, char => char.toUpperCase()) + ' Only',
-//             totalQty: invoice.lineItems.reduce((acc, item) => acc + (item.quantity || 0), 0),
-//             formatCurrency: formatCurrency,
-//             qrCodeUrl: (() => {
-//                 if (!(seller.bank.upiId && grandTotal > 0)) {
-//                   return '';
-//                 }
-//                 const payeeName = seller.name || 'KeeRa Innovations';
-//                 const upiData = `upi://pay?pa=${seller.bank.upiId}&pn=${encodeURIComponent(payeeName)}&am=${grandTotal.toFixed(2)}&cu=INR&tn=Invoice%20${invoice.id}`;
-//                 return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(upiData)}`;
-//             })(),
-//             MOCK_TERMS: [
-//                 "Payment is due within 30 days.",
-//                 "A late fee of 1.5% will be charged on overdue invoices.",
-//                 "Please include the invoice number on your payment."
-//             ],
-//         };
-=======
-        const formattedIssueDate = new Date(invoice.issueDate || Date.now()).toLocaleDateString('en-IN');
-        const formattedDueDate = invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString('en-IN') : 'N/A';
+        const subtotal = invoice.lineItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.price || 0), 0);
+        const gstAmount = subtotal * 0.18;
+        const grandTotal = subtotal + gstAmount;
 
         const dataForTemplate = {
             invoice: {
               ...invoice,
+              issueDate: new Date(invoice.issueDate || Date.now()).toLocaleDateString('en-IN'),
+              dueDate: invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString('en-IN') : 'N/A',
               seller: {
                   ...seller,
                   accHolderName: company ? company.accHolderName : (seller.name || ''),
@@ -114,8 +79,6 @@ router.delete("/:id", invoiceController.deleteInvoice);
                 companySealUrl: getFileAsBase64(company?.companySealUrl),
                 companySignatureUrl: getFileAsBase64(company?.companySignatureUrl),
             },
-            issueDate: formattedIssueDate,
-            dueDate: formattedDueDate,
             subtotal: subtotal,
             gstAmount: gstAmount,
             grandTotal: grandTotal,
