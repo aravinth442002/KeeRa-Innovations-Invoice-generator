@@ -63,6 +63,7 @@ router.delete("/:id", invoiceController.deleteInvoice);
 //         const gstAmount = subtotal * 0.18;
 //         const grandTotal = subtotal + gstAmount;
 
+<<<<<<< HEAD
 //         const dataForTemplate = {
 //             invoice: {
 //               ...invoice,
@@ -95,6 +96,48 @@ router.delete("/:id", invoiceController.deleteInvoice);
 //                 "Please include the invoice number on your payment."
 //             ],
 //         };
+=======
+        const formattedIssueDate = new Date(invoice.issueDate || Date.now()).toLocaleDateString('en-IN');
+        const formattedDueDate = invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString('en-IN') : 'N/A';
+
+        const dataForTemplate = {
+            invoice: {
+              ...invoice,
+              seller: {
+                  ...seller,
+                  accHolderName: company ? company.accHolderName : (seller.name || ''),
+              }
+            },
+            company: {
+                ...company,
+                companyLogoUrl: getFileAsBase64(company?.companyLogoUrl),
+                companySealUrl: getFileAsBase64(company?.companySealUrl),
+                companySignatureUrl: getFileAsBase64(company?.companySignatureUrl),
+            },
+            issueDate: formattedIssueDate,
+            dueDate: formattedDueDate,
+            subtotal: subtotal,
+            gstAmount: gstAmount,
+            grandTotal: grandTotal,
+            totalInWords: numberToWords.toWords(grandTotal).replace(/\b\w/g, char => char.toUpperCase()) + ' Only',
+            totalQty: invoice.lineItems.reduce((acc, item) => acc + (item.quantity || 0), 0),
+            formatCurrency: formatCurrency,
+            qrCodeUrl: (() => {
+                const bank = company || seller.bank;
+                if (!(bank?.upiId && grandTotal > 0)) {
+                  return '';
+                }
+                const payeeName = company?.accHolderName || seller.name || 'KeeRa Innovations';
+                const upiData = `upi://pay?pa=${bank.upiId}&pn=${encodeURIComponent(payeeName)}&am=${grandTotal.toFixed(2)}&cu=INR&tn=Invoice%20${invoice.id}`;
+                return `https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(upiData)}`;
+            })(),
+            MOCK_TERMS: [
+                "Payment is due within 30 days.",
+                "A late fee of 1.5% will be charged on overdue invoices.",
+                "Please include the invoice number on your payment."
+            ],
+        };
+>>>>>>> a874635 (Error generating PDF: ejs:87 85| 86| Invoice Date >> 87| <%= issueDate %)
         
 //         // --- Template Selection ---
 //         const templateName = req.query.template || 'default';

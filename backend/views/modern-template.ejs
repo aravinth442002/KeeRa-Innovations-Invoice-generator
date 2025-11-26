@@ -3,33 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice</title>
+    <title>Modern Invoice</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-         body {
-            font-family: sans-serif;
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
+        body {
+            font-family: 'Roboto', sans-serif;
+            -webkit-print-color-adjust: exact;
         }
     </style>
 </head>
 <body>
     <div class="invoice-container max-w-[800px] mx-auto shadow-2xl bg-white min-h-screen font-sans">
         <header class="px-10 pt-10 pb-6 bg-purple-800 text-white relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-1/2 h-full opacity-30"
-                 style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 10px 10px; -webkit-mask-image: linear-gradient(to right, black 80%, transparent); mask-image: linear-gradient(to right, black 80%, transparent);">
-            </div>
-            <div class="flex justify-between z-10">
+            <div class="absolute top-0 left-0 w-1/2 h-full opacity-30" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 10px 10px; -webkit-mask-image: linear-gradient(to right, black 80%, transparent); mask-image: linear-gradient(to right, black 80%, transparent);"></div>
+            <div class="flex justify-between z-10 relative">
                 <div class="flex flex-col w-1/2">
                     <div class="flex items-end mb-4">
-                        <% if (invoice.seller.companyLogoUrl) { %>
-                            <img src="<%= invoice.seller.companyLogoUrl %>" alt="Logo" class="w-10 h-10 mr-2 rounded-full">
-                        <% } else { %>
-                            <div class="w-10 h-10 mr-2 bg-fuchsia-600 rounded-full flex items-center justify-center text-white">LOGO</div>
-                        <% } %>
-                        <span class="text-4xl font-extrabold tracking-tight text-fuchsia-300" style="font-family: Georgia, serif; line-height: 1;"><%= invoice.seller.name.split(' ')[0] %></span>
+                        <div class="w-10 h-10 mr-2 rounded-full flex items-center justify-center text-white">
+                            <% if (company && company.companyLogoUrl) { %>
+                                <img src="<%= company.companyLogoUrl %>" alt="logo" width="40" height="40" class="rounded-full" />
+                            <% } else { %>
+                                LOGO
+                            <% } %>
+                        </div>
+                        <span class="text-4xl font-extrabold tracking-tight text-fuchsia-300" style="font-family: Georgia, serif; line-height: 1;"><%= (invoice.seller.name || 'KeeRa').split(' ')[0] %></span>
+                        <span class="text-sm font-semibold tracking-widest text-white ml-1 uppercase" style="font-family: Arial, sans-serif;">
+                            <%= (invoice.seller.name || 'INNOVATIONS').split(' ').slice(1).join(' ') %>
+                        </span>
                     </div>
                     <h1 class="text-6xl font-extrabold tracking-tight mb-3">TAX INVOICE</h1>
                     <p class="text-sm font-semibold text-fuchsia-300">
-                        INVOICE DATE: <span class="font-bold tracking-wider"><%= invoice.issueDate %></span>
+                        INVOICE DATE: <span class="font-bold tracking-wider"><%= issueDate %></span>
                     </p>
                     <p class="text-sm font-semibold tracking-wide text-white mt-1">
                         PROJECT NAME: <span class="font-bold"><%= invoice.description %></span>
@@ -39,7 +44,9 @@
                     <p><%= invoice.seller.phone %></p>
                     <p class="font-bold text-fuchsia-300"><%= invoice.seller.email %></p>
                     <div class="mt-2 pt-2 text-sm space-y-0.5">
-                        <span class="block"><%= invoice.seller.address %></span>
+                        <% (invoice.seller.address || '').split(',').forEach(line => { %>
+                            <span class="block"><%= line %></span>
+                        <% }); %>
                     </div>
                 </div>
             </div>
@@ -74,25 +81,29 @@
                         <p class="text-sm font-semibold"><%= invoice.phone %></p>
                         <p class="text-sm font-extrabold text-fuchsia-600"><%= invoice.email %></p>
                     </div>
+                    <% const bank = company || invoice.seller.bank; %>
                     <div class="payment-details-section mt-4 p-4 border shadow-purple-900 rounded-lg border-fuchsia-600 overflow-hidden shadow-sm">
                         <h3 class="text-sm font-bold uppercase mb-2 text-fuchsia-600 border-b border-gray-300 pb-1">Payment Details</h3>
                         <div class="flex justify-between items-start text-gray-700">
                             <div class="text-xs space-y-1 w-2/3 font-semibold">
-                                <p>A/C Name: <span class="font-extrabold text-gray-900"><%= invoice.seller.bank.accHolderName %></span></p>
-                                <p>Branch: <span class="font-extrabold text-gray-900"><%= invoice.seller.bank.branch %></span></p>
-                                <p>A/C No: <span class="font-extrabold text-gray-900"><%= invoice.seller.bank.accountNumber %></span></p>
-                                <p>IFSC: <span class="font-extrabold text-gray-900"><%= invoice.seller.bank.ifsc %></span></p>
-                                <p>UPI ID: <span class="font-extrabold text-gray-900"><%= invoice.seller.bank.upiId %></span></p>
+                                <p>A/C Name: <span class="font-extrabold text-gray-900"><%= bank.accHolderName %></span></p>
+                                <p>Branch: <span class="font-extrabold text-gray-900"><%= bank.branch %></span></p>
+                                <p>A/C No: <span class="font-extrabold text-gray-900"><%= bank.accountNumber %></span></p>
+                                <p>IFSC: <span class="font-extrabold text-gray-900"><%= bank.ifsc %></span></p>
+                                <p>UPI ID: <span class="font-extrabold text-gray-900"><%= bank.upiId %></span></p>
                             </div>
-                            <% if (qrCodeUrl) { %>
-                                <div class="w-1/3 flex flex-col items-center">
-                                    <img src="<%= qrCodeUrl %>" alt="QR Code" class="w-20 h-20 border border-fuchsia-400 bg-white">
-                                    <p class="text-[10px] px-5 mt-1 text-gray-700 font-semibold">Scan to Pay</p>
-                                </div>
-                            <% } %>
+                            <div class="w-1/3 flex flex-col items-center">
+                                <% if (qrCodeUrl) { %>
+                                    <img src="<%= qrCodeUrl %>" alt="QR Code" width="80" height="80" />
+                                <% } else { %>
+                                    <div class="w-20 h-20 border border-fuchsia-400 flex items-center justify-center text-[8px] text-fuchsia-600 bg-white">[QR CODE]</div>
+                                <% } %>
+                                <p class="text-[10px] px-5 mt-1 text-gray-700 font-semibold">Scan to Pay</p>
+                            </div>
                         </div>
                     </div>
                 </div>
+
                 <div class="totals-section w-4/12 flex flex-col items-end pt-4">
                     <div class="w-full text-sm text-gray-800 font-bold bg-white rounded-md overflow-hidden border border-gray-300 shadow-lg">
                         <div class="flex justify-between py-2 px-4 bg-gray-50 border-b border-gray-200">
@@ -104,11 +115,11 @@
                             <div class="w-3/4 divide-y divide-fuchsia-100">
                                 <div class="flex justify-between py-1.5 px-2">
                                     <span class="font-semibold text-gray-700">CGST - 9%</span>
-                                    <span class="font-bold text-gray-800"><%= formatCurrency(gstAmount / 2) %></span>
+                                    <span class="font-bold text-gray-800"><%= formatCurrency(gstAmount/2) %></span>
                                 </div>
                                 <div class="flex justify-between py-1.5 px-2 border-b border-gray-300">
                                     <span class="font-semibold text-gray-700">SGST - 9%</span>
-                                    <span class="font-bold text-gray-800"><%= formatCurrency(gstAmount / 2) %></span>
+                                    <span class="font-bold text-gray-800"><%= formatCurrency(gstAmount/2) %></span>
                                 </div>
                             </div>
                         </div>
@@ -118,25 +129,29 @@
                             <span class="final-total-amount z-10"><%= formatCurrency(grandTotal) %></span>
                         </div>
                     </div>
+
                     <div class="mt-8 text-center text-gray-700">
-                         <% if (invoice.seller.companySealUrl) { %>
-                            <img src="<%= invoice.seller.companySealUrl %>" alt="Company Seal" class="w-32 h-32 mx-auto mb-2">
-                         <% } else { %>
-                            <div class="w-32 h-32 mx-auto border-4 border-purple-400 rounded-full flex items-center justify-center text-xs font-bold bg-white mb-2 p-2 shadow-inner">
+                        <div class="w-32 h-32 mx-auto border-4 border-purple-400 rounded-full flex items-center justify-center text-xs font-bold bg-white mb-2 p-2 shadow-inner">
+                            <% if (company && company.companySealUrl) { %>
+                                <img src="<%= company.companySealUrl %>" alt="Seal" width="128" height="128" class="rounded-full"/>
+                            <% } else { %>
                                 [COMPANY SEAL HERE]
-                            </div>
-                         <% } %>
+                            <% } %>
+                        </div>
                         <p class="font-bold text-lg text-fuchsia-600">Authorized Signature</p>
                         <p class="text-sm text-gray-600">Thank you for your business!</p>
                     </div>
                 </div>
             </footer>
+
             <div class="mt-12 w-full">
-                <div class="w-full bg-fuchsia-700 text-white font-bold text-center text-xl py-3 px-10">Terms and Conditions</div>
+                <div class="w-full bg-fuchsia-700 text-white font-bold text-center text-xl py-3 px-10">
+                    Terms and Conditions
+                </div>
                 <div class="px-10 py-4 bg-white border-b border-l border-r border-fuchsia-700/50">
                     <ol class="list-decimal list-outside text-base ml-6 space-y-1 text-gray-900 font-semibold">
-                        <% MOCK_TERMS.forEach(term => { %>
-                            <li class="pl-2"><%= term %></li>
+                        <% MOCK_TERMS.forEach(point => { %>
+                            <li class="pl-2"><%= point %></li>
                         <% }); %>
                     </ol>
                 </div>
