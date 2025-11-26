@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { MoreHorizontal } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+
 import {
   Card,
   CardContent,
@@ -112,7 +113,7 @@ export default function InvoicesPage() {
       }
     }
   };
-  
+
   const openEditPage = (invoice: Invoice) => {
     router.push(`/dashboard/invoices/new?id=${invoice.id}`);
   };
@@ -121,9 +122,35 @@ export default function InvoicesPage() {
     setIsCreateDialogOpen(open);
   }
 
-  const viewPdf = (invoiceId: string, template: string = 'default') => {
-    window.open(`${API_URL}/invoices/${invoiceId}/pdf?template=${template}`, '_blank');
-  };
+  // const viewPdf = (invoiceId: string, template: string = 'default') => {
+  //   window.open(`${API_URL}/invoices/${invoiceId}/pdf?template=${template}`, '_blank');
+  // };
+
+  const viewPdf = async (invoiceId: string, template: string = 'default') => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/invoices/test-pdf`,
+      {
+        responseType: "blob", 
+      }
+    );
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "test-sample.pdf");
+    document.body.appendChild(link);
+    link.click();
+
+    link.remove();
+    window.URL.revokeObjectURL(url);
+
+  } catch (error) {
+    console.error("PDF download error:", error);
+  }
+};
+
 
   const downloadPdf = async (invoiceId: string, template: string = 'default') => {
     try {
@@ -216,7 +243,7 @@ export default function InvoicesPage() {
                               <DropdownMenuItem onClick={() => viewPdf(invoice.id, 'classic')}>View Classic</DropdownMenuItem>
                               <DropdownMenuItem onClick={() => viewPdf(invoice.id, 'modern')}>View Modern</DropdownMenuItem>
                               <DropdownMenuItem onClick={() => openEditPage(invoice)}>Edit</DropdownMenuItem>
-                               {invoice.status === 'Received' && (
+                              {invoice.status === 'Received' && (
                                 <>
                                   <DropdownMenuItem onClick={() => downloadPdf(invoice.id, 'default')}>Download Default</DropdownMenuItem>
                                   <DropdownMenuItem onClick={() => downloadPdf(invoice.id, 'classic')}>Download Classic</DropdownMenuItem>

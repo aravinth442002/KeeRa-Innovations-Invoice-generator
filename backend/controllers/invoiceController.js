@@ -1,4 +1,7 @@
 const Invoice = require("../models/invoiceModel");
+const ejs = require("ejs");
+const path = require("path");
+const puppeteer = require("puppeteer");
 
 exports.createInvoice = async (req, res) => {
 
@@ -57,4 +60,43 @@ exports.deleteInvoice = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+};
+
+
+exports.generateSamplePDF = async (req, res) => {
+    try {
+        // Load EJS (static PDF)
+        const html = await ejs.renderFile(
+            path.join(__dirname, "../views/sample.ejs")
+        );
+
+        // Launch browser
+        const browser = await puppeteer.launch({
+            headless: "new",
+            args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        });
+
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: "networkidle0" });
+
+        // Generate PDF buffer
+        const pdfBuffer = await page.pdf({
+            format: "A4",
+            printBackground: true,
+        });
+
+        await browser.close();
+
+        // Return PDF as blob
+        res.set({
+            "Content-Type": "application/pdf",
+            "Content-Disposition": "attachment; filename=test-sample.pdf",
+        });
+
+        return res.send(pdfBuffer);
+
+    } catch (err) {
+        console.error("PDF Error:", err);
+        res.status(500).json({ message: "Failed to generate PDF" });
+    }
 };
