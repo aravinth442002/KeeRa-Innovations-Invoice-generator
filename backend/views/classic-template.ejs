@@ -3,46 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Classic Invoice</title>
+    <title>Invoice</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
-        body {
-            font-family: 'Roboto', sans-serif;
-            -webkit-print-color-adjust: exact;
-        }
+      body { font-family: sans-serif; }
     </style>
 </head>
 <body>
-    <div class="p-4 md:p-8 bg-gray-100 min-h-screen font-sans">
+    <div class="p-4 md:p-8 bg-gray-100 min-h-screen">
       <div class="bg-white mx-auto max-w-5xl shadow-2xl pb-10 rounded-xl overflow-hidden">
         <header class="text-white relative overflow-hidden bg-purple-700">
           <div class="flex justify-between items-center p-8">
             <div class="flex flex-col items-start">
-              <% if (company && company.companyLogoUrl) { %>
-                <img
-                  src="<%= company.companyLogoUrl %>"
-                  alt="<%= invoice.seller.name %> Logo"
-                  class="w-12 h-12 mb-2"
-                  style="filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5))"
-                />
-              <% } %>
-              <h1 class="text-2xl font-extrabold tracking-tight"><%= invoice.seller.name || 'KEERA INNOVATIONS' %></h1>
+                <% if (company.companyLogoUrl) { %>
+                    <img
+                        src="<%= company.companyLogoUrl %>"
+                        alt="Logo"
+                        class="w-12 h-12 mb-2"
+                        style="filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5))"
+                        unoptimized
+                    />
+                <% } %>
+              <h1 class="text-2xl font-extrabold tracking-tight"><%= invoice.seller.name %></h1>
             </div>
             <div class="text-right">
               <h2 class="text-4xl font-extrabold tracking-wider mb-2">TAX INVOICE</h2>
               <div class="text-xs space-y-1">
                 <p>
                   <span class="font-bold w-20 inline-block text-right">Invoice No:</span>
-                  <span class="ml-2 font-extrabold text-yellow-300"><%= invoice.id || 'N/A' %></span>
+                  <span class="ml-2 font-extrabold text-yellow-300"><%= invoice.id %></span>
                 </p>
                 <p>
                   <span class="font-bold w-20 inline-block text-right">Date:</span>
-                  <span class="ml-2"><%= issueDate %></span>
+                  <span class="ml-2"><%= invoice.issueDate %></span>
                 </p>
                 <p>
                   <span class="font-bold w-20 inline-block text-right">Due Date:</span>
-                  <span class="ml-2"><%= dueDate %></span>
+                  <span class="ml-2"><%= invoice.dueDate %></span>
                 </p>
               </div>
             </div>
@@ -53,26 +50,26 @@
           <div class="grid grid-cols-2 gap-8 text-sm">
             <div>
               <h3 class="text-lg font-bold text-gray-700 mb-2 border-b-2 border-purple-300 inline-block pb-1">Our Details</h3>
-              <h4 class="text-base font-extrabold text-purple-700 mt-2"><%= invoice.seller.name || 'Keera Innovations' %></h4>
-              <% (invoice.seller.address || '').split(',').forEach(part => { %>
-                <p class="text-sm"><%= part %></p>
-              <% }); %>
-              <p class="text-sm mt-2">📞 <%= invoice.seller.phone || '' %></p>
+              <h4 class="text-base font-extrabold text-purple-700 mt-2"><%= invoice.seller.name %></h4>
+              <% invoice.seller.address.split(',').forEach(part => { %>
+                <p class="text-sm"><%= part.trim() %></p>
+              <% }) %>
+              <p class="text-sm mt-2">📞 <%= invoice.seller.phone %></p>
               <p class="text-sm font-light mt-1">
-                <span class="font-semibold mr-1">GSTIN:</span> <%= invoice.seller.gstin || 'N/A' %>
+                <span class="font-semibold mr-1">GSTIN:</span> <%= invoice.seller.gstin %>
               </p>
             </div>
             <div class="text-right">
               <h3 class="text-lg font-bold text-gray-700 mb-2 border-b-2 border-purple-300 inline-block pb-1">Bill To</h3>
-              <h4 class="text-2xl font-bold text-purple-700 mt-2"><%= invoice.customer || 'N/A' %></h4>
-              <% (invoice.customerAddress || '').split(',').forEach(part => { %>
-                <p class="text-sm mt-1"><%= part %></p>
-              <% }); %>
+              <h4 class="text-2xl font-bold text-purple-700 mt-2"><%= invoice.customer %></h4>
+              <% invoice.customerAddress.split(',').forEach(part => { %>
+                <p class="text-sm mt-1"><%= part.trim() %></p>
+              <% }) %>
               <p class="text-sm font-light mt-1 text-gray-800">
-                <span class="font-semibold mr-1">GSTIN:</span> <%= invoice.gstin || 'N/A' %>
+                <span class="font-semibold mr-1">GSTIN:</span> <%= invoice.gstin %>
               </p>
               <p class="text-sm pt-4 font-bold text-gray-800">
-                PROJECT: <span class="font-normal"><%= invoice.description || 'N/A' %></span>
+                PROJECT: <span class="font-normal"><%= invoice.description %></span>
               </p>
             </div>
           </div>
@@ -90,13 +87,13 @@
             </thead>
             <tbody>
               <% invoice.lineItems.forEach((item, index) => { %>
-                <tr class="<% if (index % 2 === 0) { %>bg-white<% } else { %>bg-purple-50<% } %> hover:bg-purple-100 transition-colors">
+                <tr class="<%= index % 2 === 0 ? 'bg-white' : 'bg-purple-50' %> hover:bg-purple-100 transition-colors">
                   <td class="py-3 px-4 text-left border-b border-gray-200"><%= item.name %></td>
                   <td class="py-3 px-4 text-center border-b border-gray-200"><%= formatCurrency(item.price) %></td>
                   <td class="py-3 px-4 text-center border-b border-gray-200"><%= item.quantity %></td>
                   <td class="py-3 px-4 text-right font-bold text-purple-700 border-b border-gray-200"><%= formatCurrency(item.price * item.quantity) %></td>
                 </tr>
-              <% }); %>
+              <% }) %>
             </tbody>
           </table>
         </section>
@@ -106,17 +103,16 @@
             <div class="w-1/2 pr-10">
               <h3 class="text-sm font-bold mb-3 text-purple-700 border-b border-purple-300 pb-1">PAYMENT DETAILS</h3>
               <div class="flex justify-between items-start">
-                  <% const bank = company || invoice.seller.bank %>
                   <div class="text-xs space-y-1 w-2/3 p-3 bg-purple-200 rounded shadow-inner">
-                    <p><span class="font-bold w-20 inline-block">A/C NAME:</span> <%= bank.accHolderName %></p>
-                    <p><span class="font-bold w-20 inline-block">BRANCH:</span> <%= bank.branch %></p>
-                    <p><span class="font-bold w-20 inline-block">ACC. NO:</span> <%= bank.accountNumber %></p>
-                    <p><span class="font-bold w-20 inline-block">IFSC:</span> <%= bank.ifsc %></p>
-                    <p class="mt-2 font-bold text-purple-700">UPI ID: <%= bank.upiId %></p>
+                    <p><span class="font-bold w-20 inline-block">A/C NAME:</span> <%= invoice.seller.bank.accHolderName %></p>
+                    <p><span class="font-bold w-20 inline-block">BRANCH:</span> <%= invoice.seller.bank.branch %></p>
+                    <p><span class="font-bold w-20 inline-block">ACC. NO:</span> <%= invoice.seller.bank.accountNumber %></p>
+                    <p><span class="font-bold w-20 inline-block">IFSC:</span> <%= invoice.seller.bank.ifsc %></p>
+                    <p class="mt-2 font-bold text-purple-700">UPI ID: <%= invoice.seller.bank.upiId %></p>
                   </div>
                   <% if (qrCodeUrl) { %>
                      <div class="w-1/3 flex flex-col items-center justify-center p-2 bg-white border border-purple-300 rounded shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                        <img src="<%= qrCodeUrl %>" alt="QR Code" width="80" height="80" />
+                        <img src="<%= qrCodeUrl %>" alt="QR Code" width="80" height="80" unoptimized />
                         <p class="mt-1 text-xs font-semibold text-gray-700">Scan for UPI</p>
                     </div>
                   <% } %>
@@ -132,35 +128,35 @@
               <div class="w-80 text-sm bg-gray-50 p-4 rounded-lg shadow-md">
                 <div class="flex justify-between py-1 px-4 border-b border-gray-200">
                     <span class="font-semibold text-gray-600">Sub Total</span>
-                    <span class="font-bold text-gray-800"><%= formatCurrency(subtotal) %></span>
+                    <span class="font-bold text-gray-800"><%= formatCurrency(invoice.subtotal) %></span>
                 </div>
                 <div class="flex justify-between py-1 px-4 border-b border-gray-200">
                     <span class="font-semibold text-gray-600">Tax (18%)</span>
-                    <span class="font-bold text-gray-800"><%= formatCurrency(gstAmount) %></span>
+                    <span class="font-bold text-gray-800"><%= formatCurrency(invoice.gstAmount) %></span>
                 </div>
                 <div class="flex justify-between py-1 px-4 border-b border-gray-200">
                     <span class="font-semibold text-gray-600">CGST (9%)</span>
-                    <span class="font-bold text-gray-800"><%= formatCurrency(gstAmount / 2) %></span>
+                    <span class="font-bold text-gray-800"><%= formatCurrency(invoice.gstAmount / 2) %></span>
                 </div>
-                <div class="flex justify-between py-1 px-4 border-b border-gray-200">
+                 <div class="flex justify-between py-1 px-4 border-b border-gray-200">
                     <span class="font-semibold text-gray-600">SGST (9%)</span>
-                    <span class="font-bold text-gray-800"><%= formatCurrency(gstAmount / 2) %></span>
+                    <span class="font-bold text-gray-800"><%= formatCurrency(invoice.gstAmount / 2) %></span>
                 </div>
                 <div class="flex justify-between py-1 px-4 bg-purple-700 text-white text-lg font-extrabold mt-3 rounded">
                     <span class="font-semibold text-white">Amount Due</span>
-                    <span class="font-bold text-white"><%= formatCurrency(grandTotal) %></span>
+                    <span class="font-bold text-white"><%= formatCurrency(invoice.grandTotal) %></span>
                 </div>
               </div>
               <div class="flex flex-col mt-8 pt-4 w-full items-end">
-                 <% if (company && company.companySealUrl) { %>
-                    <img src="<%= company.companySealUrl %>" alt="Seal" width="128" height="128" class="mb-4" />
-                 <% } else { %>
+                <% if (company.companySealUrl) { %>
+                    <img src="<%= company.companySealUrl %>" alt="Seal" width="128" height="128" class="mb-4" unoptimized/>
+                <% } else { %>
                     <div class="w-32 h-32 mb-4 flex items-center justify-center mr-16 border-4 border-purple-400 rounded-full bg-white shadow-lg">
                         <span class="text-sm font-bold text-gray-700 text-center uppercase tracking-wider">
                             [SEAL]
                         </span>
                     </div>
-                 <% } %>
+                <% } %>
                 <p class="text-2xl font-bold text-purple-700 mt-2">Authorized Signature</p>
                 <p class="font-normal text-gray-600 text-center text-sm mt-1">Thank you for your business!</p>
               </div>
