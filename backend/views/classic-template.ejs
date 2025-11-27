@@ -15,17 +15,17 @@
         <header class="text-white relative overflow-hidden bg-purple-700">
           <div class="flex justify-between items-center p-8">
             <div class="flex flex-col items-start">
-              <% if (company.companyLogoUrl) { %>
-                <img
-                  src="<%= company.companyLogoUrl %>"
-                  alt="Company Logo"
-                  width="48"
-                  height="48"
-                  class="mb-2"
-                  style="filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5))"
-                  unoptimized
-                />
-              <% } %>
+              <% if (invoice.seller.companyLogoUrl) { %>
+  <img
+    src="<%= invoice.seller.companyLogoUrl %>"
+    alt="Company Logo"
+    width="48"
+    height="48"
+    class="mb-2"
+    style="filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5))"
+  />
+<% } %>
+
               <h1 class="text-2xl font-extrabold tracking-tight"><%= invoice.seller.name %></h1>
             </div>
             <div class="text-right">
@@ -150,15 +150,22 @@
                 </div>
               </div>
               <div class="flex flex-col mt-8 pt-4 w-full items-end">
-                 <% if (company.companySealUrl) { %>
-                    <img src="<%= company.companySealUrl %>" alt="Seal" width="128" height="128" class="mb-4" unoptimized>
-                 <% } else { %>
-                    <div class="w-32 h-32 mb-4 flex items-center justify-center mr-16 border-4 border-purple-400 rounded-full bg-white shadow-lg">
-                        <span class="text-sm font-bold text-gray-700 text-center uppercase tracking-wider">
-                            [SEAL]
-                        </span>
-                    </div>
-                 <% } %>
+                 <% if (invoice.seller.companySealUrl) { %>
+  <img 
+    src="<%= invoice.seller.companySealUrl %>"
+    alt="Seal"
+    width="128"
+    height="128"
+    class="mb-4"
+  />
+<% } else { %>
+  <div class="w-32 h-32 mb-4 flex items-center justify-center mr-16 border-4 border-purple-400 rounded-full bg-white shadow-lg">
+    <span class="text-sm font-bold text-gray-700 text-center uppercase tracking-wider">
+      [SEAL]
+    </span>
+  </div>
+<% } %>
+
                 <p class="text-2xl font-bold text-purple-700 mt-2">Authorized Signature</p>
                 <p class="font-normal text-gray-600 text-center text-sm mt-1">Thank you for your business!</p>
               </div>

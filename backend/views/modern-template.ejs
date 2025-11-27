@@ -19,19 +19,26 @@
           </div>
           <div class="flex justify-between z-10 relative">
             <div class="flex flex-col w-1/2">
-              <div class="flex items-end mb-4">
-                 <div class="w-10 h-10 mr-2 rounded-full flex items-center justify-center text-white">
-                    <% if (company.companyLogoUrl) { %><img src="<%= company.companyLogoUrl %>" alt="logo" width="40" height="40" class="rounded-full" unoptimized /><% } else { %>LOGO<% } %>
-                 </div>
-                 <span class="text-4xl font-extrabold tracking-tight text-fuchsia-300"
-                   style="font-family: Georgia, serif; line-height: 1;">
-                   <%= invoice.seller.name.split(' ')[0] %>
-                 </span>
-                 <span class="text-sm font-semibold tracking-widest text-white ml-1 uppercase"
-                   style="font-family: Arial, sans-serif;">
-                   <%= invoice.seller.name.split(' ').slice(1).join(' ') %>
-                 </span>
-               </div>
+                <div class="flex items-end mb-4">
+  <div class="w-10 h-10 mr-2 rounded-full flex items-center justify-center text-white bg-white overflow-hidden">
+      <% if (invoice.seller.companyLogoUrl) { %>
+          <img src="<%= invoice.seller.companyLogoUrl %>" alt="logo" width="40" height="40" class="rounded-full" />
+      <% } else { %>
+          LOGO
+      <% } %>
+  </div>
+
+  <span class="text-4xl font-extrabold tracking-tight text-fuchsia-300"
+    style="font-family: Georgia, serif; line-height: 1;">
+    <%= invoice.seller.name ? invoice.seller.name.split(' ')[0] : '' %>
+  </span>
+
+  <span class="text-sm font-semibold tracking-widest text-white ml-1 uppercase"
+    style="font-family: Arial, sans-serif;">
+    <%= invoice.seller.name ? invoice.seller.name.split(' ').slice(1).join(' ') : '' %>
+  </span>
+</div>
+
               <h1 class="text-6xl font-extrabold tracking-tight mb-3">TAX INVOICE</h1>
               <p class="text-sm font-semibold text-fuchsia-300">
                  INVOICE DATE: <span class="font-bold tracking-wider"><%= invoice.issueDate %></span>
@@ -142,8 +149,13 @@
               </div>
               <div class="mt-8 text-center text-gray-700">
                 <div class="w-32 h-32 mx-auto border-4 border-purple-400 rounded-full flex items-center justify-center text-xs font-bold bg-white mb-2 p-2 shadow-inner">
-                  <% if (company.companySealUrl) { %><img src="<%= company.companySealUrl %>" alt="Seal" width="128" height="128" class="rounded-full" unoptimized><% } else { %>[COMPANY SEAL HERE]<% } %>
-                </div>
+    <% if (invoice.seller.companySealUrl) { %>
+        <img src="<%= invoice.seller.companySealUrl %>" alt="Seal" width="128" height="128" class="rounded-full" />
+    <% } else { %>
+        [COMPANY SEAL HERE]
+    <% } %>
+</div>
+
                 <p class="font-bold text-lg text-fuchsia-600">Authorized Signature</p>
                 <p class="text-sm text-gray-600">Thank you for your business!</p>
               </div>

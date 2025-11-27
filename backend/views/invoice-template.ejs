@@ -180,7 +180,7 @@
                     </tr>
                     <tr>
                         <td class="bg-[#5651e5]/20 font-bold p-2 text-xs">Invoice Date</td>
-                        <td class="p-2 text-xs"><%= issueDate %></td>
+                        <td class="p-2 text-xs"><%= invoice.issueDate %></td>
                     </tr>
                 </tbody>
               </table>
@@ -281,7 +281,6 @@
                                     <% if (index === 0) { %>
                                         <td class="text-center p-0 border-t-0 border-b-0 border-r-0 border-l border-[#5651e5]" rowspan="5">
                                           <% if (qrCodeUrl) { %>
-                                            <>
                                               <div class="w-[85px] h-[85px] m-auto border border-[#5651e5] flex items-center justify-center p-1">
                                                   <img src="<%= qrCodeUrl %>" alt="QR Code" width="80" height="80" />
                                               </div>
@@ -329,8 +328,8 @@
                         </table>
                         <div class="bg-[#5651e5] text-white font-bold p-2 text-left -mt-px text-sm">For KeeRa Innovations</div>
                          <div class="h-[140px] text-center p-2 border-x border-[#5651e5] flex items-center justify-center">
-                            <% if (companySealUrl) { %>
-                                <img src="<%= companySealUrl %>" alt="Company Seal" style="max-width: 140px; max-height: 140px; object-fit: contain;" />
+                            <% if (invoice.seller.companySealUrl) { %>
+                                <img src="<%= invoice.seller.companySealUrl %>" alt="Company Seal" style="max-width: 140px; max-height: 140px; object-fit: contain;" />
                             <% } else { %>
                                 <div class="w-32 h-32 mx-auto border border-[#5651e5] rounded-full flex items-center justify-center text-xs font-bold">
                                    
