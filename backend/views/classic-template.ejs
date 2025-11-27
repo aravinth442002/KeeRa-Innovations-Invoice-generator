@@ -6,24 +6,26 @@
     <title>Invoice</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      body { font-family: sans-serif; }
+        .font-sans { font-family: sans-serif; }
     </style>
 </head>
-<body>
+<body class="font-sans">
     <div class="p-4 md:p-8 bg-gray-100 min-h-screen">
       <div class="bg-white mx-auto max-w-5xl shadow-2xl pb-10 rounded-xl overflow-hidden">
         <header class="text-white relative overflow-hidden bg-purple-700">
           <div class="flex justify-between items-center p-8">
             <div class="flex flex-col items-start">
-                <% if (company.companyLogoUrl) { %>
-                    <img
-                        src="<%= company.companyLogoUrl %>"
-                        alt="Logo"
-                        class="w-12 h-12 mb-2"
-                        style="filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5))"
-                        unoptimized
-                    />
-                <% } %>
+              <% if (company.companyLogoUrl) { %>
+                <img
+                  src="<%= company.companyLogoUrl %>"
+                  alt="Company Logo"
+                  width="48"
+                  height="48"
+                  class="mb-2"
+                  style="filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5))"
+                  unoptimized
+                />
+              <% } %>
               <h1 class="text-2xl font-extrabold tracking-tight"><%= invoice.seller.name %></h1>
             </div>
             <div class="text-right">
@@ -51,9 +53,9 @@
             <div>
               <h3 class="text-lg font-bold text-gray-700 mb-2 border-b-2 border-purple-300 inline-block pb-1">Our Details</h3>
               <h4 class="text-base font-extrabold text-purple-700 mt-2"><%= invoice.seller.name %></h4>
-              <% invoice.seller.address.split(',').forEach(part => { %>
-                <p class="text-sm"><%= part.trim() %></p>
-              <% }) %>
+                <% invoice.seller.address.split(',').forEach(part => { %>
+                    <p class="text-sm"><%= part.trim() %></p>
+                <% }) %>
               <p class="text-sm mt-2">📞 <%= invoice.seller.phone %></p>
               <p class="text-sm font-light mt-1">
                 <span class="font-semibold mr-1">GSTIN:</span> <%= invoice.seller.gstin %>
@@ -62,9 +64,9 @@
             <div class="text-right">
               <h3 class="text-lg font-bold text-gray-700 mb-2 border-b-2 border-purple-300 inline-block pb-1">Bill To</h3>
               <h4 class="text-2xl font-bold text-purple-700 mt-2"><%= invoice.customer %></h4>
-              <% invoice.customerAddress.split(',').forEach(part => { %>
-                <p class="text-sm mt-1"><%= part.trim() %></p>
-              <% }) %>
+               <% invoice.customerAddress.split(',').forEach(part => { %>
+                    <p class="text-sm mt-1"><%= part.trim() %></p>
+                <% }) %>
               <p class="text-sm font-light mt-1 text-gray-800">
                 <span class="font-semibold mr-1">GSTIN:</span> <%= invoice.gstin %>
               </p>
@@ -87,13 +89,13 @@
             </thead>
             <tbody>
               <% invoice.lineItems.forEach((item, index) => { %>
-                <tr class="<%= index % 2 === 0 ? 'bg-white' : 'bg-purple-50' %> hover:bg-purple-100 transition-colors">
+                <tr class="<%= index % 2 === 0 ? 'bg-white hover:bg-purple-50 transition-colors' : 'bg-purple-50 hover:bg-purple-100 transition-colors' %>">
                   <td class="py-3 px-4 text-left border-b border-gray-200"><%= item.name %></td>
                   <td class="py-3 px-4 text-center border-b border-gray-200"><%= formatCurrency(item.price) %></td>
                   <td class="py-3 px-4 text-center border-b border-gray-200"><%= item.quantity %></td>
                   <td class="py-3 px-4 text-right font-bold text-purple-700 border-b border-gray-200"><%= formatCurrency(item.price * item.quantity) %></td>
                 </tr>
-              <% }) %>
+              <% }); %>
             </tbody>
           </table>
         </section>
@@ -112,16 +114,16 @@
                   </div>
                   <% if (qrCodeUrl) { %>
                      <div class="w-1/3 flex flex-col items-center justify-center p-2 bg-white border border-purple-300 rounded shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                        <img src="<%= qrCodeUrl %>" alt="QR Code" width="80" height="80" unoptimized />
+                        <img src="<%= qrCodeUrl %>" alt="QR Code" width="80" height="80" unoptimized>
                         <p class="mt-1 text-xs font-semibold text-gray-700">Scan for UPI</p>
                     </div>
                   <% } %>
               </div>
               <h3 class="text-sm font-bold mb-2 mt-8 text-purple-700 border-b border-purple-300 pb-1">TERMS AND CONDITIONS</h3>
               <ul class="text-xs text-gray-800 leading-relaxed list-disc list-inside space-y-1 pl-2">
-                <li class="pl-1 font-semibold">Payment is due within 7 days from the invoice date.</li>
-                <li class="pl-1 font-semibold">All project deliverables and warranty claims require full payment.</li>
-                <li class="pl-1 font-semibold">Disputes, if any, shall be subject to Chennai jurisdiction.</li>
+                 <% MOCK_TERMS.forEach(term => { %>
+                    <li class="pl-1 font-semibold"><%= term %></li>
+                <% }); %>
               </ul>
             </div>
             <div class="w-1/2 pl-10 flex flex-col items-end">
@@ -138,7 +140,7 @@
                     <span class="font-semibold text-gray-600">CGST (9%)</span>
                     <span class="font-bold text-gray-800"><%= formatCurrency(invoice.gstAmount / 2) %></span>
                 </div>
-                 <div class="flex justify-between py-1 px-4 border-b border-gray-200">
+                <div class="flex justify-between py-1 px-4 border-b border-gray-200">
                     <span class="font-semibold text-gray-600">SGST (9%)</span>
                     <span class="font-bold text-gray-800"><%= formatCurrency(invoice.gstAmount / 2) %></span>
                 </div>
@@ -148,15 +150,15 @@
                 </div>
               </div>
               <div class="flex flex-col mt-8 pt-4 w-full items-end">
-                <% if (company.companySealUrl) { %>
-                    <img src="<%= company.companySealUrl %>" alt="Seal" width="128" height="128" class="mb-4" unoptimized/>
-                <% } else { %>
+                 <% if (company.companySealUrl) { %>
+                    <img src="<%= company.companySealUrl %>" alt="Seal" width="128" height="128" class="mb-4" unoptimized>
+                 <% } else { %>
                     <div class="w-32 h-32 mb-4 flex items-center justify-center mr-16 border-4 border-purple-400 rounded-full bg-white shadow-lg">
                         <span class="text-sm font-bold text-gray-700 text-center uppercase tracking-wider">
                             [SEAL]
                         </span>
                     </div>
-                <% } %>
+                 <% } %>
                 <p class="text-2xl font-bold text-purple-700 mt-2">Authorized Signature</p>
                 <p class="font-normal text-gray-600 text-center text-sm mt-1">Thank you for your business!</p>
               </div>
@@ -167,3 +169,5 @@
     </div>
 </body>
 </html>
+
+    

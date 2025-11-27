@@ -5,152 +5,165 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { font-family: sans-serif; }
-    </style>
 </head>
-<body>
-    <div class="max-w-[800px] mx-auto shadow-2xl bg-white min-h-screen">
+<body class="font-sans">
+    <div class="invoice-container max-w-[800px] mx-auto shadow-2xl bg-white min-h-screen">
         <header class="px-10 pt-10 pb-6 bg-purple-800 text-white relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-1/2 h-full opacity-30" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 10px 10px; -webkit-mask-image: linear-gradient(to right, black 80%, transparent); mask-image: linear-gradient(to right, black 80%, transparent);"></div>
-            <div class="flex justify-between z-10 relative">
-                <div class="flex flex-col w-1/2">
-                    <div class="flex items-end mb-4">
-                        <div class="w-10 h-10 mr-2 rounded-full flex items-center justify-center text-white">
-                            <% if (company.companyLogoUrl) { %>
-                                <img src="<%= company.companyLogoUrl %>" alt="logo" class="w-10 h-10 rounded-full" unoptimized />
-                            <% } else { %>
-                                LOGO
-                            <% } %>
-                        </div>
-                        <span class="text-4xl font-extrabold tracking-tight text-fuchsia-300" style="font-family: Georgia, serif; line-height: 1;"><%= invoice.seller.name.split(' ')[0] %></span>
-                        <span class="text-sm font-semibold tracking-widest text-white ml-1 uppercase" style="font-family: Arial, sans-serif;"><%= invoice.seller.name.split(' ').slice(1).join(' ') %></span>
-                    </div>
-                    <h1 class="text-6xl font-extrabold tracking-tight mb-3">TAX INVOICE</h1>
-                    <p class="text-sm font-semibold text-fuchsia-300">
-                        INVOICE DATE: <span class="font-bold tracking-wider"><%= invoice.issueDate %></span>
-                    </p>
-                    <p class="text-sm font-semibold tracking-wide text-white mt-1">
-                        PROJECT NAME: <span class="font-bold"><%= invoice.description %></span>
-                    </p>
-                </div>
-                <div class="flex flex-col text-right space-y-1 text-xs w-1/2 font-semibold text-purple-200">
-                    <p><%= invoice.seller.phone %></p>
-                    <p class="font-bold text-fuchsia-300"><%= invoice.seller.email %></p>
-                    <div class="mt-2 pt-2 text-sm space-y-0.5">
-                        <% invoice.seller.address.split(',').forEach(line => { %>
-                            <span class="block"><%= line %></span>
-                        <% }) %>
-                    </div>
-                </div>
+          <div class="absolute top-0 left-0 w-1/2 h-full opacity-30"
+            style="
+              background-image: radial-gradient(#fff 1px, transparent 1px);
+              background-size: 10px 10px;
+              -webkit-mask-image: linear-gradient(to right, black 80%, transparent);
+              mask-image: linear-gradient(to right, black 80%, transparent);
+            ">
+          </div>
+          <div class="flex justify-between z-10 relative">
+            <div class="flex flex-col w-1/2">
+              <div class="flex items-end mb-4">
+                 <div class="w-10 h-10 mr-2 rounded-full flex items-center justify-center text-white">
+                    <% if (company.companyLogoUrl) { %><img src="<%= company.companyLogoUrl %>" alt="logo" width="40" height="40" class="rounded-full" unoptimized /><% } else { %>LOGO<% } %>
+                 </div>
+                 <span class="text-4xl font-extrabold tracking-tight text-fuchsia-300"
+                   style="font-family: Georgia, serif; line-height: 1;">
+                   <%= invoice.seller.name.split(' ')[0] %>
+                 </span>
+                 <span class="text-sm font-semibold tracking-widest text-white ml-1 uppercase"
+                   style="font-family: Arial, sans-serif;">
+                   <%= invoice.seller.name.split(' ').slice(1).join(' ') %>
+                 </span>
+               </div>
+              <h1 class="text-6xl font-extrabold tracking-tight mb-3">TAX INVOICE</h1>
+              <p class="text-sm font-semibold text-fuchsia-300">
+                 INVOICE DATE: <span class="font-bold tracking-wider"><%= invoice.issueDate %></span>
+              </p>
+               <p class="text-sm font-semibold tracking-wide text-white mt-1">
+                 PROJECT NAME: <span class="font-bold"><%= invoice.description %></span>
+               </p>
             </div>
+            <div class="flex flex-col text-right space-y-1 text-xs w-1/2 font-semibold text-purple-200">
+               <p><%= invoice.seller.phone %></p>
+               <p class="font-bold text-fuchsia-300"><%= invoice.seller.email %></p>
+              <div class="mt-2 pt-2 text-sm space-y-0.5">
+                 <% invoice.seller.address.split(',').forEach(line => { %><span class="block"><%= line %></span><% }) %>
+              </div>
+            </div>
+          </div>
         </header>
 
         <div class="bg-white pb-10 p-5">
-            <div class="pt-4 border border-fuchsia-300 shadow-purple-800 rounded-lg overflow-hidden shadow-sm">
-                <div class="flex text-sm font-extrabold text-gray-900 uppercase pb-2 border-b-2 border-fuchsia-500 px-3">
-                    <span class="w-6/12 text-fuchsia-600">PRODUCT DESCRIPTION</span>
-                    <span class="w-2/12 text-fuchsia-600 text-right">PRICE</span>
-                    <span class="w-2/12 text-fuchsia-600 text-center">QTY.</span>
-                    <span class="w-2/12 text-fuchsia-600 text-right">TOTAL</span>
-                </div>
-                <div class="divide-y divide-gray-200">
-                    <% invoice.lineItems.forEach((item, index) => { %>
-                        <div class="flex py-3 text-sm font-semibold px-3 <%= index % 2 === 0 ? 'bg-purple-300 text-gray-800' : 'bg-fuchsia-50 text-gray-900' %>">
-                            <span class="w-6/12"><%= item.name %></span>
-                            <span class="w-2/12 text-right"><%= formatCurrency(item.price) %></span>
-                            <span class="w-2/12 text-center"><%= item.quantity %></span>
-                            <span class="w-2/12 text-right"><%= formatCurrency(item.price * item.quantity) %></span>
-                        </div>
-                    <% }) %>
-                </div>
+          <div class="pt-4 border border-fuchsia-300 shadow-purple-800 rounded-lg overflow-hidden shadow-sm">
+            <div class="flex text-sm font-extrabold text-gray-900 uppercase pb-2 border-b-2 border-fuchsia-500 px-3">
+              <span class="w-6/12 text-fuchsia-600">PRODUCT DESCRIPTION</span>
+              <span class="w-2/12 text-fuchsia-600 text-right">PRICE</span>
+              <span class="w-2/12 text-fuchsia-600 text-center">QTY.</span>
+              <span class="w-2/12 text-fuchsia-600 text-right">TOTAL</span>
             </div>
 
-            <footer class="flex mt-8 justify-between px-10">
-                <div class="flex flex-col w-7/12 pt-6">
-                    <div class="bill-to-section mb-6 text-gray-700">
-                        <h3 class="text-base font-bold uppercase mb-2 text-fuchsia-600">INVOICE TO:</h3>
-                        <p class="text-sm font-extrabold text-gray-900"><%= invoice.customer %></p>
-                        <p class="text-sm font-semibold"><%= invoice.customerAddress %></p>
-                        <p class="text-sm font-semibold"><%= invoice.phone %></p>
-                        <p class="text-sm font-extrabold text-fuchsia-600"><%= invoice.email %></p>
-                    </div>
-                    <div class="payment-details-section mt-4 p-4 border shadow-purple-900 rounded-lg border-fuchsia-600 overflow-hidden shadow-sm">
-                        <h3 class="text-sm font-bold uppercase mb-2 text-fuchsia-600 border-b border-gray-300 pb-1">Payment Details</h3>
-                        <div class="flex justify-between items-start text-gray-700">
-                            <div class="text-xs space-y-1 w-2/3 font-semibold">
-                                <p>A/C Name: <span class="font-extrabold text-gray-900"><%= invoice.seller.bank.accHolderName %></span></p>
-                                <p>Branch: <span class="font-extrabold text-gray-900"><%= invoice.seller.bank.branch %></span></p>
-                                <p>A/C No: <span class="font-extrabold text-gray-900"><%= invoice.seller.bank.accountNumber %></span></p>
-                                <p>IFSC: <span class="font-extrabold text-gray-900"><%= invoice.seller.bank.ifsc %></span></p>
-                                <p>UPI ID: <span class="font-extrabold text-gray-900"><%= invoice.seller.bank.upiId %></span></p>
-                            </div>
-                            <div class="w-1/3 flex flex-col items-center">
-                                <% if (qrCodeUrl) { %>
-                                    <img src="<%= qrCodeUrl %>" alt="QR Code" width="80" height="80" unoptimized />
-                                <% } else { %>
-                                    <div class="w-20 h-20 border border-fuchsia-400 flex items-center justify-center text-[8px] text-fuchsia-600 bg-white">
-                                        [QR CODE]
-                                    </div>
-                                <% } %>
-                                <p class="text-[10px] px-5 mt-1 text-gray-700 font-semibold">Scan to Pay</p>
-                            </div>
-                        </div>
-                    </div>
+            <div class="divide-y divide-gray-200">
+              <% invoice.lineItems.forEach((item, index) => { %>
+                <div
+                  class="flex py-3 text-sm font-semibold px-3 <%= index % 2 === 0 ? 'bg-purple-300 text-gray-800' : 'bg-fuchsia-50 text-gray-900' %>"
+                  key="<%= index %>"
+                >
+                  <span class="w-6/12"><%= item.name %></span>
+                  <span class="w-2/12 text-right"><%= formatCurrency(item.price) %></span>
+                  <span class="w-2/12 text-center"><%= item.quantity %></span>
+                  <span class="w-2/12 text-right"><%= formatCurrency(item.price * item.quantity) %></span>
                 </div>
-                <div class="totals-section w-4/12 flex flex-col items-end pt-4">
-                    <div class="w-full text-sm text-gray-800 font-bold bg-white rounded-md overflow-hidden border border-gray-300 shadow-lg">
-                        <div class="flex justify-between py-2 px-4 bg-gray-50 border-b border-gray-200">
-                            <span class="font-extrabold text-gray-900">Amount without Tax</span>
-                            <span class="font-extrabold text-gray-900"><%= formatCurrency(invoice.subtotal) %></span>
-                        </div>
-                        <div class="flex">
-                            <div class="w-1/4 flex items-start justify-center pt-6 text-xs font-extrabold text-gray-800">
-                                ADD
-                            </div>
-                            <div class="w-3/4 divide-y divide-fuchsia-100">
-                                <div class="flex justify-between py-1.5 px-2">
-                                    <span class="font-semibold text-gray-700">CGST - 9%</span>
-                                    <span class="font-bold text-gray-800"><%= formatCurrency(invoice.gstAmount / 2) %></span>
-                                </div>
-                                <div class="flex justify-between py-1.5 px-2 border-b border-gray-300">
-                                    <span class="font-semibold text-gray-700">SGST - 9%</span>
-                                    <span class="font-bold text-gray-800"><%= formatCurrency(invoice.gstAmount / 2) %></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="total-row final-total-box w-full py-2 px-4 flex justify-between bg-fuchsia-700 text-white font-extrabold text-lg relative overflow-hidden shadow-xl">
-                            <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 10px 10px;"></div>
-                            <span class="final-total-text z-10">Total Amount</span>
-                            <span class="final-total-amount z-10"><%= formatCurrency(invoice.grandTotal) %></span>
-                        </div>
-                    </div>
-                    <div class="mt-8 text-center text-gray-700">
-                        <div class="w-32 h-32 mx-auto border-4 border-purple-400 rounded-full flex items-center justify-center text-xs font-bold bg-white mb-2 p-2 shadow-inner">
-                            <% if (company.companySealUrl) { %>
-                                <img src="<%= company.companySealUrl %>" alt="Seal" class="w-32 h-32 rounded-full" unoptimized/>
-                            <% } else { %>
-                                [COMPANY SEAL HERE]
-                            <% } %>
-                        </div>
-                        <p class="font-bold text-lg text-fuchsia-600">Authorized Signature</p>
-                        <p class="text-sm text-gray-600">Thank you for your business!</p>
-                    </div>
-                </div>
-            </footer>
-            <div class="mt-12 w-full">
-                <div class="w-full bg-fuchsia-700 text-white font-bold text-center text-xl py-3 px-10">
-                    Terms and Conditions
-                </div>
-                <div class="px-10 py-4 bg-white border-b border-l border-r border-fuchsia-700/50">
-                    <ol class="list-decimal list-outside text-base ml-6 space-y-1 text-gray-900 font-semibold">
-                        <li class="pl-2">Payment to be made within 7 days from the date of invoice.</li>
-                        <li class="pl-2">Project deliverables and warranty are valid only after full payment.</li>
-                        <li class="pl-2">All disputes are subject to Chennai jurisdiction.</li>
-                    </ol>
-                </div>
+              <% }); %>
             </div>
+          </div>
+
+          <footer class="flex mt-8 justify-between px-10">
+            <div class="flex flex-col w-7/12 pt-6">
+              <div class="bill-to-section mb-6 text-gray-700">
+                <h3 class="text-base font-bold uppercase mb-2 text-fuchsia-600">INVOICE TO:</h3>
+                <p class="text-sm font-extrabold text-gray-900"><%= invoice.customer %></p>
+                <p class="text-sm font-semibold"><%= invoice.customerAddress %></p>
+                <p class="text-sm font-semibold"><%= invoice.phone %></p>
+                <p class="text-sm font-extrabold text-fuchsia-600"><%= invoice.email %></p>
+              </div>
+
+              <div class="payment-details-section mt-4 p-4 border shadow-purple-900 rounded-lg border-fuchsia-600 overflow-hidden shadow-sm">
+                <h3 class="text-sm font-bold uppercase mb-2 text-fuchsia-600 border-b border-gray-300 pb-1">Payment Details</h3>
+                <div class="flex justify-between items-start text-gray-700">
+                  <div class="text-xs space-y-1 w-2/3 font-semibold">
+                    <p>A/C Name: <span class="font-extrabold text-gray-900"><%= invoice.seller.bank.accHolderName %></span></p>
+                    <p>Branch: <span class="font-extrabold text-gray-900"><%= invoice.seller.bank.branch %></span></p>
+                    <p>A/C No: <span class="font-extrabold text-gray-900"><%= invoice.seller.bank.accountNumber %></span></p>
+                    <p>IFSC: <span class="font-extrabold text-gray-900"><%= invoice.seller.bank.ifsc %></span></p>
+                    <p>UPI ID: <span class="font-extrabold text-gray-900"><%= invoice.seller.bank.upiId %></span></p>
+                  </div>
+                   <div class="w-1/3 flex flex-col items-center">
+                    <% if (qrCodeUrl) { %>
+                      <img src="<%= qrCodeUrl %>" alt="QR Code" width="80" height="80" unoptimized>
+                    <% } else { %>
+                      <div class="w-20 h-20 border border-fuchsia-400 flex items-center justify-center text-[8px] text-fuchsia-600 bg-white">
+                        [QR CODE]
+                      </div>
+                    <% } %>
+                    <p class="text-[10px] px-5 mt-1 text-gray-700 font-semibold">Scan to Pay</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="totals-section w-4/12 flex flex-col items-end pt-4">
+              <div class="w-full text-sm text-gray-800 font-bold bg-white rounded-md overflow-hidden border border-gray-300 shadow-lg">
+                <div class="flex justify-between py-2 px-4 bg-gray-50 border-b border-gray-200">
+                  <span class="font-extrabold text-gray-900">Amount without Tax</span>
+                  <span class="font-extrabold text-gray-900"><%= formatCurrency(invoice.subtotal) %></span>
+                </div>
+                <div class="flex">
+                  <div class="w-1/4 flex items-start justify-center pt-6 text-xs font-extrabold text-gray-800">
+                    ADD
+                  </div>
+                  <div class="w-3/4 divide-y divide-fuchsia-100">
+                    <div class="flex justify-between py-1.5 px-2">
+                      <span class="font-semibold text-gray-700">CGST - 9%</span>
+                      <span class="font-bold text-gray-800"><%= formatCurrency(invoice.gstAmount / 2) %></span>
+                    </div>
+                    <div class="flex justify-between py-1.5 px-2 border-b border-gray-300">
+                      <span class="font-semibold text-gray-700">SGST - 9%</span>
+                      <span class="font-bold text-gray-800"><%= formatCurrency(invoice.gstAmount / 2) %></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="total-row final-total-box w-full py-2 px-4 flex justify-between bg-fuchsia-700 text-white font-extrabold text-lg relative overflow-hidden shadow-xl">
+                  <div class="absolute inset-0 opacity-20"
+                    style="
+                      background-image: radial-gradient(#fff 1px, transparent 1px);
+                      background-size: 10px 10px;
+                    ">
+                  </div>
+                  <span class="final-total-text z-10">Total Amount</span>
+                  <span class="final-total-amount z-10"><%= formatCurrency(invoice.grandTotal) %></span>
+                </div>
+              </div>
+              <div class="mt-8 text-center text-gray-700">
+                <div class="w-32 h-32 mx-auto border-4 border-purple-400 rounded-full flex items-center justify-center text-xs font-bold bg-white mb-2 p-2 shadow-inner">
+                  <% if (company.companySealUrl) { %><img src="<%= company.companySealUrl %>" alt="Seal" width="128" height="128" class="rounded-full" unoptimized><% } else { %>[COMPANY SEAL HERE]<% } %>
+                </div>
+                <p class="font-bold text-lg text-fuchsia-600">Authorized Signature</p>
+                <p class="text-sm text-gray-600">Thank you for your business!</p>
+              </div>
+            </div>
+          </footer>
+          <div class="mt-12 w-full">
+            <div class="w-full bg-fuchsia-700 text-white font-bold text-center text-xl py-3 px-10">
+              Terms and Conditions
+            </div>
+            <div class="px-10 py-4 bg-white border-b border-l border-r border-fuchsia-700/50">
+              <ol class="list-decimal list-outside text-base ml-6 space-y-1 text-gray-900 font-semibold">
+                <% MOCK_TERMS.forEach(point => { %>
+                  <li class="pl-2"><%= point %></li>
+                <% }); %>
+              </ol>
+            </div>
+          </div>
         </div>
-    </div>
+      </div>
 </body>
 </html>
+
+    
