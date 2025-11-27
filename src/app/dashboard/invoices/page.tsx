@@ -122,34 +122,34 @@ export default function InvoicesPage() {
     setIsCreateDialogOpen(open);
   }
 
-  // const viewPdf = (invoiceId: string, template: string = 'default') => {
-  //   window.open(`${API_URL}/invoices/${invoiceId}/pdf?template=${template}`, '_blank');
+  const viewPdf = (invoiceId: string, template: string = 'default') => {
+    window.open(`${API_URL}/invoices/${invoiceId}/pdf?template=${template}`, '_blank');
+  };
+
+  // const viewPdf = async (invoiceId: string, template: string = 'default') => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${API_URL}/invoices/test-pdf/get`,
+  //       {
+  //         responseType: "blob",
+  //       }
+  //     );
+
+  //     const url = window.URL.createObjectURL(new Blob([response.data]));
+
+  //     const link = document.createElement("a");
+  //     link.href = url;
+  //     link.setAttribute("download", "test-sample.pdf");
+  //     document.body.appendChild(link);
+  //     link.click();
+
+  //     link.remove();
+  //     window.URL.revokeObjectURL(url);
+
+  //   } catch (error) {
+  //     console.error("PDF download error:", error);
+  //   }
   // };
-
-  const viewPdf = async (invoiceId: string, template: string = 'default') => {
-  try {
-    const response = await axios.get(
-      `${API_URL}/invoices/test-pdf`,
-      {
-        responseType: "blob", 
-      }
-    );
-
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", "test-sample.pdf");
-    document.body.appendChild(link);
-    link.click();
-
-    link.remove();
-    window.URL.revokeObjectURL(url);
-
-  } catch (error) {
-    console.error("PDF download error:", error);
-  }
-};
 
 
   const downloadPdf = async (invoiceId: string, template: string = 'default') => {

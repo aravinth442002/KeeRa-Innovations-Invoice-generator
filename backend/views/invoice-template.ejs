@@ -21,6 +21,247 @@
       <div class="bg-[#5651e5] text-white font-bold text-center text-4xl py-2" style="height: 48px; line-height: 32px;">
         TAX INVOICE
       </div>
+
+      <table class="w-full border-collapse border border-[#5651e5] -mt-px">
+        <tbody>
+          <tr>
+            <td class="w-[45%] p-0 border-r border-[#5651e5] align-top">
+              <div class="flex items-center p-2">
+                <div class="w-[70px] h-[70px] mr-2">
+                </div>
+                <div>
+                   <h1 class="text-4xl font-bold m-0 leading-none bg-primary-gradient">KeeRa</h1>
+                   <p class="text-sm uppercase font-bold m-0 -mt-1 bg-primary-gradient">Innovations</p>
+                </div>
+              </div>
+              <table class="w-full border-t border-[#5651e5] border-collapse">
+                  <tbody>
+                      <tr><td class="p-2 text-sm leading-normal"><%= invoice.seller.address %></td></tr>
+                  </tbody>
+              </table>
+              <table class="w-full border-t border-[#5651e5] border-collapse">
+                  <tbody>
+                      <tr>
+                          <td class="bg-[#5651e5]/20 font-bold p-2 border-r border-[#5651e5] w-[30%] text-xs">GSTIN</td>
+                          <td class="p-2 text-xs"><%= invoice.seller.gstin %></td>
+                      </tr>
+                      <tr>
+                          <td class="bg-[#5651e5]/20 font-bold p-2 border-r border-[#5651e5] text-xs">Phone</td>
+                          <td class="p-2 text-xs"><%= invoice.seller.phone %></td>
+                      </tr>
+                      <tr>
+                          <td class="bg-[#5651e5]/20 font-bold p-2 border-r border-[#5651e5] text-xs">Email</td>
+                          <td class="p-2 text-xs"><%= invoice.seller.email %></td>
+                      </tr>
+                  </tbody>
+              </table>
+            </td>
+
+            <td class="w-[55%] p-0 align-top">
+              <div class="bg-[#5651e5]/20 font-bold text-center py-1 text-base">Customer Detail</div>
+              <table class="w-full border-t border-[#5651e5] border-collapse">
+                <tbody>
+                    <tr>
+                        <td class="bg-[#5651e5]/20 font-bold p-2 w-[25%] text-xs">Name</td>
+                        <td class="p-2 text-xs"><%= invoice.customer || 'N/A' %></td>
+                    </tr>
+                    <tr>
+                        <td class="bg-[#5651e5]/20 font-bold p-2 text-xs">Address</td>
+                        <td class="p-2 text-xs leading-tight"><%= invoice.customerAddress || 'N/A' %></td>
+                    </tr>
+                     <tr>
+                        <td class="bg-[#5651e5]/20 font-bold p-2 text-xs">Phone</td>
+                        <td class="p-2 text-xs"><%= invoice.phone || '-' %></td>
+                    </tr>
+                    <tr>
+                        <td class="bg-[#5651e5]/20 font-bold p-2 text-xs">GSTIN</td>
+                        <td class="p-2 text-xs"><%= invoice.gstin || 'N/A' %></td>
+                    </tr>
+                    <tr>
+                        <td class="bg-[#5651e5]/20 font-bold p-2 text-xs">Invoice No.</td>
+                        <td class="p-2 text-xs"><%= invoice.id %></td>
+                    </tr>
+                    <tr>
+                        <td class="bg-[#5651e5]/20 font-bold p-2 text-xs">Invoice Date</td>
+                        <td class="p-2 text-xs"><%= issueDate %></td>
+                    </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <table class="w-full border-collapse border border-[#5651e5] -mt-px">
+        <tbody>
+            <tr class="bg-[#5651e5]/20">
+                <td class="font-bold p-2 border-r border-[#5651e5] w-[13%] text-xs">Project Name</td>
+                <td class="p-2 text-xs"><%= invoice.description %></td>
+            </tr>
+        </tbody>
+      </table>
+
+      <div class="mt-1">
+        <table class="w-full border-collapse border border-[#5651e5] text-xs">
+            <thead>
+                <tr class="bg-[#5651e5] text-white font-bold">
+                    <th class="p-2 text-left w-[8%] text-sm">Sr. No.</th>
+                    <th class="p-2 text-left w-[42%] text-sm">Name of Product / Service</th>
+                    <th class="p-2 text-center w-[10%] text-sm">Qty</th>
+                    <th class="p-2 text-right w-[20%] text-sm">Rate</th>
+                    <th class="p-2 text-right w-[20%] text-sm">Total (Excl. Tax)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% invoice.lineItems.forEach((item, index) => { %>
+                    <tr style="height: 32px;">
+                        <td class="border border-[#5651e5] p-2 text-center text-sm"><%= index + 1 %></td>
+                        <td class="border border-[#5651e5] p-2 font-bold text-sm"><%= item.name %></td>
+                        <td class="border border-[#5651e5] p-2 text-center text-sm"><%= item.quantity %></td>
+                        <td class="border border-[#5651e5] p-2 text-right text-sm"><%= formatCurrency(item.price) %></td>
+                        <td class="border border-[#5651e5] p-2 text-right text-sm"><%= formatCurrency(item.price * item.quantity) %></td>
+                    </tr>
+                <% }); %>
+                <% for(let i = invoice.lineItems.length; i < 7; i++) { %>
+                    <tr style="height: 32px;">
+                        <td class="border border-[#5651e5]">&nbsp;</td>
+                        <td class="border border-[#5651e5]">&nbsp;</td>
+                        <td class="border border-[#5651e5]">&nbsp;</td>
+                        <td class="border border-[#5651e5]">&nbsp;</td>
+                        <td class="border border-[#5651e5]">&nbsp;</td>
+                    </tr>
+                <% } %>
+                <tr class="bg-[#5651e5]/20 font-bold text-sm">
+                    <td colspan="2" class="border border-[#5651e5] p-2 text-right">Total</td>
+                    <td class="border border-[#5651e5] p-2 text-center"><%= totalQty %></td>
+                    <td class="border border-[#5651e5] p-2"></td>
+                    <td class="border border-[#5651e5] p-2 text-right"><%= formatCurrency(subtotal) %></td>
+                </tr>
+            </tbody>
+        </table>
+      </div>
+
+       <div class="mt-1">
+          <table class="w-full border-collapse border border-[#5651e5] -mt-px text-xs">
+              <tbody>
+                  <tr style="height: 28px;">
+                      <td class="bg-[#5651e5]/20 font-bold text-center text-sm p-1 w-[60%]" rowspan="3">
+                          <%= totalInWords %>
+                      </td>
+                      <td class="bg-[#5651e5]/20 font-bold p-1 border-b border-[#5651e5] w-[20%]">Amount without Tax</td>
+                      <td class="font-bold text-right p-1 border-b border-[#5651e5] w-[20%]"><%= formatCurrency(subtotal) %></td>
+                  </tr>
+                  <tr>
+                      <td class="p-1">Add CGST @ 9%</td>
+                      <td class="font-bold text-right p-1"><%= formatCurrency(gstAmount/2) %></td>
+                  </tr>
+                  <tr>
+                      <td class="p-1 border-b border-[#5651e5]">Add SGST @ 9%</td>
+                      <td class="font-bold text-right p-1 border-b border-[#5651e5]"><%= formatCurrency(gstAmount/2) %></td>
+                  </tr>
+              </tbody>
+          </table>
+
+           <table class="w-full border-collapse border border-[#5651e5] -mt-px text-xs">
+              <tbody>
+                <tr>
+                  <td class="p-0 w-[60%] align-top">
+                      <div class="bg-[#5651e5] text-white font-bold p-2 text-center text-sm">Bank Details</div>
+                      <table class="w-full border-collapse">
+                          <tbody>
+                            <% 
+                            const bankDetails = [
+                                {label: 'Name', value: invoice.seller.bank?.accHolderName},
+                                {label: 'Branch', value: invoice.seller.bank?.branch},
+                                {label: 'Acc. Number', value: invoice.seller.bank?.accountNumber},
+                                {label: 'IFSC', value: invoice.seller.bank?.ifsc},
+                                {label: 'UPI ID', value: invoice.seller.bank?.upiId},
+                            ];
+                            %>
+                            <% bankDetails.forEach((detail, index) => { %>
+                                <tr style="height: 25px;">
+                                    <td class="bg-[#5651e5]/20 font-bold p-1 border border-[#5651e5] w-[25%]"><%= detail.label %></td>
+                                    <td class="p-1 border border-[#5651e5] w-[50%]"><%= detail.value || '' %></td>
+                                    <% if (index === 0) { %>
+                                        <td class="text-center p-0 border-t-0 border-b-0 border-r-0 border-l border-[#5651e5]" rowspan="5">
+                                          <% if (qrCodeUrl) { %>
+                                            <>
+                                              <div class="w-[85px] h-[85px] m-auto border border-[#5651e5] flex items-center justify-center p-1">
+                                                  <img src="<%= qrCodeUrl %>" alt="QR Code" width="80" height="80" />
+                                              </div>
+                                              <p class="font-bold text-xs pt-1">Pay with QR</p>
+                                            </>
+                                          <% } %>
+                                        </td>
+                                    <% } %>
+                                </tr>
+                            <% }); %>
+                          </tbody>
+                      </table>
+
+                      <div class="bg-[#5651e5] text-white font-bold p-2 text-center -mt-px text-sm">Terms and Conditions</div>
+                       <table class="w-full border-collapse border border-[#5651e5] -mt-px">
+                          <tbody>
+                            <tr>
+                                <td>
+                                    <ol class="font-bold list-decimal ml-4 p-2 text-xs space-y-1">
+                                        <% MOCK_TERMS.forEach(term => { %>
+                                          <li><%= term %></li>
+                                        <% }); %>
+                                    </ol>
+                                </td>
+                            </tr>
+                          </tbody>
+                      </table>
+                  </td>
+                  <td class="p-0 w-[40%] align-top">
+                        <table class="w-full border-collapse border-l-0">
+                            <tbody>
+                                <tr class="bg-[#5651e5] text-white font-bold">
+                                    <td class="text-left p-2 text-sm w-[50%]">Total Amount</td>
+                                    <td class="text-right p-2 text-sm w-[50%]"><%= formatCurrency(grandTotal) %></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-right font-bold p-2 border border-[#5651e5]" colspan="2">(E & O.E.)</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-left font-bold text-xs p-2 border border-[#5651e5] h-[30px]" colspan="2">
+                                        Certified that the particulars given above are true and correct.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="bg-[#5651e5] text-white font-bold p-2 text-left -mt-px text-sm">For KeeRa Innovations</div>
+                         <div class="h-[140px] text-center p-2 border-x border-[#5651e5] flex items-center justify-center">
+                            <% if (companySealUrl) { %>
+                                <img src="<%= companySealUrl %>" alt="Company Seal" style="max-width: 140px; max-height: 140px; object-fit: contain;" />
+                            <% } else { %>
+                                <div class="w-32 h-32 mx-auto border border-[#5651e5] rounded-full flex items-center justify-center text-xs font-bold">
+                                   
+                                </div>
+                            <% } %>
+                        </div>
+                        <table class="w-full border-collapse border border-[#5651e5] mt-[15px]">
+                           <tbody>
+                               <tr>
+                                   <td class="text-center font-bold p-2 text-xs">
+                                       Company Seal / Authorised Signatory
+                                   </td>
+                               </tr>
+                           </tbody>
+                        </table>
+                  </td>
+                </tr>
+              </tbody>
+           </table>
+
+            <table class="w-full border-collapse border border-[#5651e5] -mt-px">
+                <tbody>
+                    <tr class="bg-[#5651e5]/20">
+                        <td class="text-center font-semibold p-2 text-base">Thank you for Working with us!</td>
+                    </tr>
+                </tbody>
+            </table>
+       </div>
      
     </body>
 </html>
