@@ -34,6 +34,14 @@ function numberToWords(num: number): string {
     return str.trim().split(/\s+/).map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ') + ' Only';
 }
 
+const getFileUrl = (filePath?: string) => {
+    if (!filePath) return null;
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+    const BASE_URL = API_URL.replace('/api', '');
+    return `${BASE_URL}/${filePath}`;
+}
+
+
 const DefaultTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] }) => {
     const subtotal = invoice.lineItems.reduce(
         (acc, item) => acc + (item.quantity || 0) * (item.price || 0),
@@ -51,21 +59,6 @@ const DefaultTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] 
         "A late fee of 1.5% will be charged on overdue invoices.",
         "Please include the invoice number on your payment."
     ];
-
-  const totalQty = invoice.lineItems.reduce((acc, item) => acc + (item.quantity || 0), 0);
-  const totalInWords = numberToWords(grandTotal);
-  const bankDetails = invoice.seller?.bank || {};
-  
-  const MOCK_TERMS = [
-      "Payment is due within 30 days.",
-      "A late fee of 1.5% will be charged on overdue invoices.",
-      "Please include the invoice number on your payment."
-  ];
-
-  const qrCodeUrl = (() => {
-    if (!(bankDetails.upiId && grandTotal > 0)) {
-      return '';
-    }
 
     const companyLogoUrl = getFileUrl(invoice.seller.companyLogoUrl);
     const companySealUrl = getFileUrl(invoice.seller.companySealUrl);
@@ -324,13 +317,6 @@ const ClassicTemplate = ({ invoice }: { invoice: InvoicePreviewProps['invoice'] 
   const gstAmount = subtotal * 0.18; // Assuming flat 18%
   const grandTotal = subtotal + gstAmount;
 
-  const getFileUrl = (filePath?: string) => {
-    if (!filePath) return null;
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-    const BASE_URL = API_URL.replace('/api', '');
-    return `${BASE_URL}/${filePath}`;
-  }
-  
   const qrCodeUrl = (() => {
     if (!(seller.bank?.upiId && grandTotal > 0)) return '';
     const payeeName = seller?.name || 'KeeRa Innovations';
@@ -508,13 +494,6 @@ const ModernTemplate = ({ invoice: inv }: { invoice: InvoicePreviewProps['invoic
         "All disputes are subject to Chennai jurisdiction.",
     ];
 
-    const getFileUrl = (filePath?: string) => {
-        if (!filePath) return null;
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-        const BASE_URL = API_URL.replace('/api', '');
-        return `${BASE_URL}/${filePath}`;
-    }
-
     const companyLogoUrl = getFileUrl(inv.seller.companyLogoUrl);
     const companySealUrl = getFileUrl(inv.seller.companySealUrl);
     const qrCodeUrl = (() => {
@@ -568,7 +547,7 @@ const ModernTemplate = ({ invoice: inv }: { invoice: InvoicePreviewProps['invoic
                <p>{inv.seller.phone}</p>
                <p className="font-bold text-fuchsia-300">{inv.seller.email}</p>
               <div className="mt-2 pt-2 text-sm space-y-0.5">
-                 {inv.seller.address.split(',').map((line, index) => <span key={index} className="block">{line}</span>)}
+                 {(inv.seller.address || '').split(',').map((line, index) => <span key={index} className="block">{line}</span>)}
               </div>
             </div>
           </div>
